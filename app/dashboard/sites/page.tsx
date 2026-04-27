@@ -13,7 +13,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Globe, Plus, MessageSquare, Settings, Code } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Globe, Plus, MessageSquare, Settings, Code, FileText, Key } from "lucide-react";
 
 export default async function SitesPage() {
   const session = await auth();
@@ -53,57 +60,95 @@ export default async function SitesPage() {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {sites.map((site) => (
-              <Card key={site.id} className="flex flex-col">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted">
-                        <Globe className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <TooltipProvider>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {sites.map((site) => (
+                <Card key={site.id} className="flex flex-col">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted">
+                          <Globe className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                        </div>
+                        <div className="min-w-0">
+                          <CardTitle className="text-sm font-semibold truncate">
+                            {site.name}
+                          </CardTitle>
+                          <CardDescription className="text-xs truncate">
+                            {site.domain}
+                          </CardDescription>
+                        </div>
                       </div>
-                      <div>
-                        <CardTitle className="text-base">{site.name}</CardTitle>
-                        <CardDescription className="text-xs">
-                          {site.domain}
-                        </CardDescription>
-                      </div>
+                      <Badge
+                        variant="outline"
+                        className={
+                          site.autoApprove
+                            ? "shrink-0 border-green-200 bg-green-500/10 text-green-700 dark:border-green-800 dark:text-green-400"
+                            : "shrink-0 border-amber-200 bg-amber-500/10 text-amber-700 dark:border-amber-800 dark:text-amber-400"
+                        }
+                      >
+                        {site.autoApprove ? "Auto-approve" : "Moderated"}
+                      </Badge>
                     </div>
-                    <Badge variant={site.autoApprove ? "default" : "secondary"}>
-                      {site.autoApprove ? "Auto-approve" : "Moderated"}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-1 pb-3">
-                  <p className="text-xs text-muted-foreground">
-                    {site._count.pages} page
-                    {site._count.pages !== 1 ? "s" : ""} with comments
-                  </p>
-                  <p className="text-xs text-muted-foreground font-mono mt-1 truncate">
-                    Key: {site.siteKey.slice(0, 12)}…
-                  </p>
-                </CardContent>
-                <CardFooter className="gap-2 pt-0">
-                  <Button asChild variant="outline" size="sm" className="flex-1">
-                    <Link href={`/dashboard/sites/${site.id}/comments`}>
-                      <MessageSquare className="mr-1 h-3 w-3" aria-hidden="true" />
-                      Comments
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline" size="sm" aria-label={`Integration steps for ${site.name}`}>
-                    <Link href={`/dashboard/sites/${site.id}/install`}>
-                      <Code className="h-3 w-3" aria-hidden="true" />
-                    </Link>
-                  </Button>
-                  <Button asChild variant="ghost" size="sm" aria-label={`Settings for ${site.name}`}>
-                    <Link href={`/dashboard/sites/${site.id}/settings`}>
-                      <Settings className="h-3 w-3" aria-hidden="true" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+                  </CardHeader>
+
+                  <CardContent className="flex-1 pb-3 space-y-2">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      <span>
+                        {site._count.pages} page{site._count.pages !== 1 ? "s" : ""} with comments
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
+                      <Key className="h-3.5 w-3.5 shrink-0 font-sans" aria-hidden="true" />
+                      <span className="truncate">{site.siteKey.slice(0, 16)}…</span>
+                    </div>
+                  </CardContent>
+
+                  <Separator />
+
+                  <CardFooter className="pt-3 gap-2">
+                    <Button asChild variant="outline" size="sm" className="flex-1">
+                      <Link href={`/dashboard/sites/${site.id}/comments`}>
+                        <MessageSquare className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                        Comments
+                      </Link>
+                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          asChild
+                          variant="outline"
+                          size="sm"
+                          aria-label={`Integration steps for ${site.name}`}
+                        >
+                          <Link href={`/dashboard/sites/${site.id}/install`}>
+                            <Code className="h-3.5 w-3.5" aria-hidden="true" />
+                          </Link>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Integration</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          asChild
+                          variant="outline"
+                          size="sm"
+                          aria-label={`Settings for ${site.name}`}
+                        >
+                          <Link href={`/dashboard/sites/${site.id}/settings`}>
+                            <Settings className="h-3.5 w-3.5" aria-hidden="true" />
+                          </Link>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Settings</TooltipContent>
+                    </Tooltip>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </TooltipProvider>
         )}
       </div>
     </div>
