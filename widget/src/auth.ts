@@ -56,9 +56,13 @@ export async function signInWithGoogle(
       return;
     }
 
+    let timer: ReturnType<typeof setInterval>;
+
     const handler = async (e: MessageEvent) => {
       if (e.origin !== appUrl) return;
       if (e.data?.type !== "ZEON_GOOGLE_TOKEN") return;
+      // Clear the closed-popup timer immediately so it can't race and reject
+      clearInterval(timer);
       window.removeEventListener("message", handler);
       popup.close();
       try {
@@ -85,7 +89,7 @@ export async function signInWithGoogle(
     window.addEventListener("message", handler);
 
     // Detect popup closed without auth
-    const timer = setInterval(() => {
+    timer = setInterval(() => {
       if (popup.closed) {
         clearInterval(timer);
         window.removeEventListener("message", handler);
