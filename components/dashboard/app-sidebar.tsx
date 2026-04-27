@@ -4,13 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
-  LayoutDashboard,
-  Globe,
-  MessageSquare,
-  Settings,
-  LogOut,
-  ChevronDown,
-} from "lucide-react";
+  RiDashboardLine,
+  RiGlobalLine,
+  RiSettingsLine,
+  RiLogoutBoxLine,
+  RiArrowDownSLine,
+} from "@remixicon/react";
 import {
   Sidebar,
   SidebarContent,
@@ -39,9 +38,9 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Sites", href: "/dashboard/sites", icon: Globe },
-  { label: "Account", href: "/dashboard/account", icon: Settings },
+  { label: "Overview", href: "/dashboard", icon: RiDashboardLine },
+  { label: "Sites", href: "/dashboard/sites", icon: RiGlobalLine },
+  { label: "Account", href: "/dashboard/account", icon: RiSettingsLine },
 ];
 
 type Props = {
@@ -59,7 +58,7 @@ export function AppSidebar({ user }: Props) {
           href="/dashboard/sites"
           className="flex items-center gap-2 px-2 py-1"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm shrink-0">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-sm">
             Z
           </div>
           <span className="font-semibold text-sm group-data-[collapsible=icon]:hidden">
@@ -105,7 +104,7 @@ export function AppSidebar({ user }: Props) {
                   size="lg"
                   className="data-[state=open]:bg-sidebar-accent"
                 >
-                  <Avatar className="h-8 w-8 rounded-lg">
+                  <Avatar className="size-8 rounded-lg">
                     <AvatarImage src={user.image ?? ""} alt={user.name ?? ""} />
                     <AvatarFallback className="rounded-lg text-xs">
                       {initials}
@@ -117,13 +116,13 @@ export function AppSidebar({ user }: Props) {
                       {user.email}
                     </p>
                   </div>
-                  <ChevronDown className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
+                  <RiArrowDownSLine className="ml-auto group-data-[collapsible=icon]:hidden" aria-hidden="true" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="start" className="w-56">
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard/account">
-                    <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
+                    <RiSettingsLine aria-hidden="true" />
                     Account settings
                   </Link>
                 </DropdownMenuItem>
@@ -131,7 +130,7 @@ export function AppSidebar({ user }: Props) {
                   onSelect={() => signOut({ callbackUrl: "/sign-in" })}
                   className="cursor-pointer"
                 >
-                  <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+                  <RiLogoutBoxLine aria-hidden="true" />
                   Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
