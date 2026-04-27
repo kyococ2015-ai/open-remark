@@ -14,6 +14,101 @@ declare const __APP_URL__: string;
 declare const __GOOGLE_CLIENT_ID__: string;
 declare const __STYLES__: string;
 
+/**
+ * Attempt to read the host page's CSS variables and map them to zeon vars.
+ *
+ * Priority:
+ *   1. shadcn/Tailwind v4 — variables are full color values (oklch, hsl, hex)
+ *      → CSS var() inheritance in :host handles it automatically; return null.
+ *   2. shadcn/Tailwind v3 — variables are bare HSL components ("h s% l%")
+ *      → Wrap in hsl() and inject explicit overrides.
+ *   3. Bootstrap 5 — --bs-body-bg / --bs-body-color
+ *      → Map to zeon vars.
+ *   4. Computed body background luminance
+ *      → Force dark theme if the page is dark.
+ *   5. null → let CSS defaults + @media prefers-color-scheme handle it.
+ */
+function detectHostTheme(host: HTMLElement): string | null {
+  const cs = getComputedStyle(document.documentElement);
+  const get = (v: string) => cs.getPropertyValue(v).trim();
+
+  const bg = get("--background");
+
+  // Shadcn v4 / any modern CSS var: direct color values flow in via CSS inheritance
+  if (bg && /oklch|hsl\(|rgb\(|#[0-9a-f]/i.test(bg)) {
+    host.setAttribute("data-theme-detected", "");
+    return null; // CSS var() chain in :host handles it
+  }
+
+  // Shadcn v3: bare HSL components like "222.2 84% 4.9%"
+  const v3Pattern = /^\d[\d.]*\s+[\d.]+%\s+[\d.]+%$/;
+  if (bg && v3Pattern.test(bg)) {
+    host.setAttribute("data-theme-detected", "");
+    const fg = get("--foreground");
+    const border = get("--border");
+    const mutedFg = get("--muted-foreground");
+    const primary = get("--primary");
+    const primaryFg = get("--primary-foreground");
+    const muted = get("--muted");
+    const radius = get("--radius");
+    const accent = get("--accent");
+    const lines: string[] = [":host {"];
+    if (bg)       lines.push(`  --zeon-bg: hsl(${bg});`);
+    if (fg)       lines.push(`  --zeon-text: hsl(${fg});`);
+    if (border)   lines.push(`  --zeon-border: hsl(${border});`);
+    if (mutedFg)  lines.push(`  --zeon-muted: hsl(${mutedFg});`);
+    if (primary)  lines.push(`  --zeon-primary: hsl(${primary});`);
+    if (primaryFg)lines.push(`  --zeon-primary-fg: hsl(${primaryFg});`);
+    if (muted)    lines.push(`  --zeon-subtle: hsl(${muted});`);
+    if (accent)   lines.push(`  --zeon-accent: hsl(${accent});`);
+    if (radius)   lines.push(`  --zeon-radius: ${radius};`);
+    lines.push("}");
+    return lines.join("\n");
+  }
+
+  // Bootstrap 5
+  const bsBg = get("--bs-body-bg");
+  if (bsBg) {
+    host.setAttribute("data-theme-detected", "");
+    const bsFg = get("--bs-body-color");
+    const bsBorder = get("--bs-border-color");
+    const bsSecondary = get("--bs-secondary-color");
+    const bsPrimary = get("--bs-primary") || get("--bs-link-color");
+    const lines: string[] = [":host {"];
+    lines.push(`  --zeon-bg: ${bsBg};`);
+    if (bsFg)        lines.push(`  --zeon-text: ${bsFg};`);
+    if (bsBorder)    lines.push(`  --zeon-border: ${bsBorder};`);
+    if (bsSecondary) lines.push(`  --zeon-muted: ${bsSecondary};`);
+    if (bsPrimary)   lines.push(`  --zeon-primary: ${bsPrimary};`);
+    lines.push("}");
+    return lines.join("\n");
+  }
+
+  // Last resort: infer dark/light from computed body background
+  const bodyStyle = getComputedStyle(document.body);
+  const bodyBg = bodyStyle.backgroundColor;
+  const m = bodyBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (m) {
+    const lum = (0.299 * +m[1] + 0.587 * +m[2] + 0.114 * +m[3]) / 255;
+    if (lum < 0.4) {
+      // Dark background — override to a neutral dark palette
+      host.setAttribute("data-theme-detected", "");
+      return `:host {
+  --zeon-bg: ${bodyBg};
+  --zeon-text: #f1f5f9;
+  --zeon-border: rgba(255,255,255,0.1);
+  --zeon-muted: #94a3b8;
+  --zeon-primary: #f1f5f9;
+  --zeon-primary-fg: #0f172a;
+  --zeon-subtle: rgba(255,255,255,0.06);
+  --zeon-accent: rgba(255,255,255,0.08);
+}`;
+    }
+  }
+
+  return null;
+}
+
 class ZeonWidget {
   private config: WidgetConfig;
   private shadow: ShadowRoot;
@@ -28,10 +123,18 @@ class ZeonWidget {
     this.shadow = config.container.attachShadow({ mode: "open" });
     this.auth = loadStoredAuth();
 
-    // Inject scoped styles
+    // Base styles
     const style = document.createElement("style");
     style.textContent = __STYLES__;
     this.shadow.appendChild(style);
+
+    // Theme detection: inject overrides if needed
+    const themeOverride = detectHostTheme(config.container);
+    if (themeOverride) {
+      const themeStyle = document.createElement("style");
+      themeStyle.textContent = themeOverride;
+      this.shadow.appendChild(themeStyle);
+    }
 
     this.root = document.createElement("div");
     this.root.className = "zeon-root";
@@ -42,7 +145,7 @@ class ZeonWidget {
   }
 
   private async loadComments() {
-    this.renderLoading();
+    this.renderLoadingState();
     try {
       this.comments = await fetchComments(
         this.config.appUrl,
@@ -109,8 +212,10 @@ class ZeonWidget {
     }
   }
 
-  private renderLoading() {
+  private renderLoadingState() {
     this.root.innerHTML = "";
+    const header = this.buildHeader();
+    this.root.appendChild(header);
     this.root.appendChild(renderLoading());
   }
 
@@ -127,24 +232,25 @@ class ZeonWidget {
     setTimeout(() => banner.remove(), 4000);
   }
 
-  private render() {
-    this.root.innerHTML = "";
-
-    // Header
+  private buildHeader(): HTMLElement {
     const header = document.createElement("div");
     header.className = "zeon-header";
     const heading = document.createElement("h2");
     const count = this.comments.length;
     heading.textContent = `${count} Comment${count !== 1 ? "s" : ""}`;
     header.appendChild(heading);
-    this.root.appendChild(header);
+    return header;
+  }
 
-    // Auth state error
+  private render() {
+    this.root.innerHTML = "";
+
+    this.root.appendChild(this.buildHeader());
+
     if (this.auth.status === "error") {
       this.root.appendChild(renderError(this.auth.message));
     }
 
-    // Auth bar
     this.root.appendChild(
       renderAuthBar(
         this.auth,
@@ -153,7 +259,6 @@ class ZeonWidget {
       ),
     );
 
-    // Comment form (only when authenticated)
     if (this.auth.status === "authenticated") {
       this.root.appendChild(
         renderCommentForm(
@@ -168,7 +273,6 @@ class ZeonWidget {
       );
     }
 
-    // Comments list
     this.root.appendChild(
       renderCommentList(this.comments, (comment) => {
         if (this.auth.status !== "authenticated") {
@@ -177,7 +281,6 @@ class ZeonWidget {
         }
         this.replyTo = comment;
         this.render();
-        // Scroll form into view
         const form = this.shadow.querySelector(".zeon-form");
         form?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }),

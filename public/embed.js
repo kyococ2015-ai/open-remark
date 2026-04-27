@@ -78,9 +78,11 @@
         reject(new Error("Popup blocked. Please allow popups for this site."));
         return;
       }
+      let timer;
       const handler = async (e) => {
         if (e.origin !== appUrl) return;
         if (e.data?.type !== "ZEON_GOOGLE_TOKEN") return;
+        clearInterval(timer);
         window.removeEventListener("message", handler);
         popup.close();
         try {
@@ -99,7 +101,7 @@
         }
       };
       window.addEventListener("message", handler);
-      const timer = setInterval(() => {
+      timer = setInterval(() => {
         if (popup.closed) {
           clearInterval(timer);
           window.removeEventListener("message", handler);
@@ -123,18 +125,18 @@
       new Date(isoDate)
     );
   }
-  function avatarEl(name, image) {
+  function avatarEl(name, image, small = false) {
     if (image) {
       const img = document.createElement("img");
       img.src = image;
       img.alt = name;
-      img.className = "zeon-avatar";
-      img.width = 28;
-      img.height = 28;
+      img.className = small ? "zeon-avatar zeon-avatar-sm" : "zeon-avatar";
+      img.width = small ? 24 : 30;
+      img.height = small ? 24 : 30;
       return img;
     }
     const el = document.createElement("div");
-    el.className = "zeon-avatar-placeholder";
+    el.className = small ? "zeon-avatar-placeholder zeon-avatar-placeholder-sm" : "zeon-avatar-placeholder";
     el.setAttribute("aria-hidden", "true");
     el.textContent = name.slice(0, 2).toUpperCase();
     return el;
@@ -145,22 +147,22 @@
     li.dataset.id = comment.id;
     const meta = document.createElement("div");
     meta.className = "zeon-comment-meta";
-    meta.appendChild(avatarEl(comment.authorName, comment.authorImage));
+    meta.appendChild(avatarEl(comment.authorName, comment.authorImage, depth > 0));
     const authorEl = document.createElement("span");
     authorEl.className = "zeon-comment-author";
     authorEl.textContent = comment.authorName;
     meta.appendChild(authorEl);
+    if (comment.status === "PENDING") {
+      const badge = document.createElement("span");
+      badge.className = "zeon-pending-badge";
+      badge.textContent = "Pending";
+      meta.appendChild(badge);
+    }
     const timeEl = document.createElement("time");
     timeEl.className = "zeon-comment-time";
     timeEl.dateTime = comment.createdAt;
     timeEl.textContent = formatRelativeTime(comment.createdAt);
     meta.appendChild(timeEl);
-    if (comment.status === "PENDING") {
-      const badge = document.createElement("span");
-      badge.className = "zeon-pending-badge";
-      badge.textContent = "Pending review";
-      meta.appendChild(badge);
-    }
     li.appendChild(meta);
     const body = document.createElement("p");
     body.className = "zeon-comment-body";
@@ -192,7 +194,23 @@
     if (comments.length === 0) {
       const el = document.createElement("div");
       el.className = "zeon-empty";
-      el.textContent = "No comments yet. Be the first to comment!";
+      const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      icon.setAttribute("viewBox", "0 0 24 24");
+      icon.setAttribute("fill", "none");
+      icon.setAttribute("stroke", "currentColor");
+      icon.setAttribute("stroke-width", "1.5");
+      icon.setAttribute("aria-hidden", "true");
+      icon.classList.add("zeon-empty-icon");
+      icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />`;
+      el.appendChild(icon);
+      const title = document.createElement("p");
+      title.className = "zeon-empty-title";
+      title.textContent = "No comments yet";
+      el.appendChild(title);
+      const desc = document.createElement("p");
+      desc.className = "zeon-empty-desc";
+      desc.textContent = "Be the first to share your thoughts.";
+      el.appendChild(desc);
       return el;
     }
     const list = document.createElement("ul");
@@ -220,30 +238,30 @@
       bar.appendChild(signOutBtn);
     } else {
       const label = document.createElement("span");
-      label.style.flex = "1";
-      label.style.color = "var(--zeon-muted)";
-      label.style.fontSize = "13px";
-      label.textContent = "Sign in to leave a comment";
+      label.className = "zeon-user-name";
+      label.textContent = "Sign in to comment";
       bar.appendChild(label);
       const signInBtn = document.createElement("button");
       signInBtn.className = "zeon-btn zeon-btn-google";
       signInBtn.type = "button";
       signInBtn.disabled = auth.status === "loading";
-      signInBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>${auth.status === "loading" ? "Signing in\u2026" : "Continue with Google"}`;
+      signInBtn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>${auth.status === "loading" ? "Signing in\u2026" : "Continue with Google"}`;
       signInBtn.addEventListener("click", onSignIn);
       bar.appendChild(signInBtn);
     }
     return bar;
   }
+  var MAX_CHARS = 2e3;
   function renderCommentForm(onSubmit, replyTo, onCancelReply, isSubmitting) {
     const form = document.createElement("div");
     form.className = "zeon-form";
     if (replyTo) {
       const indicator = document.createElement("div");
       indicator.className = "zeon-reply-indicator";
-      indicator.innerHTML = `Replying to <strong>${replyTo.authorName}</strong>`;
+      indicator.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" /></svg>Replying to <strong>${replyTo.authorName}</strong>`;
       const cancelBtn = document.createElement("button");
       cancelBtn.type = "button";
+      cancelBtn.className = "zeon-reply-indicator-cancel";
       cancelBtn.setAttribute("aria-label", "Cancel reply");
       cancelBtn.textContent = "\u2715";
       cancelBtn.addEventListener("click", onCancelReply);
@@ -251,13 +269,30 @@
       form.appendChild(indicator);
     }
     const textarea = document.createElement("textarea");
-    textarea.placeholder = "Write a comment\u2026";
-    textarea.setAttribute("aria-label", replyTo ? `Reply to ${replyTo.authorName}` : "Write a comment");
+    textarea.placeholder = replyTo ? `Reply to ${replyTo.authorName}\u2026` : "Write a comment\u2026";
+    textarea.setAttribute(
+      "aria-label",
+      replyTo ? `Reply to ${replyTo.authorName}` : "Write a comment"
+    );
     textarea.rows = 3;
     textarea.disabled = isSubmitting;
+    textarea.addEventListener("input", () => {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+      const len = textarea.value.length;
+      counter.textContent = `${len} / ${MAX_CHARS}`;
+      counter.classList.toggle("zeon-char-counter-warn", len >= MAX_CHARS * 0.9 && len < MAX_CHARS);
+      counter.classList.toggle("zeon-char-counter-over", len > MAX_CHARS);
+      submitBtn.disabled = isSubmitting || len === 0 || len > MAX_CHARS;
+    });
     form.appendChild(textarea);
-    const actions = document.createElement("div");
-    actions.className = "zeon-form-actions";
+    const footer = document.createElement("div");
+    footer.className = "zeon-form-footer";
+    const counter = document.createElement("span");
+    counter.className = "zeon-char-counter";
+    counter.setAttribute("aria-live", "polite");
+    counter.textContent = `0 / ${MAX_CHARS}`;
+    footer.appendChild(counter);
     const submitBtn = document.createElement("button");
     submitBtn.className = "zeon-btn zeon-btn-primary";
     submitBtn.type = "button";
@@ -265,33 +300,132 @@
     submitBtn.disabled = isSubmitting;
     submitBtn.addEventListener("click", async () => {
       const body = textarea.value.trim();
-      if (!body) {
+      if (!body || body.length > MAX_CHARS) {
         textarea.focus();
         return;
       }
       await onSubmit(body, replyTo?.id);
       textarea.value = "";
+      textarea.style.height = "";
+      counter.textContent = `0 / ${MAX_CHARS}`;
+      counter.classList.remove("zeon-char-counter-warn", "zeon-char-counter-over");
+      submitBtn.disabled = true;
     });
-    actions.appendChild(submitBtn);
-    form.appendChild(actions);
+    footer.appendChild(submitBtn);
+    form.appendChild(footer);
     return form;
   }
   function renderError(message) {
     const el = document.createElement("div");
     el.className = "zeon-error";
     el.setAttribute("role", "alert");
-    el.textContent = message;
+    el.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${message}`;
     return el;
   }
   function renderLoading() {
-    const el = document.createElement("div");
-    el.className = "zeon-loading";
-    el.setAttribute("aria-live", "polite");
-    el.textContent = "Loading comments\u2026";
-    return el;
+    const list = document.createElement("ul");
+    list.className = "zeon-loading";
+    list.setAttribute("aria-busy", "true");
+    list.setAttribute("aria-label", "Loading comments");
+    const widths = [
+      ["60%", "90%", "70%"],
+      ["45%", "80%", "55%"],
+      ["55%", "85%"]
+    ];
+    for (const lines of widths) {
+      const item = document.createElement("li");
+      item.className = "zeon-skeleton-item";
+      const meta = document.createElement("div");
+      meta.className = "zeon-skeleton-meta";
+      const avatar = document.createElement("div");
+      avatar.className = "zeon-skeleton zeon-skeleton-avatar";
+      meta.appendChild(avatar);
+      const name = document.createElement("div");
+      name.className = "zeon-skeleton zeon-skeleton-name";
+      meta.appendChild(name);
+      item.appendChild(meta);
+      for (const w of lines) {
+        const line = document.createElement("div");
+        line.className = "zeon-skeleton zeon-skeleton-line";
+        line.style.width = w;
+        line.style.marginLeft = "38px";
+        item.appendChild(line);
+      }
+      list.appendChild(item);
+    }
+    return list;
   }
 
   // widget/src/index.ts
+  function detectHostTheme(host) {
+    const cs = getComputedStyle(document.documentElement);
+    const get = (v) => cs.getPropertyValue(v).trim();
+    const bg = get("--background");
+    if (bg && /oklch|hsl\(|rgb\(|#[0-9a-f]/i.test(bg)) {
+      host.setAttribute("data-theme-detected", "");
+      return null;
+    }
+    const v3Pattern = /^\d[\d.]*\s+[\d.]+%\s+[\d.]+%$/;
+    if (bg && v3Pattern.test(bg)) {
+      host.setAttribute("data-theme-detected", "");
+      const fg = get("--foreground");
+      const border = get("--border");
+      const mutedFg = get("--muted-foreground");
+      const primary = get("--primary");
+      const primaryFg = get("--primary-foreground");
+      const muted = get("--muted");
+      const radius = get("--radius");
+      const accent = get("--accent");
+      const lines = [":host {"];
+      if (bg) lines.push(`  --zeon-bg: hsl(${bg});`);
+      if (fg) lines.push(`  --zeon-text: hsl(${fg});`);
+      if (border) lines.push(`  --zeon-border: hsl(${border});`);
+      if (mutedFg) lines.push(`  --zeon-muted: hsl(${mutedFg});`);
+      if (primary) lines.push(`  --zeon-primary: hsl(${primary});`);
+      if (primaryFg) lines.push(`  --zeon-primary-fg: hsl(${primaryFg});`);
+      if (muted) lines.push(`  --zeon-subtle: hsl(${muted});`);
+      if (accent) lines.push(`  --zeon-accent: hsl(${accent});`);
+      if (radius) lines.push(`  --zeon-radius: ${radius};`);
+      lines.push("}");
+      return lines.join("\n");
+    }
+    const bsBg = get("--bs-body-bg");
+    if (bsBg) {
+      host.setAttribute("data-theme-detected", "");
+      const bsFg = get("--bs-body-color");
+      const bsBorder = get("--bs-border-color");
+      const bsSecondary = get("--bs-secondary-color");
+      const bsPrimary = get("--bs-primary") || get("--bs-link-color");
+      const lines = [":host {"];
+      lines.push(`  --zeon-bg: ${bsBg};`);
+      if (bsFg) lines.push(`  --zeon-text: ${bsFg};`);
+      if (bsBorder) lines.push(`  --zeon-border: ${bsBorder};`);
+      if (bsSecondary) lines.push(`  --zeon-muted: ${bsSecondary};`);
+      if (bsPrimary) lines.push(`  --zeon-primary: ${bsPrimary};`);
+      lines.push("}");
+      return lines.join("\n");
+    }
+    const bodyStyle = getComputedStyle(document.body);
+    const bodyBg = bodyStyle.backgroundColor;
+    const m = bodyBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (m) {
+      const lum = (0.299 * +m[1] + 0.587 * +m[2] + 0.114 * +m[3]) / 255;
+      if (lum < 0.4) {
+        host.setAttribute("data-theme-detected", "");
+        return `:host {
+  --zeon-bg: ${bodyBg};
+  --zeon-text: #f1f5f9;
+  --zeon-border: rgba(255,255,255,0.1);
+  --zeon-muted: #94a3b8;
+  --zeon-primary: #f1f5f9;
+  --zeon-primary-fg: #0f172a;
+  --zeon-subtle: rgba(255,255,255,0.06);
+  --zeon-accent: rgba(255,255,255,0.08);
+}`;
+      }
+    }
+    return null;
+  }
   var ZeonWidget = class {
     constructor(config) {
       this.comments = [];
@@ -301,8 +435,539 @@
       this.shadow = config.container.attachShadow({ mode: "open" });
       this.auth = loadStoredAuth();
       const style = document.createElement("style");
-      style.textContent = '/* Zeon Comments Widget \u2014 scoped inside shadow DOM */\n:host {\n  display: block;\n  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;\n  font-size: 14px;\n  line-height: 1.6;\n  color: var(--zeon-text, #0f172a);\n  --zeon-bg: #ffffff;\n  --zeon-border: #e2e8f0;\n  --zeon-muted: #64748b;\n  --zeon-primary: #0f172a;\n  --zeon-primary-fg: #ffffff;\n  --zeon-radius: 8px;\n  --zeon-avatar-bg: #e2e8f0;\n}\n\n@media (prefers-color-scheme: dark) {\n  :host {\n    --zeon-text: #f8fafc;\n    --zeon-bg: #0f172a;\n    --zeon-border: #1e293b;\n    --zeon-muted: #94a3b8;\n    --zeon-primary: #f8fafc;\n    --zeon-primary-fg: #0f172a;\n    --zeon-avatar-bg: #1e293b;\n  }\n}\n\n* {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n\n.zeon-root {\n  background: var(--zeon-bg);\n  border: 1px solid var(--zeon-border);\n  border-radius: var(--zeon-radius);\n  overflow: hidden;\n}\n\n/* Header */\n.zeon-header {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 12px 16px;\n  border-bottom: 1px solid var(--zeon-border);\n}\n\n.zeon-header h2 {\n  font-size: 14px;\n  font-weight: 600;\n  color: var(--zeon-text);\n}\n\n/* Auth bar */\n.zeon-auth-bar {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 12px 16px;\n  border-bottom: 1px solid var(--zeon-border);\n  background: var(--zeon-bg);\n}\n\n.zeon-avatar {\n  width: 28px;\n  height: 28px;\n  border-radius: 50%;\n  background: var(--zeon-avatar-bg);\n  object-fit: cover;\n  flex-shrink: 0;\n}\n\n.zeon-avatar-placeholder {\n  width: 28px;\n  height: 28px;\n  border-radius: 50%;\n  background: var(--zeon-avatar-bg);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 11px;\n  font-weight: 600;\n  color: var(--zeon-muted);\n  flex-shrink: 0;\n}\n\n.zeon-user-name {\n  font-size: 13px;\n  font-weight: 500;\n  flex: 1;\n  color: var(--zeon-text);\n}\n\n/* Buttons */\n.zeon-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  padding: 6px 12px;\n  border-radius: 6px;\n  font-size: 13px;\n  font-weight: 500;\n  cursor: pointer;\n  border: 1px solid transparent;\n  transition: opacity 0.15s, background-color 0.15s;\n  font-family: inherit;\n  touch-action: manipulation;\n}\n\n.zeon-btn:focus-visible {\n  outline: 2px solid var(--zeon-primary);\n  outline-offset: 2px;\n}\n\n.zeon-btn:disabled {\n  opacity: 0.5;\n  cursor: not-allowed;\n}\n\n.zeon-btn-primary {\n  background: var(--zeon-primary);\n  color: var(--zeon-primary-fg);\n}\n\n.zeon-btn-primary:hover:not(:disabled) {\n  opacity: 0.9;\n}\n\n.zeon-btn-ghost {\n  background: transparent;\n  color: var(--zeon-muted);\n  border-color: var(--zeon-border);\n}\n\n.zeon-btn-ghost:hover:not(:disabled) {\n  background: var(--zeon-border);\n  color: var(--zeon-text);\n}\n\n.zeon-btn-sm {\n  padding: 4px 8px;\n  font-size: 12px;\n}\n\n/* Google button */\n.zeon-btn-google {\n  background: #fff;\n  color: #374151;\n  border-color: #d1d5db;\n  font-size: 13px;\n}\n\n.zeon-btn-google:hover:not(:disabled) {\n  background: #f9fafb;\n}\n\n/* Comment form */\n.zeon-form {\n  padding: 12px 16px;\n  border-bottom: 1px solid var(--zeon-border);\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n.zeon-form textarea {\n  width: 100%;\n  min-height: 80px;\n  padding: 8px 10px;\n  border: 1px solid var(--zeon-border);\n  border-radius: 6px;\n  font-family: inherit;\n  font-size: 13px;\n  line-height: 1.5;\n  resize: vertical;\n  background: var(--zeon-bg);\n  color: var(--zeon-text);\n  transition: border-color 0.15s;\n}\n\n.zeon-form textarea:focus {\n  outline: none;\n  border-color: var(--zeon-primary);\n}\n\n.zeon-form textarea::placeholder {\n  color: var(--zeon-muted);\n}\n\n.zeon-form-actions {\n  display: flex;\n  align-items: center;\n  justify-content: flex-end;\n  gap: 8px;\n}\n\n/* Reply form indicator */\n.zeon-reply-indicator {\n  padding: 6px 10px;\n  background: var(--zeon-avatar-bg);\n  border-radius: 4px;\n  font-size: 12px;\n  color: var(--zeon-muted);\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.zeon-reply-indicator button {\n  background: none;\n  border: none;\n  cursor: pointer;\n  color: var(--zeon-muted);\n  padding: 0;\n  font-size: 14px;\n  line-height: 1;\n}\n\n/* Comments list */\n.zeon-list {\n  list-style: none;\n}\n\n.zeon-empty {\n  padding: 32px 16px;\n  text-align: center;\n  color: var(--zeon-muted);\n  font-size: 13px;\n}\n\n/* Comment item */\n.zeon-comment {\n  padding: 14px 16px;\n  border-bottom: 1px solid var(--zeon-border);\n}\n\n.zeon-comment:last-child {\n  border-bottom: none;\n}\n\n.zeon-comment-meta {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  margin-bottom: 8px;\n}\n\n.zeon-comment-author {\n  font-weight: 600;\n  font-size: 13px;\n  color: var(--zeon-text);\n}\n\n.zeon-comment-time {\n  font-size: 12px;\n  color: var(--zeon-muted);\n}\n\n.zeon-comment-body {\n  font-size: 14px;\n  line-height: 1.6;\n  color: var(--zeon-text);\n  white-space: pre-wrap;\n  word-break: break-word;\n  overflow-wrap: break-word;\n}\n\n.zeon-comment-actions {\n  margin-top: 8px;\n  display: flex;\n  gap: 4px;\n}\n\n/* Replies */\n.zeon-replies {\n  margin-top: 10px;\n  margin-left: 36px;\n  padding-left: 12px;\n  border-left: 2px solid var(--zeon-border);\n  list-style: none;\n}\n\n.zeon-reply {\n  padding: 10px 0;\n  border-bottom: 1px solid var(--zeon-border);\n}\n\n.zeon-reply:last-child {\n  border-bottom: none;\n}\n\n/* Pending badge */\n.zeon-pending-badge {\n  display: inline-block;\n  padding: 1px 6px;\n  border-radius: 4px;\n  font-size: 11px;\n  background: #fef3c7;\n  color: #92400e;\n  margin-left: 4px;\n}\n\n/* Loading + error */\n.zeon-loading {\n  padding: 24px 16px;\n  text-align: center;\n  color: var(--zeon-muted);\n  font-size: 13px;\n}\n\n.zeon-error {\n  padding: 12px 16px;\n  background: #fef2f2;\n  color: #991b1b;\n  font-size: 13px;\n  border-bottom: 1px solid var(--zeon-border);\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .zeon-btn { transition: none; }\n  .zeon-form textarea { transition: none; }\n}\n';
+      style.textContent = `/* Zeon Comments Widget \u2014 scoped inside shadow DOM */
+
+/* \u2500\u2500\u2500 Design tokens \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+/*
+ * :host vars try to inherit from the client page's CSS custom properties
+ * (shadcn/Tailwind v4 uses direct color values: oklch/hsl/hex).
+ * If the host page defines --background, --foreground, etc. they flow in
+ * automatically. The hard-coded values are the fallback own theme.
+ */
+:host {
+  display: block;
+  font-family: var(--font-sans, var(--font-geist-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif));
+  font-size: 14px;
+  line-height: 1.6;
+
+  /* These bind to the host's CSS vars first, then fall back to own theme */
+  --zeon-bg:         var(--background,          #ffffff);
+  --zeon-text:       var(--foreground,           #0f172a);
+  --zeon-border:     var(--border,               #e2e8f0);
+  --zeon-muted:      var(--muted-foreground,     #64748b);
+  --zeon-primary:    var(--primary,              #0f172a);
+  --zeon-primary-fg: var(--primary-foreground,   #ffffff);
+  --zeon-subtle:     var(--muted,                #f1f5f9);
+  --zeon-accent:     var(--accent,               #f1f5f9);
+  --zeon-radius:     var(--radius,               8px);
+
+  /* Derived */
+  --zeon-radius-sm:  calc(var(--zeon-radius) * 0.6);
+  --zeon-radius-lg:  calc(var(--zeon-radius) * 1.5);
+
+  color: var(--zeon-text);
+}
+
+/* \u2500\u2500\u2500 Own fallback dark theme (only active when host has no CSS vars) \u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+@media (prefers-color-scheme: dark) {
+  :host(:not([data-theme-detected])) {
+    --zeon-bg:         #0f172a;
+    --zeon-text:       #f8fafc;
+    --zeon-border:     #1e293b;
+    --zeon-muted:      #94a3b8;
+    --zeon-primary:    #f8fafc;
+    --zeon-primary-fg: #0f172a;
+    --zeon-subtle:     #1e293b;
+    --zeon-accent:     #1e293b;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* \u2500\u2500\u2500 Root container \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.zeon-root {
+  background: var(--zeon-bg);
+  border: 1px solid var(--zeon-border);
+  border-radius: var(--zeon-radius-lg);
+  overflow: hidden;
+}
+
+/* \u2500\u2500\u2500 Header \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.zeon-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 13px;
+  border-bottom: 1px solid var(--zeon-border);
+}
+
+.zeon-header h2 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--zeon-text);
+  letter-spacing: -0.01em;
+}
+
+/* \u2500\u2500\u2500 Auth bar \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.zeon-auth-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--zeon-border);
+  background: var(--zeon-subtle);
+  min-height: 48px;
+}
+
+/* \u2500\u2500\u2500 Avatars \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.zeon-avatar,
+.zeon-avatar-placeholder {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.zeon-avatar {
+  background: var(--zeon-subtle);
+  object-fit: cover;
+}
+
+.zeon-avatar-placeholder {
+  background: var(--zeon-subtle);
+  border: 1px solid var(--zeon-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--zeon-muted);
+  letter-spacing: 0.03em;
+}
+
+.zeon-avatar-sm,
+.zeon-avatar-placeholder-sm {
+  width: 24px;
+  height: 24px;
+  font-size: 9px;
+}
+
+.zeon-user-name {
+  font-size: 13px;
+  font-weight: 500;
+  flex: 1;
+  color: var(--zeon-text);
+}
+
+/* \u2500\u2500\u2500 Buttons \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.zeon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--zeon-radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.12s, opacity 0.12s, color 0.12s;
+  font-family: inherit;
+  touch-action: manipulation;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.zeon-btn:focus-visible {
+  outline: 2px solid var(--zeon-primary);
+  outline-offset: 2px;
+}
+
+.zeon-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.zeon-btn-primary {
+  background: var(--zeon-primary);
+  color: var(--zeon-primary-fg);
+  border-color: var(--zeon-primary);
+}
+
+.zeon-btn-primary:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.zeon-btn-ghost {
+  background: transparent;
+  color: var(--zeon-muted);
+  border-color: var(--zeon-border);
+}
+
+.zeon-btn-ghost:hover:not(:disabled) {
+  background: var(--zeon-accent);
+  color: var(--zeon-text);
+}
+
+.zeon-btn-sm {
+  padding: 3px 9px;
+  font-size: 12px;
+  border-radius: calc(var(--zeon-radius-sm) * 0.85);
+}
+
+/* Google sign-in button */
+.zeon-btn-google {
+  background: var(--zeon-bg);
+  color: var(--zeon-text);
+  border-color: var(--zeon-border);
+  font-size: 13px;
+  padding: 6px 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.zeon-btn-google:hover:not(:disabled) {
+  background: var(--zeon-accent);
+}
+
+.zeon-btn-google svg {
+  flex-shrink: 0;
+}
+
+/* \u2500\u2500\u2500 Comment form \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.zeon-form {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--zeon-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zeon-form textarea {
+  width: 100%;
+  min-height: 80px;
+  max-height: 360px;
+  padding: 9px 11px;
+  border: 1px solid var(--zeon-border);
+  border-radius: var(--zeon-radius-sm);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.55;
+  resize: none;
+  overflow-y: hidden;
+  background: var(--zeon-bg);
+  color: var(--zeon-text);
+  transition: border-color 0.12s, box-shadow 0.12s;
+  display: block;
+}
+
+.zeon-form textarea:focus {
+  outline: none;
+  border-color: var(--zeon-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zeon-primary) 12%, transparent);
+}
+
+.zeon-form textarea::placeholder {
+  color: var(--zeon-muted);
+}
+
+.zeon-form textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.zeon-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.zeon-char-counter {
+  font-size: 11px;
+  color: var(--zeon-muted);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.12s;
+}
+
+.zeon-char-counter-warn {
+  color: #f59e0b;
+}
+
+.zeon-char-counter-over {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* Reply indicator */
+.zeon-reply-indicator {
+  padding: 6px 10px 6px 12px;
+  background: var(--zeon-accent);
+  border: 1px solid var(--zeon-border);
+  border-left: 3px solid var(--zeon-primary);
+  border-radius: var(--zeon-radius-sm);
+  font-size: 12px;
+  color: var(--zeon-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zeon-reply-indicator strong {
+  color: var(--zeon-text);
+  font-weight: 600;
+}
+
+.zeon-reply-indicator-cancel {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--zeon-muted);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zeon-reply-indicator-cancel:hover {
+  background: var(--zeon-border);
+  color: var(--zeon-text);
+}
+
+/* \u2500\u2500\u2500 Comments list \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.zeon-list {
+  list-style: none;
+}
+
+/* Empty state */
+.zeon-empty {
+  padding: 40px 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.zeon-empty-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--zeon-border);
+  opacity: 0.8;
+}
+
+.zeon-empty-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--zeon-text);
+}
+
+.zeon-empty-desc {
+  font-size: 13px;
+  color: var(--zeon-muted);
+}
+
+/* \u2500\u2500\u2500 Comment item \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.zeon-comment {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--zeon-border);
+}
+
+.zeon-comment:last-child {
+  border-bottom: none;
+}
+
+.zeon-comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.zeon-comment-author {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--zeon-text);
+}
+
+.zeon-comment-time {
+  font-size: 12px;
+  color: var(--zeon-muted);
+  margin-left: auto;
+}
+
+.zeon-comment-body {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--zeon-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  padding-left: 38px; /* align under author name */
+}
+
+.zeon-comment-actions {
+  margin-top: 6px;
+  padding-left: 38px;
+  display: flex;
+  gap: 4px;
+}
+
+/* \u2500\u2500\u2500 Replies \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.zeon-replies {
+  margin-top: 12px;
+  margin-left: 38px;
+  padding-left: 14px;
+  border-left: 2px solid var(--zeon-border);
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.zeon-reply {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--zeon-border);
+}
+
+.zeon-reply:last-child {
+  border-bottom: none;
+  padding-bottom: 2px;
+}
+
+.zeon-reply .zeon-comment-body {
+  padding-left: 32px;
+}
+
+.zeon-reply .zeon-comment-meta {
+  margin-bottom: 4px;
+}
+
+/* \u2500\u2500\u2500 Pending badge \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.zeon-pending-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 500;
+  background: color-mix(in srgb, #f59e0b 12%, var(--zeon-bg));
+  color: #b45309;
+  border: 1px solid color-mix(in srgb, #f59e0b 25%, transparent);
+  margin-left: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host(:not([data-theme-detected])) .zeon-pending-badge {
+    background: color-mix(in srgb, #f59e0b 15%, transparent);
+    color: #fbbf24;
+    border-color: color-mix(in srgb, #f59e0b 30%, transparent);
+  }
+}
+
+/* \u2500\u2500\u2500 Loading skeleton \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.zeon-loading {
+  padding: 0;
+  list-style: none;
+}
+
+.zeon-skeleton-item {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--zeon-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zeon-skeleton-item:last-child {
+  border-bottom: none;
+}
+
+.zeon-skeleton-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zeon-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--zeon-subtle) 25%,
+    var(--zeon-accent) 50%,
+    var(--zeon-subtle) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: zeon-shimmer 1.6s infinite linear;
+}
+
+@keyframes zeon-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.zeon-skeleton-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.zeon-skeleton-name {
+  height: 12px;
+  width: 100px;
+}
+
+.zeon-skeleton-line {
+  height: 11px;
+}
+
+/* \u2500\u2500\u2500 Error \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.zeon-error {
+  padding: 10px 16px;
+  background: color-mix(in srgb, #ef4444 10%, var(--zeon-bg));
+  color: #b91c1c;
+  font-size: 13px;
+  border-bottom: 1px solid color-mix(in srgb, #ef4444 20%, transparent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host(:not([data-theme-detected])) .zeon-error {
+    color: #fca5a5;
+  }
+}
+
+/* \u2500\u2500\u2500 Accessibility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+@media (prefers-reduced-motion: reduce) {
+  .zeon-btn,
+  .zeon-form textarea {
+    transition: none;
+  }
+  .zeon-skeleton {
+    animation: none;
+    background: var(--zeon-subtle);
+  }
+}
+`;
       this.shadow.appendChild(style);
+      const themeOverride = detectHostTheme(config.container);
+      if (themeOverride) {
+        const themeStyle = document.createElement("style");
+        themeStyle.textContent = themeOverride;
+        this.shadow.appendChild(themeStyle);
+      }
       this.root = document.createElement("div");
       this.root.className = "zeon-root";
       this.shadow.appendChild(this.root);
@@ -310,7 +975,7 @@
       this.loadComments();
     }
     async loadComments() {
-      this.renderLoading();
+      this.renderLoadingState();
       try {
         this.comments = await fetchComments(
           this.config.appUrl,
@@ -373,8 +1038,10 @@
         this.render();
       }
     }
-    renderLoading() {
+    renderLoadingState() {
       this.root.innerHTML = "";
+      const header = this.buildHeader();
+      this.root.appendChild(header);
       this.root.appendChild(renderLoading());
     }
     renderErrorState(message) {
@@ -388,15 +1055,18 @@
       this.root.insertBefore(banner, this.root.firstChild);
       setTimeout(() => banner.remove(), 4e3);
     }
-    render() {
-      this.root.innerHTML = "";
+    buildHeader() {
       const header = document.createElement("div");
       header.className = "zeon-header";
       const heading = document.createElement("h2");
       const count = this.comments.length;
       heading.textContent = `${count} Comment${count !== 1 ? "s" : ""}`;
       header.appendChild(heading);
-      this.root.appendChild(header);
+      return header;
+    }
+    render() {
+      this.root.innerHTML = "";
+      this.root.appendChild(this.buildHeader());
       if (this.auth.status === "error") {
         this.root.appendChild(renderError(this.auth.message));
       }
