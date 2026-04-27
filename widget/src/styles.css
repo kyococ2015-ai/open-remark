@@ -1,28 +1,47 @@
 /* Zeon Comments Widget — scoped inside shadow DOM */
+
+/* ─── Design tokens ───────────────────────────────────────────────────────── */
+/*
+ * :host vars try to inherit from the client page's CSS custom properties
+ * (shadcn/Tailwind v4 uses direct color values: oklch/hsl/hex).
+ * If the host page defines --background, --foreground, etc. they flow in
+ * automatically. The hard-coded values are the fallback own theme.
+ */
 :host {
   display: block;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans, var(--font-geist-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif));
   font-size: 14px;
   line-height: 1.6;
-  color: var(--zeon-text, #0f172a);
-  --zeon-bg: #ffffff;
-  --zeon-border: #e2e8f0;
-  --zeon-muted: #64748b;
-  --zeon-primary: #0f172a;
-  --zeon-primary-fg: #ffffff;
-  --zeon-radius: 8px;
-  --zeon-avatar-bg: #e2e8f0;
+
+  /* These bind to the host's CSS vars first, then fall back to own theme */
+  --zeon-bg:         var(--background,          #ffffff);
+  --zeon-text:       var(--foreground,           #0f172a);
+  --zeon-border:     var(--border,               #e2e8f0);
+  --zeon-muted:      var(--muted-foreground,     #64748b);
+  --zeon-primary:    var(--primary,              #0f172a);
+  --zeon-primary-fg: var(--primary-foreground,   #ffffff);
+  --zeon-subtle:     var(--muted,                #f1f5f9);
+  --zeon-accent:     var(--accent,               #f1f5f9);
+  --zeon-radius:     var(--radius,               8px);
+
+  /* Derived */
+  --zeon-radius-sm:  calc(var(--zeon-radius) * 0.6);
+  --zeon-radius-lg:  calc(var(--zeon-radius) * 1.5);
+
+  color: var(--zeon-text);
 }
 
+/* ─── Own fallback dark theme (only active when host has no CSS vars) ─────── */
 @media (prefers-color-scheme: dark) {
-  :host {
-    --zeon-text: #f8fafc;
-    --zeon-bg: #0f172a;
-    --zeon-border: #1e293b;
-    --zeon-muted: #94a3b8;
-    --zeon-primary: #f8fafc;
+  :host(:not([data-theme-detected])) {
+    --zeon-bg:         #0f172a;
+    --zeon-text:       #f8fafc;
+    --zeon-border:     #1e293b;
+    --zeon-muted:      #94a3b8;
+    --zeon-primary:    #f8fafc;
     --zeon-primary-fg: #0f172a;
-    --zeon-avatar-bg: #1e293b;
+    --zeon-subtle:     #1e293b;
+    --zeon-accent:     #1e293b;
   }
 }
 
@@ -32,19 +51,20 @@
   padding: 0;
 }
 
+/* ─── Root container ─────────────────────────────────────────────────────── */
 .zeon-root {
   background: var(--zeon-bg);
   border: 1px solid var(--zeon-border);
-  border-radius: var(--zeon-radius);
+  border-radius: var(--zeon-radius-lg);
   overflow: hidden;
 }
 
-/* Header */
+/* ─── Header ─────────────────────────────────────────────────────────────── */
 .zeon-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 14px 16px 13px;
   border-bottom: 1px solid var(--zeon-border);
 }
 
@@ -52,39 +72,51 @@
   font-size: 14px;
   font-weight: 600;
   color: var(--zeon-text);
+  letter-spacing: -0.01em;
 }
 
-/* Auth bar */
+/* ─── Auth bar ───────────────────────────────────────────────────────────── */
 .zeon-auth-bar {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--zeon-border);
-  background: var(--zeon-bg);
+  background: var(--zeon-subtle);
+  min-height: 48px;
 }
 
-.zeon-avatar {
-  width: 28px;
-  height: 28px;
+/* ─── Avatars ────────────────────────────────────────────────────────────── */
+.zeon-avatar,
+.zeon-avatar-placeholder {
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: var(--zeon-avatar-bg);
-  object-fit: cover;
   flex-shrink: 0;
 }
 
+.zeon-avatar {
+  background: var(--zeon-subtle);
+  object-fit: cover;
+}
+
 .zeon-avatar-placeholder {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--zeon-avatar-bg);
+  background: var(--zeon-subtle);
+  border: 1px solid var(--zeon-border);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--zeon-muted);
-  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+
+.zeon-avatar-sm,
+.zeon-avatar-placeholder-sm {
+  width: 24px;
+  height: 24px;
+  font-size: 9px;
 }
 
 .zeon-user-name {
@@ -94,20 +126,23 @@
   color: var(--zeon-text);
 }
 
-/* Buttons */
+/* ─── Buttons ────────────────────────────────────────────────────────────── */
 .zeon-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 6px 14px;
+  border-radius: var(--zeon-radius-sm);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: opacity 0.15s, background-color 0.15s;
+  transition: background-color 0.12s, opacity 0.12s, color 0.12s;
   font-family: inherit;
   touch-action: manipulation;
+  white-space: nowrap;
+  user-select: none;
 }
 
 .zeon-btn:focus-visible {
@@ -116,17 +151,19 @@
 }
 
 .zeon-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 .zeon-btn-primary {
   background: var(--zeon-primary);
   color: var(--zeon-primary-fg);
+  border-color: var(--zeon-primary);
 }
 
 .zeon-btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
+  opacity: 0.88;
 }
 
 .zeon-btn-ghost {
@@ -136,72 +173,106 @@
 }
 
 .zeon-btn-ghost:hover:not(:disabled) {
-  background: var(--zeon-border);
+  background: var(--zeon-accent);
   color: var(--zeon-text);
 }
 
 .zeon-btn-sm {
-  padding: 4px 8px;
+  padding: 3px 9px;
   font-size: 12px;
+  border-radius: calc(var(--zeon-radius-sm) * 0.85);
 }
 
-/* Google button */
+/* Google sign-in button */
 .zeon-btn-google {
-  background: #fff;
-  color: #374151;
-  border-color: #d1d5db;
+  background: var(--zeon-bg);
+  color: var(--zeon-text);
+  border-color: var(--zeon-border);
   font-size: 13px;
+  padding: 6px 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .zeon-btn-google:hover:not(:disabled) {
-  background: #f9fafb;
+  background: var(--zeon-accent);
 }
 
-/* Comment form */
+.zeon-btn-google svg {
+  flex-shrink: 0;
+}
+
+/* ─── Comment form ───────────────────────────────────────────────────────── */
 .zeon-form {
   padding: 12px 16px;
   border-bottom: 1px solid var(--zeon-border);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .zeon-form textarea {
   width: 100%;
   min-height: 80px;
-  padding: 8px 10px;
+  max-height: 360px;
+  padding: 9px 11px;
   border: 1px solid var(--zeon-border);
-  border-radius: 6px;
+  border-radius: var(--zeon-radius-sm);
   font-family: inherit;
   font-size: 13px;
-  line-height: 1.5;
-  resize: vertical;
+  line-height: 1.55;
+  resize: none;
+  overflow-y: hidden;
   background: var(--zeon-bg);
   color: var(--zeon-text);
-  transition: border-color 0.15s;
+  transition: border-color 0.12s, box-shadow 0.12s;
+  display: block;
 }
 
 .zeon-form textarea:focus {
   outline: none;
   border-color: var(--zeon-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zeon-primary) 12%, transparent);
 }
 
 .zeon-form textarea::placeholder {
   color: var(--zeon-muted);
 }
 
-.zeon-form-actions {
+.zeon-form textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.zeon-form-footer {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 8px;
 }
 
-/* Reply form indicator */
+.zeon-char-counter {
+  font-size: 11px;
+  color: var(--zeon-muted);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.12s;
+}
+
+.zeon-char-counter-warn {
+  color: #f59e0b;
+}
+
+.zeon-char-counter-over {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* Reply indicator */
 .zeon-reply-indicator {
-  padding: 6px 10px;
-  background: var(--zeon-avatar-bg);
-  border-radius: 4px;
+  padding: 6px 10px 6px 12px;
+  background: var(--zeon-accent);
+  border: 1px solid var(--zeon-border);
+  border-left: 3px solid var(--zeon-primary);
+  border-radius: var(--zeon-radius-sm);
   font-size: 12px;
   color: var(--zeon-muted);
   display: flex;
@@ -209,29 +280,66 @@
   gap: 6px;
 }
 
-.zeon-reply-indicator button {
+.zeon-reply-indicator strong {
+  color: var(--zeon-text);
+  font-weight: 600;
+}
+
+.zeon-reply-indicator-cancel {
+  margin-left: auto;
   background: none;
   border: none;
   cursor: pointer;
   color: var(--zeon-muted);
-  padding: 0;
+  padding: 2px 4px;
+  border-radius: 4px;
   font-size: 14px;
   line-height: 1;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Comments list */
+.zeon-reply-indicator-cancel:hover {
+  background: var(--zeon-border);
+  color: var(--zeon-text);
+}
+
+/* ─── Comments list ──────────────────────────────────────────────────────── */
 .zeon-list {
   list-style: none;
 }
 
+/* Empty state */
 .zeon-empty {
-  padding: 32px 16px;
+  padding: 40px 16px;
   text-align: center;
-  color: var(--zeon-muted);
-  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Comment item */
+.zeon-empty-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--zeon-border);
+  opacity: 0.8;
+}
+
+.zeon-empty-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--zeon-text);
+}
+
+.zeon-empty-desc {
+  font-size: 13px;
+  color: var(--zeon-muted);
+}
+
+/* ─── Comment item ───────────────────────────────────────────────────────── */
 .zeon-comment {
   padding: 14px 16px;
   border-bottom: 1px solid var(--zeon-border);
@@ -245,7 +353,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .zeon-comment-author {
@@ -257,30 +365,36 @@
 .zeon-comment-time {
   font-size: 12px;
   color: var(--zeon-muted);
+  margin-left: auto;
 }
 
 .zeon-comment-body {
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 13.5px;
+  line-height: 1.65;
   color: var(--zeon-text);
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: break-word;
+  padding-left: 38px; /* align under author name */
 }
 
 .zeon-comment-actions {
-  margin-top: 8px;
+  margin-top: 6px;
+  padding-left: 38px;
   display: flex;
   gap: 4px;
 }
 
-/* Replies */
+/* ─── Replies ────────────────────────────────────────────────────────────── */
 .zeon-replies {
-  margin-top: 10px;
-  margin-left: 36px;
-  padding-left: 12px;
+  margin-top: 12px;
+  margin-left: 38px;
+  padding-left: 14px;
   border-left: 2px solid var(--zeon-border);
   list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .zeon-reply {
@@ -290,36 +404,122 @@
 
 .zeon-reply:last-child {
   border-bottom: none;
+  padding-bottom: 2px;
 }
 
-/* Pending badge */
+.zeon-reply .zeon-comment-body {
+  padding-left: 32px;
+}
+
+.zeon-reply .zeon-comment-meta {
+  margin-bottom: 4px;
+}
+
+/* ─── Pending badge ──────────────────────────────────────────────────────── */
 .zeon-pending-badge {
-  display: inline-block;
-  padding: 1px 6px;
-  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 99px;
   font-size: 11px;
-  background: #fef3c7;
-  color: #92400e;
-  margin-left: 4px;
+  font-weight: 500;
+  background: color-mix(in srgb, #f59e0b 12%, var(--zeon-bg));
+  color: #b45309;
+  border: 1px solid color-mix(in srgb, #f59e0b 25%, transparent);
+  margin-left: 2px;
 }
 
-/* Loading + error */
+@media (prefers-color-scheme: dark) {
+  :host(:not([data-theme-detected])) .zeon-pending-badge {
+    background: color-mix(in srgb, #f59e0b 15%, transparent);
+    color: #fbbf24;
+    border-color: color-mix(in srgb, #f59e0b 30%, transparent);
+  }
+}
+
+/* ─── Loading skeleton ───────────────────────────────────────────────────── */
 .zeon-loading {
-  padding: 24px 16px;
-  text-align: center;
-  color: var(--zeon-muted);
-  font-size: 13px;
+  padding: 0;
+  list-style: none;
 }
 
-.zeon-error {
-  padding: 12px 16px;
-  background: #fef2f2;
-  color: #991b1b;
-  font-size: 13px;
+.zeon-skeleton-item {
+  padding: 14px 16px;
   border-bottom: 1px solid var(--zeon-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
+.zeon-skeleton-item:last-child {
+  border-bottom: none;
+}
+
+.zeon-skeleton-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zeon-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--zeon-subtle) 25%,
+    var(--zeon-accent) 50%,
+    var(--zeon-subtle) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: zeon-shimmer 1.6s infinite linear;
+}
+
+@keyframes zeon-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.zeon-skeleton-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.zeon-skeleton-name {
+  height: 12px;
+  width: 100px;
+}
+
+.zeon-skeleton-line {
+  height: 11px;
+}
+
+/* ─── Error ──────────────────────────────────────────────────────────────── */
+.zeon-error {
+  padding: 10px 16px;
+  background: color-mix(in srgb, #ef4444 10%, var(--zeon-bg));
+  color: #b91c1c;
+  font-size: 13px;
+  border-bottom: 1px solid color-mix(in srgb, #ef4444 20%, transparent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host(:not([data-theme-detected])) .zeon-error {
+    color: #fca5a5;
+  }
+}
+
+/* ─── Accessibility ──────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .zeon-btn { transition: none; }
-  .zeon-form textarea { transition: none; }
+  .zeon-btn,
+  .zeon-form textarea {
+    transition: none;
+  }
+  .zeon-skeleton {
+    animation: none;
+    background: var(--zeon-subtle);
+  }
 }

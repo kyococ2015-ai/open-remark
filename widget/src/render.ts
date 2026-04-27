@@ -14,18 +14,20 @@ export function formatRelativeTime(isoDate: string): string {
   );
 }
 
-function avatarEl(name: string, image: string | null | undefined): HTMLElement {
+function avatarEl(name: string, image: string | null | undefined, small = false): HTMLElement {
   if (image) {
     const img = document.createElement("img");
     img.src = image;
     img.alt = name;
-    img.className = "zeon-avatar";
-    img.width = 28;
-    img.height = 28;
+    img.className = small ? "zeon-avatar zeon-avatar-sm" : "zeon-avatar";
+    img.width = small ? 24 : 30;
+    img.height = small ? 24 : 30;
     return img;
   }
   const el = document.createElement("div");
-  el.className = "zeon-avatar-placeholder";
+  el.className = small
+    ? "zeon-avatar-placeholder zeon-avatar-placeholder-sm"
+    : "zeon-avatar-placeholder";
   el.setAttribute("aria-hidden", "true");
   el.textContent = name.slice(0, 2).toUpperCase();
   return el;
@@ -43,12 +45,19 @@ function renderCommentItem(
   // Meta row
   const meta = document.createElement("div");
   meta.className = "zeon-comment-meta";
-  meta.appendChild(avatarEl(comment.authorName, comment.authorImage));
+  meta.appendChild(avatarEl(comment.authorName, comment.authorImage, depth > 0));
 
   const authorEl = document.createElement("span");
   authorEl.className = "zeon-comment-author";
   authorEl.textContent = comment.authorName;
   meta.appendChild(authorEl);
+
+  if (comment.status === "PENDING") {
+    const badge = document.createElement("span");
+    badge.className = "zeon-pending-badge";
+    badge.textContent = "Pending";
+    meta.appendChild(badge);
+  }
 
   const timeEl = document.createElement("time");
   timeEl.className = "zeon-comment-time";
@@ -56,16 +65,9 @@ function renderCommentItem(
   timeEl.textContent = formatRelativeTime(comment.createdAt);
   meta.appendChild(timeEl);
 
-  if (comment.status === "PENDING") {
-    const badge = document.createElement("span");
-    badge.className = "zeon-pending-badge";
-    badge.textContent = "Pending review";
-    meta.appendChild(badge);
-  }
-
   li.appendChild(meta);
 
-  // Body
+  // Body — indented to align under author name
   const body = document.createElement("p");
   body.className = "zeon-comment-body";
   body.textContent = comment.body;
@@ -106,7 +108,27 @@ export function renderCommentList(
   if (comments.length === 0) {
     const el = document.createElement("div");
     el.className = "zeon-empty";
-    el.textContent = "No comments yet. Be the first to comment!";
+
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    icon.setAttribute("viewBox", "0 0 24 24");
+    icon.setAttribute("fill", "none");
+    icon.setAttribute("stroke", "currentColor");
+    icon.setAttribute("stroke-width", "1.5");
+    icon.setAttribute("aria-hidden", "true");
+    icon.classList.add("zeon-empty-icon");
+    icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />`;
+    el.appendChild(icon);
+
+    const title = document.createElement("p");
+    title.className = "zeon-empty-title";
+    title.textContent = "No comments yet";
+    el.appendChild(title);
+
+    const desc = document.createElement("p");
+    desc.className = "zeon-empty-desc";
+    desc.textContent = "Be the first to share your thoughts.";
+    el.appendChild(desc);
+
     return el;
   }
 
@@ -142,23 +164,23 @@ export function renderAuthBar(
     bar.appendChild(signOutBtn);
   } else {
     const label = document.createElement("span");
-    label.style.flex = "1";
-    label.style.color = "var(--zeon-muted)";
-    label.style.fontSize = "13px";
-    label.textContent = "Sign in to leave a comment";
+    label.className = "zeon-user-name";
+    label.textContent = "Sign in to comment";
     bar.appendChild(label);
 
     const signInBtn = document.createElement("button");
     signInBtn.className = "zeon-btn zeon-btn-google";
     signInBtn.type = "button";
     signInBtn.disabled = auth.status === "loading";
-    signInBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>${auth.status === "loading" ? "Signing in…" : "Continue with Google"}`;
+    signInBtn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>${auth.status === "loading" ? "Signing in…" : "Continue with Google"}`;
     signInBtn.addEventListener("click", onSignIn);
     bar.appendChild(signInBtn);
   }
 
   return bar;
 }
+
+const MAX_CHARS = 2000;
 
 export function renderCommentForm(
   onSubmit: (body: string, parentId?: string) => Promise<void>,
@@ -172,9 +194,10 @@ export function renderCommentForm(
   if (replyTo) {
     const indicator = document.createElement("div");
     indicator.className = "zeon-reply-indicator";
-    indicator.innerHTML = `Replying to <strong>${replyTo.authorName}</strong>`;
+    indicator.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" /></svg>Replying to <strong>${replyTo.authorName}</strong>`;
     const cancelBtn = document.createElement("button");
     cancelBtn.type = "button";
+    cancelBtn.className = "zeon-reply-indicator-cancel";
     cancelBtn.setAttribute("aria-label", "Cancel reply");
     cancelBtn.textContent = "✕";
     cancelBtn.addEventListener("click", onCancelReply);
@@ -183,14 +206,35 @@ export function renderCommentForm(
   }
 
   const textarea = document.createElement("textarea");
-  textarea.placeholder = "Write a comment…";
-  textarea.setAttribute("aria-label", replyTo ? `Reply to ${replyTo.authorName}` : "Write a comment");
+  textarea.placeholder = replyTo ? `Reply to ${replyTo.authorName}…` : "Write a comment…";
+  textarea.setAttribute(
+    "aria-label",
+    replyTo ? `Reply to ${replyTo.authorName}` : "Write a comment",
+  );
   textarea.rows = 3;
   textarea.disabled = isSubmitting;
+
+  // Auto-grow
+  textarea.addEventListener("input", () => {
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+    const len = textarea.value.length;
+    counter.textContent = `${len} / ${MAX_CHARS}`;
+    counter.classList.toggle("zeon-char-counter-warn", len >= MAX_CHARS * 0.9 && len < MAX_CHARS);
+    counter.classList.toggle("zeon-char-counter-over", len > MAX_CHARS);
+    submitBtn.disabled = isSubmitting || len === 0 || len > MAX_CHARS;
+  });
+
   form.appendChild(textarea);
 
-  const actions = document.createElement("div");
-  actions.className = "zeon-form-actions";
+  const footer = document.createElement("div");
+  footer.className = "zeon-form-footer";
+
+  const counter = document.createElement("span");
+  counter.className = "zeon-char-counter";
+  counter.setAttribute("aria-live", "polite");
+  counter.textContent = `0 / ${MAX_CHARS}`;
+  footer.appendChild(counter);
 
   const submitBtn = document.createElement("button");
   submitBtn.className = "zeon-btn zeon-btn-primary";
@@ -199,16 +243,20 @@ export function renderCommentForm(
   submitBtn.disabled = isSubmitting;
   submitBtn.addEventListener("click", async () => {
     const body = textarea.value.trim();
-    if (!body) {
+    if (!body || body.length > MAX_CHARS) {
       textarea.focus();
       return;
     }
     await onSubmit(body, replyTo?.id);
     textarea.value = "";
+    textarea.style.height = "";
+    counter.textContent = `0 / ${MAX_CHARS}`;
+    counter.classList.remove("zeon-char-counter-warn", "zeon-char-counter-over");
+    submitBtn.disabled = true;
   });
 
-  actions.appendChild(submitBtn);
-  form.appendChild(actions);
+  footer.appendChild(submitBtn);
+  form.appendChild(footer);
 
   return form;
 }
@@ -217,14 +265,48 @@ export function renderError(message: string): HTMLElement {
   const el = document.createElement("div");
   el.className = "zeon-error";
   el.setAttribute("role", "alert");
-  el.textContent = message;
+  el.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${message}`;
   return el;
 }
 
 export function renderLoading(): HTMLElement {
-  const el = document.createElement("div");
-  el.className = "zeon-loading";
-  el.setAttribute("aria-live", "polite");
-  el.textContent = "Loading comments…";
-  return el;
+  const list = document.createElement("ul");
+  list.className = "zeon-loading";
+  list.setAttribute("aria-busy", "true");
+  list.setAttribute("aria-label", "Loading comments");
+
+  const widths = [
+    ["60%", "90%", "70%"],
+    ["45%", "80%", "55%"],
+    ["55%", "85%"],
+  ];
+
+  for (const lines of widths) {
+    const item = document.createElement("li");
+    item.className = "zeon-skeleton-item";
+
+    const meta = document.createElement("div");
+    meta.className = "zeon-skeleton-meta";
+
+    const avatar = document.createElement("div");
+    avatar.className = "zeon-skeleton zeon-skeleton-avatar";
+    meta.appendChild(avatar);
+
+    const name = document.createElement("div");
+    name.className = "zeon-skeleton zeon-skeleton-name";
+    meta.appendChild(name);
+    item.appendChild(meta);
+
+    for (const w of lines) {
+      const line = document.createElement("div");
+      line.className = "zeon-skeleton zeon-skeleton-line";
+      line.style.width = w;
+      line.style.marginLeft = "38px";
+      item.appendChild(line);
+    }
+
+    list.appendChild(item);
+  }
+
+  return list;
 }
