@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Globe,
@@ -126,16 +127,12 @@ export function AppSidebar({ user }: Props) {
                     Account settings
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <form action="/api/auth/signout" method="POST">
-                    <button
-                      type="submit"
-                      className="flex w-full items-center gap-2"
-                    >
-                      <LogOut className="h-4 w-4" aria-hidden="true" />
-                      Sign out
-                    </button>
-                  </form>
+                <DropdownMenuItem
+                  onSelect={() => signOut({ callbackUrl: "/sign-in" })}
+                  className="cursor-pointer"
+                >
+                  <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
