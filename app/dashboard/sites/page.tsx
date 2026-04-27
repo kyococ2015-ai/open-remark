@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Globe, Plus, MessageSquare, Settings } from "lucide-react";
+import { Globe, Plus, MessageSquare, Settings, Code } from "lucide-react";
 
 export default async function SitesPage() {
   const session = await auth();
@@ -88,6 +88,11 @@ export default async function SitesPage() {
                     <Link href={`/dashboard/sites/${site.id}/comments`}>
                       <MessageSquare className="mr-1 h-3 w-3" aria-hidden="true" />
                       Comments
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" aria-label={`Integration steps for ${site.name}`}>
+                    <Link href={`/dashboard/sites/${site.id}/install`}>
+                      <Code className="h-3 w-3" aria-hidden="true" />
                     </Link>
                   </Button>
                   <Button asChild variant="ghost" size="sm" aria-label={`Settings for ${site.name}`}>

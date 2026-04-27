@@ -15,9 +15,12 @@ export function GET(_req: NextRequest) {
     var params = new URLSearchParams(hash);
     var idToken = params.get('id_token');
     if (idToken && window.opener) {
+      // targetOrigin is '*' because window.opener is on the third-party
+      // site that embedded the widget, not our origin. The receiving widget
+      // validates e.origin === appUrl before acting on the message.
       window.opener.postMessage(
         { type: 'ZEON_GOOGLE_TOKEN', idToken: idToken },
-        window.location.origin
+        '*'
       );
     }
   } catch (e) {

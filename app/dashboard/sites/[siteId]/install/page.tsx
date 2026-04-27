@@ -3,15 +3,36 @@ import { redirect, notFound } from "next/navigation";
 import { getSiteByIdForOwner } from "@/lib/services/site-service";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { InstallSnippet } from "@/components/dashboard/install-snippet";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 
 type Props = { params: Promise<{ siteId: string }> };
+
+function StepHeader({
+  number,
+  title,
+  description,
+}: {
+  number: number;
+  title: string;
+  description?: string;
+}) {
+  return (
+    <div className="flex gap-4 items-start">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+        {number}
+      </div>
+      <div>
+        <h2 className="font-semibold text-base leading-tight">{title}</h2>
+        {description && (
+          <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default async function InstallPage({ params }: Props) {
   const { siteId } = await params;
@@ -36,11 +57,10 @@ export default async function InstallPage({ params }: Props) {
 <script async src="${appUrl}/embed.js"></script>`;
 
   const astroSnippet = `---
-// In your .astro frontmatter, pass the slug dynamically:
+// Pass the slug dynamically from Astro.params:
 const { slug } = Astro.params;
 ---
 
-<!-- Anywhere in your template -->
 <div
   data-zeon-comments
   data-site-key="${site.siteKey}"
@@ -48,7 +68,7 @@ const { slug } = Astro.params;
 ></div>
 <script async src="${appUrl}/embed.js"></script>`;
 
-  const hugoSnippet = `{{/* In your layouts/partials/comments.html */}}
+  const hugoSnippet = `{{/* layouts/partials/comments.html */}}
 <div
   data-zeon-comments
   data-site-key="${site.siteKey}"
@@ -76,62 +96,85 @@ export function Comments({ slug }: { slug: string }) {
   return (
     <div>
       <PageHeader
-        title="Install Snippet"
-        description={`Embed Zeon Comments on ${site.name}`}
+        title="Integration setup"
+        description={`Get ${site.name} up and running in 3 steps`}
       />
 
-      <div className="p-6 space-y-6 max-w-3xl">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Your site key</CardTitle>
-            <CardDescription>
-              Keep this key in your templates. It identifies your site when
-              receiving comments.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+      <div className="p-6 space-y-10 max-w-3xl">
+        {/* Step 1 */}
+        <div className="space-y-4">
+          <StepHeader
+            number={1}
+            title="Save your site key"
+            description="This key identifies your site. You'll need it in the snippet below."
+          />
+          <div className="ml-12">
             <InstallSnippet code={site.siteKey} language="plaintext" />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">HTML / Generic</CardTitle>
-            <CardDescription>
-              Works in any static site. Replace the slug with your page path.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <InstallSnippet code={htmlSnippet} language="html" />
-          </CardContent>
-        </Card>
+        {/* Divider */}
+        <div className="ml-12 border-t" />
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Astro</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <InstallSnippet code={astroSnippet} language="astro" />
-          </CardContent>
-        </Card>
+        {/* Step 2 */}
+        <div className="space-y-4">
+          <StepHeader
+            number={2}
+            title="Add the snippet to your site"
+            description="Pick your framework and paste the code where you want comments to appear. Replace the slug with the current page path."
+          />
+          <div className="ml-12">
+            <Tabs defaultValue="html">
+              <TabsList>
+                <TabsTrigger value="html">HTML</TabsTrigger>
+                <TabsTrigger value="astro">Astro</TabsTrigger>
+                <TabsTrigger value="hugo">Hugo</TabsTrigger>
+                <TabsTrigger value="nextjs">Next.js</TabsTrigger>
+              </TabsList>
+              <TabsContent value="html">
+                <InstallSnippet code={htmlSnippet} language="html" />
+              </TabsContent>
+              <TabsContent value="astro">
+                <InstallSnippet code={astroSnippet} language="astro" />
+              </TabsContent>
+              <TabsContent value="hugo">
+                <InstallSnippet code={hugoSnippet} language="hugo" />
+              </TabsContent>
+              <TabsContent value="nextjs">
+                <InstallSnippet code={nextSnippet} language="tsx" />
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Hugo</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <InstallSnippet code={hugoSnippet} language="hugo" />
-          </CardContent>
-        </Card>
+        {/* Divider */}
+        <div className="ml-12 border-t" />
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Next.js</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <InstallSnippet code={nextSnippet} language="tsx" />
-          </CardContent>
-        </Card>
+        {/* Step 3 */}
+        <div className="space-y-4">
+          <StepHeader
+            number={3}
+            title="Verify the integration"
+            description="Open a page on your site where you added the snippet. You should see the Zeon Comments widget. Post a test comment to confirm everything works."
+          />
+          <div className="ml-12 flex items-center gap-2 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
+            Once comments appear on your page, you're all set.
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="ml-12 border-t" />
+
+        {/* Done */}
+        <div className="ml-12 flex gap-3">
+          <Button asChild>
+            <Link href={`/dashboard/sites/${siteId}`}>Go to site dashboard</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/dashboard/sites">All sites</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );

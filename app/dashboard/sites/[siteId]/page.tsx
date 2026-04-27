@@ -38,10 +38,10 @@ export default async function SiteOverviewPage({ params }: Props) {
         description={site.domain}
         action={
           <div className="flex gap-2">
-            <Button asChild variant="outline" size="sm">
+            <Button asChild size="sm">
               <Link href={`/dashboard/sites/${siteId}/install`}>
                 <Code className="mr-1 h-3.5 w-3.5" />
-                Install
+                Integration
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm">
