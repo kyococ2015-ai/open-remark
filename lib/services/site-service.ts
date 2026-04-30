@@ -29,6 +29,9 @@ export async function createSite(ownerId: string, input: CreateSiteInput) {
       domain: input.domain,
       autoApprove: input.autoApprove,
       allowedOrigins: JSON.stringify(input.allowedOrigins),
+      theme: input.theme,
+      primaryColor: input.primaryColor,
+      radius: input.radius,
       ownerId,
     },
   });
@@ -51,6 +54,9 @@ export async function updateSite(
       ...(input.allowedOrigins && {
         allowedOrigins: JSON.stringify(input.allowedOrigins),
       }),
+      ...(input.theme && { theme: input.theme }),
+      ...(input.primaryColor && { primaryColor: input.primaryColor }),
+      ...(typeof input.radius === "number" && { radius: input.radius }),
     },
   });
 }

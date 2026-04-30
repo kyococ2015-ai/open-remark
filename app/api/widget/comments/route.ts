@@ -32,7 +32,14 @@ export async function GET(req: NextRequest) {
 
     const site = await getSiteBySiteKey(siteKey);
     const comments = await getApprovedCommentsForPage(site.id, slug);
-    return buildCorsResponse(req, comments);
+    return buildCorsResponse(req, {
+      comments,
+      config: {
+        theme: site.theme,
+        primaryColor: site.primaryColor,
+        radius: site.radius,
+      },
+    });
   } catch (err) {
     return handleApiError(err);
   }

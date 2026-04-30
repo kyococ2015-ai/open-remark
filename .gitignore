@@ -44,3 +44,4 @@ prisma/dev.db-journal
 # env
 .env
 
+public/embed.js

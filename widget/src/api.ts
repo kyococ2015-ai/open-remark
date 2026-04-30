@@ -1,10 +1,10 @@
-import type { CommentData } from "./types";
+import type { CommentData, WidgetThemeConfig } from "./types";
 
 export async function fetchComments(
   appUrl: string,
   siteKey: string,
   slug: string,
-): Promise<CommentData[]> {
+): Promise<{ comments: CommentData[]; config: WidgetThemeConfig }> {
   const url = `${appUrl}/api/widget/comments?siteKey=${encodeURIComponent(siteKey)}&slug=${encodeURIComponent(slug)}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch comments");

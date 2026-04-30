@@ -83,6 +83,10 @@ model Site {
   siteKey        String   @unique @default(cuid())
   allowedOrigins String   @default("[]") // JSON array stored as string for SQLite
   autoApprove    Boolean  @default(false)
+  // Embed appearance — controlled entirely from the dashboard
+  theme          String   @default("AUTO") // "AUTO" | "LIGHT" | "DARK"
+  primaryColor   String   @default("#0f172a") // hex
+  radius         Int      @default(8) // px
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

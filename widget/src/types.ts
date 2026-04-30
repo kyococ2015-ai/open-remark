@@ -28,3 +28,9 @@ export type AuthState =
   | { status: "loading" }
   | { status: "authenticated"; token: string; user: CommentAuthor }
   | { status: "error"; message: string };
+
+export type WidgetThemeConfig = {
+  theme: "AUTO" | "LIGHT" | "DARK";
+  primaryColor: string;
+  radius: number;
+};

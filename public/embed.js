@@ -357,74 +357,43 @@
   }
 
   // widget/src/index.ts
-  function detectHostTheme(host) {
-    const cs = getComputedStyle(document.documentElement);
-    const get = (v) => cs.getPropertyValue(v).trim();
-    const bg = get("--background");
-    if (bg && /oklch|hsl\(|rgb\(|#[0-9a-f]/i.test(bg)) {
-      host.setAttribute("data-theme-detected", "");
-      return null;
-    }
-    const v3Pattern = /^\d[\d.]*\s+[\d.]+%\s+[\d.]+%$/;
-    if (bg && v3Pattern.test(bg)) {
-      host.setAttribute("data-theme-detected", "");
-      const fg = get("--foreground");
-      const border = get("--border");
-      const mutedFg = get("--muted-foreground");
-      const primary = get("--primary");
-      const primaryFg = get("--primary-foreground");
-      const muted = get("--muted");
-      const radius = get("--radius");
-      const accent = get("--accent");
-      const lines = [":host {"];
-      if (bg) lines.push(`  --zeon-bg: hsl(${bg});`);
-      if (fg) lines.push(`  --zeon-text: hsl(${fg});`);
-      if (border) lines.push(`  --zeon-border: hsl(${border});`);
-      if (mutedFg) lines.push(`  --zeon-muted: hsl(${mutedFg});`);
-      if (primary) lines.push(`  --zeon-primary: hsl(${primary});`);
-      if (primaryFg) lines.push(`  --zeon-primary-fg: hsl(${primaryFg});`);
-      if (muted) lines.push(`  --zeon-subtle: hsl(${muted});`);
-      if (accent) lines.push(`  --zeon-accent: hsl(${accent});`);
-      if (radius) lines.push(`  --zeon-radius: ${radius};`);
-      lines.push("}");
-      return lines.join("\n");
-    }
-    const bsBg = get("--bs-body-bg");
-    if (bsBg) {
-      host.setAttribute("data-theme-detected", "");
-      const bsFg = get("--bs-body-color");
-      const bsBorder = get("--bs-border-color");
-      const bsSecondary = get("--bs-secondary-color");
-      const bsPrimary = get("--bs-primary") || get("--bs-link-color");
-      const lines = [":host {"];
-      lines.push(`  --zeon-bg: ${bsBg};`);
-      if (bsFg) lines.push(`  --zeon-text: ${bsFg};`);
-      if (bsBorder) lines.push(`  --zeon-border: ${bsBorder};`);
-      if (bsSecondary) lines.push(`  --zeon-muted: ${bsSecondary};`);
-      if (bsPrimary) lines.push(`  --zeon-primary: ${bsPrimary};`);
-      lines.push("}");
-      return lines.join("\n");
-    }
-    const bodyStyle = getComputedStyle(document.body);
-    const bodyBg = bodyStyle.backgroundColor;
-    const m = bodyBg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-    if (m) {
-      const lum = (0.299 * +m[1] + 0.587 * +m[2] + 0.114 * +m[3]) / 255;
-      if (lum < 0.4) {
-        host.setAttribute("data-theme-detected", "");
-        return `:host {
-  --zeon-bg: ${bodyBg};
-  --zeon-text: #f1f5f9;
-  --zeon-border: rgba(255,255,255,0.1);
+  function readableOn(hex) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+    if (!m) return "#ffffff";
+    const n = parseInt(m[1], 16);
+    const r = n >> 16 & 255;
+    const g = n >> 8 & 255;
+    const b = n & 255;
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return lum > 0.6 ? "#0f172a" : "#ffffff";
+  }
+  function buildThemeStyle(cfg) {
+    const lines = [];
+    if (cfg.theme === "DARK") {
+      lines.push(`:host {
+  --zeon-bg: #0f172a;
+  --zeon-text: #f8fafc;
+  --zeon-border: #1e293b;
   --zeon-muted: #94a3b8;
-  --zeon-primary: #f1f5f9;
-  --zeon-primary-fg: #0f172a;
-  --zeon-subtle: rgba(255,255,255,0.06);
-  --zeon-accent: rgba(255,255,255,0.08);
-}`;
-      }
+  --zeon-subtle: #1e293b;
+  --zeon-accent: #1e293b;
+}`);
+    } else if (cfg.theme === "LIGHT") {
+      lines.push(`:host {
+  --zeon-bg: #ffffff;
+  --zeon-text: #0f172a;
+  --zeon-border: #e2e8f0;
+  --zeon-muted: #64748b;
+  --zeon-subtle: #f1f5f9;
+  --zeon-accent: #f1f5f9;
+}`);
     }
-    return null;
+    lines.push(`:host {
+  --zeon-primary: ${cfg.primaryColor};
+  --zeon-primary-fg: ${readableOn(cfg.primaryColor)};
+  --zeon-radius: ${cfg.radius}px;
+}`);
+    return lines.join("\n");
   }
   var ZeonWidget = class {
     constructor(config) {
@@ -435,539 +404,10 @@
       this.shadow = config.container.attachShadow({ mode: "open" });
       this.auth = loadStoredAuth();
       const style = document.createElement("style");
-      style.textContent = `/* Zeon Comments Widget \u2014 scoped inside shadow DOM */
-
-/* \u2500\u2500\u2500 Design tokens \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-/*
- * :host vars try to inherit from the client page's CSS custom properties
- * (shadcn/Tailwind v4 uses direct color values: oklch/hsl/hex).
- * If the host page defines --background, --foreground, etc. they flow in
- * automatically. The hard-coded values are the fallback own theme.
- */
-:host {
-  display: block;
-  font-family: var(--font-sans, var(--font-geist-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif));
-  font-size: 14px;
-  line-height: 1.6;
-
-  /* These bind to the host's CSS vars first, then fall back to own theme */
-  --zeon-bg:         var(--background,          #ffffff);
-  --zeon-text:       var(--foreground,           #0f172a);
-  --zeon-border:     var(--border,               #e2e8f0);
-  --zeon-muted:      var(--muted-foreground,     #64748b);
-  --zeon-primary:    var(--primary,              #0f172a);
-  --zeon-primary-fg: var(--primary-foreground,   #ffffff);
-  --zeon-subtle:     var(--muted,                #f1f5f9);
-  --zeon-accent:     var(--accent,               #f1f5f9);
-  --zeon-radius:     var(--radius,               8px);
-
-  /* Derived */
-  --zeon-radius-sm:  calc(var(--zeon-radius) * 0.6);
-  --zeon-radius-lg:  calc(var(--zeon-radius) * 1.5);
-
-  color: var(--zeon-text);
-}
-
-/* \u2500\u2500\u2500 Own fallback dark theme (only active when host has no CSS vars) \u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-@media (prefers-color-scheme: dark) {
-  :host(:not([data-theme-detected])) {
-    --zeon-bg:         #0f172a;
-    --zeon-text:       #f8fafc;
-    --zeon-border:     #1e293b;
-    --zeon-muted:      #94a3b8;
-    --zeon-primary:    #f8fafc;
-    --zeon-primary-fg: #0f172a;
-    --zeon-subtle:     #1e293b;
-    --zeon-accent:     #1e293b;
-  }
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-/* \u2500\u2500\u2500 Root container \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-.zeon-root {
-  background: var(--zeon-bg);
-  border: 1px solid var(--zeon-border);
-  border-radius: var(--zeon-radius-lg);
-  overflow: hidden;
-}
-
-/* \u2500\u2500\u2500 Header \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-.zeon-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px 13px;
-  border-bottom: 1px solid var(--zeon-border);
-}
-
-.zeon-header h2 {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--zeon-text);
-  letter-spacing: -0.01em;
-}
-
-/* \u2500\u2500\u2500 Auth bar \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-.zeon-auth-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--zeon-border);
-  background: var(--zeon-subtle);
-  min-height: 48px;
-}
-
-/* \u2500\u2500\u2500 Avatars \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-.zeon-avatar,
-.zeon-avatar-placeholder {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.zeon-avatar {
-  background: var(--zeon-subtle);
-  object-fit: cover;
-}
-
-.zeon-avatar-placeholder {
-  background: var(--zeon-subtle);
-  border: 1px solid var(--zeon-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--zeon-muted);
-  letter-spacing: 0.03em;
-}
-
-.zeon-avatar-sm,
-.zeon-avatar-placeholder-sm {
-  width: 24px;
-  height: 24px;
-  font-size: 9px;
-}
-
-.zeon-user-name {
-  font-size: 13px;
-  font-weight: 500;
-  flex: 1;
-  color: var(--zeon-text);
-}
-
-/* \u2500\u2500\u2500 Buttons \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-.zeon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--zeon-radius-sm);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: background-color 0.12s, opacity 0.12s, color 0.12s;
-  font-family: inherit;
-  touch-action: manipulation;
-  white-space: nowrap;
-  user-select: none;
-}
-
-.zeon-btn:focus-visible {
-  outline: 2px solid var(--zeon-primary);
-  outline-offset: 2px;
-}
-
-.zeon-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.zeon-btn-primary {
-  background: var(--zeon-primary);
-  color: var(--zeon-primary-fg);
-  border-color: var(--zeon-primary);
-}
-
-.zeon-btn-primary:hover:not(:disabled) {
-  opacity: 0.88;
-}
-
-.zeon-btn-ghost {
-  background: transparent;
-  color: var(--zeon-muted);
-  border-color: var(--zeon-border);
-}
-
-.zeon-btn-ghost:hover:not(:disabled) {
-  background: var(--zeon-accent);
-  color: var(--zeon-text);
-}
-
-.zeon-btn-sm {
-  padding: 3px 9px;
-  font-size: 12px;
-  border-radius: calc(var(--zeon-radius-sm) * 0.85);
-}
-
-/* Google sign-in button */
-.zeon-btn-google {
-  background: var(--zeon-bg);
-  color: var(--zeon-text);
-  border-color: var(--zeon-border);
-  font-size: 13px;
-  padding: 6px 14px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-}
-
-.zeon-btn-google:hover:not(:disabled) {
-  background: var(--zeon-accent);
-}
-
-.zeon-btn-google svg {
-  flex-shrink: 0;
-}
-
-/* \u2500\u2500\u2500 Comment form \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-.zeon-form {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--zeon-border);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.zeon-form textarea {
-  width: 100%;
-  min-height: 80px;
-  max-height: 360px;
-  padding: 9px 11px;
-  border: 1px solid var(--zeon-border);
-  border-radius: var(--zeon-radius-sm);
-  font-family: inherit;
-  font-size: 13px;
-  line-height: 1.55;
-  resize: none;
-  overflow-y: hidden;
-  background: var(--zeon-bg);
-  color: var(--zeon-text);
-  transition: border-color 0.12s, box-shadow 0.12s;
-  display: block;
-}
-
-.zeon-form textarea:focus {
-  outline: none;
-  border-color: var(--zeon-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zeon-primary) 12%, transparent);
-}
-
-.zeon-form textarea::placeholder {
-  color: var(--zeon-muted);
-}
-
-.zeon-form textarea:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.zeon-form-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.zeon-char-counter {
-  font-size: 11px;
-  color: var(--zeon-muted);
-  font-variant-numeric: tabular-nums;
-  transition: color 0.12s;
-}
-
-.zeon-char-counter-warn {
-  color: #f59e0b;
-}
-
-.zeon-char-counter-over {
-  color: #ef4444;
-  font-weight: 600;
-}
-
-/* Reply indicator */
-.zeon-reply-indicator {
-  padding: 6px 10px 6px 12px;
-  background: var(--zeon-accent);
-  border: 1px solid var(--zeon-border);
-  border-left: 3px solid var(--zeon-primary);
-  border-radius: var(--zeon-radius-sm);
-  font-size: 12px;
-  color: var(--zeon-muted);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.zeon-reply-indicator strong {
-  color: var(--zeon-text);
-  font-weight: 600;
-}
-
-.zeon-reply-indicator-cancel {
-  margin-left: auto;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--zeon-muted);
-  padding: 2px 4px;
-  border-radius: 4px;
-  font-size: 14px;
-  line-height: 1;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.zeon-reply-indicator-cancel:hover {
-  background: var(--zeon-border);
-  color: var(--zeon-text);
-}
-
-/* \u2500\u2500\u2500 Comments list \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-.zeon-list {
-  list-style: none;
-}
-
-/* Empty state */
-.zeon-empty {
-  padding: 40px 16px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.zeon-empty-icon {
-  width: 40px;
-  height: 40px;
-  color: var(--zeon-border);
-  opacity: 0.8;
-}
-
-.zeon-empty-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--zeon-text);
-}
-
-.zeon-empty-desc {
-  font-size: 13px;
-  color: var(--zeon-muted);
-}
-
-/* \u2500\u2500\u2500 Comment item \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-.zeon-comment {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--zeon-border);
-}
-
-.zeon-comment:last-child {
-  border-bottom: none;
-}
-
-.zeon-comment-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.zeon-comment-author {
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--zeon-text);
-}
-
-.zeon-comment-time {
-  font-size: 12px;
-  color: var(--zeon-muted);
-  margin-left: auto;
-}
-
-.zeon-comment-body {
-  font-size: 13.5px;
-  line-height: 1.65;
-  color: var(--zeon-text);
-  white-space: pre-wrap;
-  word-break: break-word;
-  overflow-wrap: break-word;
-  padding-left: 38px; /* align under author name */
-}
-
-.zeon-comment-actions {
-  margin-top: 6px;
-  padding-left: 38px;
-  display: flex;
-  gap: 4px;
-}
-
-/* \u2500\u2500\u2500 Replies \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-.zeon-replies {
-  margin-top: 12px;
-  margin-left: 38px;
-  padding-left: 14px;
-  border-left: 2px solid var(--zeon-border);
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.zeon-reply {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--zeon-border);
-}
-
-.zeon-reply:last-child {
-  border-bottom: none;
-  padding-bottom: 2px;
-}
-
-.zeon-reply .zeon-comment-body {
-  padding-left: 32px;
-}
-
-.zeon-reply .zeon-comment-meta {
-  margin-bottom: 4px;
-}
-
-/* \u2500\u2500\u2500 Pending badge \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-.zeon-pending-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px 7px;
-  border-radius: 99px;
-  font-size: 11px;
-  font-weight: 500;
-  background: color-mix(in srgb, #f59e0b 12%, var(--zeon-bg));
-  color: #b45309;
-  border: 1px solid color-mix(in srgb, #f59e0b 25%, transparent);
-  margin-left: 2px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :host(:not([data-theme-detected])) .zeon-pending-badge {
-    background: color-mix(in srgb, #f59e0b 15%, transparent);
-    color: #fbbf24;
-    border-color: color-mix(in srgb, #f59e0b 30%, transparent);
-  }
-}
-
-/* \u2500\u2500\u2500 Loading skeleton \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-.zeon-loading {
-  padding: 0;
-  list-style: none;
-}
-
-.zeon-skeleton-item {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--zeon-border);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.zeon-skeleton-item:last-child {
-  border-bottom: none;
-}
-
-.zeon-skeleton-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.zeon-skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--zeon-subtle) 25%,
-    var(--zeon-accent) 50%,
-    var(--zeon-subtle) 75%
-  );
-  background-size: 200% 100%;
-  border-radius: 4px;
-  animation: zeon-shimmer 1.6s infinite linear;
-}
-
-@keyframes zeon-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-.zeon-skeleton-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.zeon-skeleton-name {
-  height: 12px;
-  width: 100px;
-}
-
-.zeon-skeleton-line {
-  height: 11px;
-}
-
-/* \u2500\u2500\u2500 Error \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-.zeon-error {
-  padding: 10px 16px;
-  background: color-mix(in srgb, #ef4444 10%, var(--zeon-bg));
-  color: #b91c1c;
-  font-size: 13px;
-  border-bottom: 1px solid color-mix(in srgb, #ef4444 20%, transparent);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-@media (prefers-color-scheme: dark) {
-  :host(:not([data-theme-detected])) .zeon-error {
-    color: #fca5a5;
-  }
-}
-
-/* \u2500\u2500\u2500 Accessibility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
-@media (prefers-reduced-motion: reduce) {
-  .zeon-btn,
-  .zeon-form textarea {
-    transition: none;
-  }
-  .zeon-skeleton {
-    animation: none;
-    background: var(--zeon-subtle);
-  }
-}
-`;
+      style.textContent = '/* Zeon Comments Widget \u2014 scoped inside shadow DOM */\n\n/* \u2500\u2500\u2500 Design tokens \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n/*\n * Defaults are the LIGHT theme. The widget JS injects a :host override that\n * applies the dashboard appearance (theme + primaryColor + radius) on load.\n * The @media block below is the AUTO theme fallback: if the dashboard sets\n * theme=AUTO, no override is injected and the OS preference takes effect.\n */\n:host {\n  display: block;\n  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;\n  font-size: 14px;\n  line-height: 1.6;\n\n  --zeon-bg:         #ffffff;\n  --zeon-text:       #0f172a;\n  --zeon-border:     #e2e8f0;\n  --zeon-muted:      #64748b;\n  --zeon-primary:    #0f172a;\n  --zeon-primary-fg: #ffffff;\n  --zeon-subtle:     #f1f5f9;\n  --zeon-accent:     #f1f5f9;\n  --zeon-radius:     8px;\n\n  --zeon-radius-sm:  calc(var(--zeon-radius) * 0.6);\n  --zeon-radius-lg:  calc(var(--zeon-radius) * 1.5);\n\n  color: var(--zeon-text);\n}\n\n/* AUTO theme: follow OS preference. JS-injected explicit theme overrides win\n   because they appear after this stylesheet in the shadow root. */\n@media (prefers-color-scheme: dark) {\n  :host {\n    --zeon-bg:         #0f172a;\n    --zeon-text:       #f8fafc;\n    --zeon-border:     #1e293b;\n    --zeon-muted:      #94a3b8;\n    --zeon-subtle:     #1e293b;\n    --zeon-accent:     #1e293b;\n  }\n}\n\n* {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n\n/* \u2500\u2500\u2500 Root container \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.zeon-root {\n  background: var(--zeon-bg);\n  border: 1px solid var(--zeon-border);\n  border-radius: var(--zeon-radius-lg);\n  overflow: hidden;\n}\n\n/* \u2500\u2500\u2500 Header \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.zeon-header {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 14px 16px 13px;\n  border-bottom: 1px solid var(--zeon-border);\n}\n\n.zeon-header h2 {\n  font-size: 14px;\n  font-weight: 600;\n  color: var(--zeon-text);\n  letter-spacing: -0.01em;\n}\n\n/* \u2500\u2500\u2500 Auth bar \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.zeon-auth-bar {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 10px 16px;\n  border-bottom: 1px solid var(--zeon-border);\n  background: var(--zeon-subtle);\n  min-height: 48px;\n}\n\n/* \u2500\u2500\u2500 Avatars \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.zeon-avatar,\n.zeon-avatar-placeholder {\n  width: 30px;\n  height: 30px;\n  border-radius: 50%;\n  flex-shrink: 0;\n}\n\n.zeon-avatar {\n  background: var(--zeon-subtle);\n  object-fit: cover;\n}\n\n.zeon-avatar-placeholder {\n  background: var(--zeon-subtle);\n  border: 1px solid var(--zeon-border);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 11px;\n  font-weight: 700;\n  color: var(--zeon-muted);\n  letter-spacing: 0.03em;\n}\n\n.zeon-avatar-sm,\n.zeon-avatar-placeholder-sm {\n  width: 24px;\n  height: 24px;\n  font-size: 9px;\n}\n\n.zeon-user-name {\n  font-size: 13px;\n  font-weight: 500;\n  flex: 1;\n  color: var(--zeon-text);\n}\n\n/* \u2500\u2500\u2500 Buttons \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.zeon-btn {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  gap: 6px;\n  padding: 6px 14px;\n  border-radius: var(--zeon-radius-sm);\n  font-size: 13px;\n  font-weight: 500;\n  cursor: pointer;\n  border: 1px solid transparent;\n  transition: background-color 0.12s, opacity 0.12s, color 0.12s;\n  font-family: inherit;\n  touch-action: manipulation;\n  white-space: nowrap;\n  user-select: none;\n}\n\n.zeon-btn:focus-visible {\n  outline: 2px solid var(--zeon-primary);\n  outline-offset: 2px;\n}\n\n.zeon-btn:disabled {\n  opacity: 0.45;\n  cursor: not-allowed;\n  pointer-events: none;\n}\n\n.zeon-btn-primary {\n  background: var(--zeon-primary);\n  color: var(--zeon-primary-fg);\n  border-color: var(--zeon-primary);\n}\n\n.zeon-btn-primary:hover:not(:disabled) {\n  opacity: 0.88;\n}\n\n.zeon-btn-ghost {\n  background: transparent;\n  color: var(--zeon-muted);\n  border-color: var(--zeon-border);\n}\n\n.zeon-btn-ghost:hover:not(:disabled) {\n  background: var(--zeon-accent);\n  color: var(--zeon-text);\n}\n\n.zeon-btn-sm {\n  padding: 3px 9px;\n  font-size: 12px;\n  border-radius: calc(var(--zeon-radius-sm) * 0.85);\n}\n\n/* Google sign-in button */\n.zeon-btn-google {\n  background: var(--zeon-bg);\n  color: var(--zeon-text);\n  border-color: var(--zeon-border);\n  font-size: 13px;\n  padding: 6px 14px;\n  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);\n}\n\n.zeon-btn-google:hover:not(:disabled) {\n  background: var(--zeon-accent);\n}\n\n.zeon-btn-google svg {\n  flex-shrink: 0;\n}\n\n/* \u2500\u2500\u2500 Comment form \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.zeon-form {\n  padding: 12px 16px;\n  border-bottom: 1px solid var(--zeon-border);\n  display: flex;\n  flex-direction: column;\n  gap: 10px;\n}\n\n.zeon-form textarea {\n  width: 100%;\n  min-height: 80px;\n  max-height: 360px;\n  padding: 9px 11px;\n  border: 1px solid var(--zeon-border);\n  border-radius: var(--zeon-radius-sm);\n  font-family: inherit;\n  font-size: 13px;\n  line-height: 1.55;\n  resize: none;\n  overflow-y: hidden;\n  background: var(--zeon-bg);\n  color: var(--zeon-text);\n  transition: border-color 0.12s, box-shadow 0.12s;\n  display: block;\n}\n\n.zeon-form textarea:focus {\n  outline: none;\n  border-color: var(--zeon-primary);\n  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zeon-primary) 12%, transparent);\n}\n\n.zeon-form textarea::placeholder {\n  color: var(--zeon-muted);\n}\n\n.zeon-form textarea:disabled {\n  opacity: 0.5;\n  cursor: not-allowed;\n}\n\n.zeon-form-footer {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 8px;\n}\n\n.zeon-char-counter {\n  font-size: 11px;\n  color: var(--zeon-muted);\n  font-variant-numeric: tabular-nums;\n  transition: color 0.12s;\n}\n\n.zeon-char-counter-warn {\n  color: #f59e0b;\n}\n\n.zeon-char-counter-over {\n  color: #ef4444;\n  font-weight: 600;\n}\n\n/* Reply indicator */\n.zeon-reply-indicator {\n  padding: 6px 10px 6px 12px;\n  background: var(--zeon-accent);\n  border: 1px solid var(--zeon-border);\n  border-left: 3px solid var(--zeon-primary);\n  border-radius: var(--zeon-radius-sm);\n  font-size: 12px;\n  color: var(--zeon-muted);\n  display: flex;\n  align-items: center;\n  gap: 6px;\n}\n\n.zeon-reply-indicator strong {\n  color: var(--zeon-text);\n  font-weight: 600;\n}\n\n.zeon-reply-indicator-cancel {\n  margin-left: auto;\n  background: none;\n  border: none;\n  cursor: pointer;\n  color: var(--zeon-muted);\n  padding: 2px 4px;\n  border-radius: 4px;\n  font-size: 14px;\n  line-height: 1;\n  font-family: inherit;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n.zeon-reply-indicator-cancel:hover {\n  background: var(--zeon-border);\n  color: var(--zeon-text);\n}\n\n/* \u2500\u2500\u2500 Comments list \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.zeon-list {\n  list-style: none;\n}\n\n/* Empty state */\n.zeon-empty {\n  padding: 40px 16px;\n  text-align: center;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 10px;\n}\n\n.zeon-empty-icon {\n  width: 40px;\n  height: 40px;\n  color: var(--zeon-border);\n  opacity: 0.8;\n}\n\n.zeon-empty-title {\n  font-size: 14px;\n  font-weight: 600;\n  color: var(--zeon-text);\n}\n\n.zeon-empty-desc {\n  font-size: 13px;\n  color: var(--zeon-muted);\n}\n\n/* \u2500\u2500\u2500 Comment item \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.zeon-comment {\n  padding: 14px 16px;\n  border-bottom: 1px solid var(--zeon-border);\n}\n\n.zeon-comment:last-child {\n  border-bottom: none;\n}\n\n.zeon-comment-meta {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  margin-bottom: 6px;\n}\n\n.zeon-comment-author {\n  font-weight: 600;\n  font-size: 13px;\n  color: var(--zeon-text);\n}\n\n.zeon-comment-time {\n  font-size: 12px;\n  color: var(--zeon-muted);\n  margin-left: auto;\n}\n\n.zeon-comment-body {\n  font-size: 13.5px;\n  line-height: 1.65;\n  color: var(--zeon-text);\n  white-space: pre-wrap;\n  word-break: break-word;\n  overflow-wrap: break-word;\n  padding-left: 38px; /* align under author name */\n}\n\n.zeon-comment-actions {\n  margin-top: 6px;\n  padding-left: 38px;\n  display: flex;\n  gap: 4px;\n}\n\n/* \u2500\u2500\u2500 Replies \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.zeon-replies {\n  margin-top: 12px;\n  margin-left: 38px;\n  padding-left: 14px;\n  border-left: 2px solid var(--zeon-border);\n  list-style: none;\n  display: flex;\n  flex-direction: column;\n  gap: 0;\n}\n\n.zeon-reply {\n  padding: 10px 0;\n  border-bottom: 1px solid var(--zeon-border);\n}\n\n.zeon-reply:last-child {\n  border-bottom: none;\n  padding-bottom: 2px;\n}\n\n.zeon-reply .zeon-comment-body {\n  padding-left: 32px;\n}\n\n.zeon-reply .zeon-comment-meta {\n  margin-bottom: 4px;\n}\n\n/* \u2500\u2500\u2500 Pending badge \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.zeon-pending-badge {\n  display: inline-flex;\n  align-items: center;\n  padding: 1px 7px;\n  border-radius: 99px;\n  font-size: 11px;\n  font-weight: 500;\n  background: color-mix(in srgb, #f59e0b 12%, var(--zeon-bg));\n  color: #b45309;\n  border: 1px solid color-mix(in srgb, #f59e0b 25%, transparent);\n  margin-left: 2px;\n}\n\n@media (prefers-color-scheme: dark) {\n  :host .zeon-pending-badge {\n    background: color-mix(in srgb, #f59e0b 15%, transparent);\n    color: #fbbf24;\n    border-color: color-mix(in srgb, #f59e0b 30%, transparent);\n  }\n}\n\n/* \u2500\u2500\u2500 Loading skeleton \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.zeon-loading {\n  padding: 0;\n  list-style: none;\n}\n\n.zeon-skeleton-item {\n  padding: 14px 16px;\n  border-bottom: 1px solid var(--zeon-border);\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n.zeon-skeleton-item:last-child {\n  border-bottom: none;\n}\n\n.zeon-skeleton-meta {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n\n.zeon-skeleton {\n  background: linear-gradient(\n    90deg,\n    var(--zeon-subtle) 25%,\n    var(--zeon-accent) 50%,\n    var(--zeon-subtle) 75%\n  );\n  background-size: 200% 100%;\n  border-radius: 4px;\n  animation: zeon-shimmer 1.6s infinite linear;\n}\n\n@keyframes zeon-shimmer {\n  0%   { background-position: 200% 0; }\n  100% { background-position: -200% 0; }\n}\n\n.zeon-skeleton-avatar {\n  width: 30px;\n  height: 30px;\n  border-radius: 50%;\n  flex-shrink: 0;\n}\n\n.zeon-skeleton-name {\n  height: 12px;\n  width: 100px;\n}\n\n.zeon-skeleton-line {\n  height: 11px;\n}\n\n/* \u2500\u2500\u2500 Error \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n.zeon-error {\n  padding: 10px 16px;\n  background: color-mix(in srgb, #ef4444 10%, var(--zeon-bg));\n  color: #b91c1c;\n  font-size: 13px;\n  border-bottom: 1px solid color-mix(in srgb, #ef4444 20%, transparent);\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n\n@media (prefers-color-scheme: dark) {\n  :host .zeon-error {\n    color: #fca5a5;\n  }\n}\n\n/* \u2500\u2500\u2500 Accessibility \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n@media (prefers-reduced-motion: reduce) {\n  .zeon-btn,\n  .zeon-form textarea {\n    transition: none;\n  }\n  .zeon-skeleton {\n    animation: none;\n    background: var(--zeon-subtle);\n  }\n}\n';
       this.shadow.appendChild(style);
-      const themeOverride = detectHostTheme(config.container);
-      if (themeOverride) {
-        const themeStyle = document.createElement("style");
-        themeStyle.textContent = themeOverride;
-        this.shadow.appendChild(themeStyle);
-      }
+      this.themeStyle = document.createElement("style");
+      this.shadow.appendChild(this.themeStyle);
       this.root = document.createElement("div");
       this.root.className = "zeon-root";
       this.shadow.appendChild(this.root);
@@ -977,11 +417,13 @@
     async loadComments() {
       this.renderLoadingState();
       try {
-        this.comments = await fetchComments(
+        const { comments, config } = await fetchComments(
           this.config.appUrl,
           this.config.siteKey,
           this.config.slug
         );
+        this.themeStyle.textContent = buildThemeStyle(config);
+        this.comments = comments;
         this.render();
       } catch {
         this.renderErrorState("Failed to load comments. Please try again later.");
@@ -1040,8 +482,7 @@
     }
     renderLoadingState() {
       this.root.innerHTML = "";
-      const header = this.buildHeader();
-      this.root.appendChild(header);
+      this.root.appendChild(this.buildHeader());
       this.root.appendChild(renderLoading());
     }
     renderErrorState(message) {
