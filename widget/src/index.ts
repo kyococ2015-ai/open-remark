@@ -12,6 +12,7 @@ import {
   renderCommentList,
   renderError,
   renderLoading,
+  renderLoadingAuthBar,
 } from "./render";
 
 // Injected by esbuild define
@@ -52,6 +53,8 @@ function buildThemeStyle(cfg: WidgetThemeConfig): string {
   --zeon-muted: #94a3b8;
   --zeon-subtle: #1e293b;
   --zeon-accent: #1e293b;
+  --zeon-skel-base: #1e293b;
+  --zeon-skel-glow: #334155;
 }`);
   } else if (cfg.theme === "LIGHT") {
     // Override the prefers-color-scheme dark fallback
@@ -62,6 +65,8 @@ function buildThemeStyle(cfg: WidgetThemeConfig): string {
   --zeon-muted: #64748b;
   --zeon-subtle: #f1f5f9;
   --zeon-accent: #f1f5f9;
+  --zeon-skel-base: #e8edf2;
+  --zeon-skel-glow: #f8fafc;
 }`);
   }
 
@@ -72,6 +77,29 @@ function buildThemeStyle(cfg: WidgetThemeConfig): string {
 }`);
 
   return lines.join("\n");
+}
+
+// ─── Theme cache (localStorage) ───────────────────────────────────────────
+// Apply saved theme immediately in the constructor so the skeleton renders
+// with the correct colours before the API call completes.
+
+function themeKey(siteKey: string) {
+  return `zeon_theme_${siteKey}`;
+}
+
+function loadCachedTheme(siteKey: string): WidgetThemeConfig | null {
+  try {
+    const raw = localStorage.getItem(themeKey(siteKey));
+    return raw ? (JSON.parse(raw) as WidgetThemeConfig) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveCachedTheme(siteKey: string, cfg: WidgetThemeConfig) {
+  try {
+    localStorage.setItem(themeKey(siteKey), JSON.stringify(cfg));
+  } catch { /* storage quota / private mode */ }
 }
 
 class ZeonWidget {
@@ -94,8 +122,10 @@ class ZeonWidget {
     style.textContent = __STYLES__;
     this.shadow.appendChild(style);
 
-    // Theme overrides — populated after first fetch
+    // Theme overrides — populated from cache immediately, then refreshed after fetch
     this.themeStyle = document.createElement("style");
+    const cached = loadCachedTheme(config.siteKey);
+    if (cached) this.themeStyle.textContent = buildThemeStyle(cached);
     this.shadow.appendChild(this.themeStyle);
 
     this.root = document.createElement("div");
@@ -109,12 +139,14 @@ class ZeonWidget {
   private async loadComments() {
     this.renderLoadingState();
     try {
-      const { comments, config } = await fetchComments(
+      const { comments, config: themeConfig } = await fetchComments(
         this.config.appUrl,
         this.config.siteKey,
         this.config.slug,
       );
-      this.themeStyle.textContent = buildThemeStyle(config);
+      // Update theme + persist for next page load
+      this.themeStyle.textContent = buildThemeStyle(themeConfig);
+      saveCachedTheme(this.config.siteKey, themeConfig);
       this.comments = comments;
       this.render();
     } catch {
@@ -178,7 +210,19 @@ class ZeonWidget {
 
   private renderLoadingState() {
     this.root.innerHTML = "";
-    this.root.appendChild(this.buildHeader());
+
+    // Header with skeleton title instead of "0 Comments"
+    const header = document.createElement("div");
+    header.className = "zeon-header";
+    const titleSkel = document.createElement("div");
+    titleSkel.className = "zeon-skeleton zeon-skeleton-name";
+    titleSkel.style.width = "80px";
+    titleSkel.style.height = "14px";
+    titleSkel.setAttribute("aria-hidden", "true");
+    header.appendChild(titleSkel);
+    this.root.appendChild(header);
+
+    this.root.appendChild(renderLoadingAuthBar());
     this.root.appendChild(renderLoading());
   }
 

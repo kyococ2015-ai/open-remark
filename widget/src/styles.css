@@ -26,6 +26,10 @@
   --zeon-radius-sm:  calc(var(--zeon-radius) * 0.6);
   --zeon-radius-lg:  calc(var(--zeon-radius) * 1.5);
 
+  /* Skeleton-specific tokens — always distinct base vs highlight */
+  --zeon-skel-base:  #e8edf2;
+  --zeon-skel-glow:  #f8fafc;
+
   color: var(--zeon-text);
 }
 
@@ -39,6 +43,8 @@
     --zeon-muted:      #94a3b8;
     --zeon-subtle:     #1e293b;
     --zeon-accent:     #1e293b;
+    --zeon-skel-base:  #1e293b;
+    --zeon-skel-glow:  #334155;
   }
 }
 
@@ -440,6 +446,17 @@
   list-style: none;
 }
 
+/* Auth bar placeholder shown during load */
+.zeon-skeleton-authbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--zeon-border);
+  background: var(--zeon-subtle);
+  min-height: 48px;
+}
+
 .zeon-skeleton-item {
   padding: 14px 16px;
   border-bottom: 1px solid var(--zeon-border);
@@ -452,27 +469,32 @@
   border-bottom: none;
 }
 
+/* Meta row: avatar | name | spacer | timestamp */
 .zeon-skeleton-meta {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
+.zeon-skeleton-spacer {
+  flex: 1;
+}
+
 .zeon-skeleton {
   background: linear-gradient(
     90deg,
-    var(--zeon-subtle) 25%,
-    var(--zeon-accent) 50%,
-    var(--zeon-subtle) 75%
+    var(--zeon-skel-base) 25%,
+    var(--zeon-skel-glow) 50%,
+    var(--zeon-skel-base) 75%
   );
-  background-size: 200% 100%;
+  background-size: 300% 100%;
   border-radius: 4px;
-  animation: zeon-shimmer 1.6s infinite linear;
+  animation: zeon-shimmer 1.8s ease-in-out infinite;
 }
 
 @keyframes zeon-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
 .zeon-skeleton-avatar {
@@ -483,12 +505,21 @@
 }
 
 .zeon-skeleton-name {
-  height: 12px;
-  width: 100px;
+  height: 11px;
+  border-radius: 4px;
+}
+
+.zeon-skeleton-time {
+  height: 10px;
+  width: 44px;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .zeon-skeleton-line {
   height: 11px;
+  border-radius: 4px;
+  margin-left: 38px;
 }
 
 /* ─── Error ──────────────────────────────────────────────────────────────── */

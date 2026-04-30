@@ -269,24 +269,58 @@ export function renderError(message: string): HTMLElement {
   return el;
 }
 
-export function renderLoading(): HTMLElement {
-  const list = document.createElement("ul");
-  list.className = "zeon-loading";
-  list.setAttribute("aria-busy", "true");
-  list.setAttribute("aria-label", "Loading comments");
+/** Skeleton for the auth bar (shown while theme + comments load). */
+export function renderLoadingAuthBar(): HTMLElement {
+  const bar = document.createElement("div");
+  bar.className = "zeon-skeleton-authbar";
+  bar.setAttribute("aria-hidden", "true");
 
-  const widths = [
-    ["60%", "90%", "70%"],
-    ["45%", "80%", "55%"],
-    ["55%", "85%"],
+  const avatar = document.createElement("div");
+  avatar.className = "zeon-skeleton zeon-skeleton-avatar";
+  bar.appendChild(avatar);
+
+  const name = document.createElement("div");
+  name.className = "zeon-skeleton zeon-skeleton-name";
+  name.style.width = "90px";
+  bar.appendChild(name);
+
+  const spacer = document.createElement("div");
+  spacer.className = "zeon-skeleton-spacer";
+  bar.appendChild(spacer);
+
+  const btn = document.createElement("div");
+  btn.className = "zeon-skeleton zeon-skeleton-name";
+  btn.style.width = "70px";
+  btn.style.height = "28px";
+  btn.style.borderRadius = "var(--zeon-radius-sm)";
+  bar.appendChild(btn);
+
+  return bar;
+}
+
+export function renderLoading(): HTMLElement {
+  const wrap = document.createElement("div");
+  wrap.setAttribute("aria-busy", "true");
+  wrap.setAttribute("aria-label", "Loading comments");
+
+  // Comment skeletons: [nameWidth, [bodyLineWidths]]
+  const items: [string, string[]][] = [
+    ["110px", ["88%", "64%"]],
+    ["80px",  ["92%", "76%", "48%"]],
+    ["130px", ["70%", "84%"]],
   ];
 
-  for (const lines of widths) {
+  const list = document.createElement("ul");
+  list.className = "zeon-loading";
+
+  for (const [nameWidth, bodyLines] of items) {
     const item = document.createElement("li");
     item.className = "zeon-skeleton-item";
 
+    // Meta row: avatar | name | spacer | timestamp
     const meta = document.createElement("div");
     meta.className = "zeon-skeleton-meta";
+    meta.setAttribute("aria-hidden", "true");
 
     const avatar = document.createElement("div");
     avatar.className = "zeon-skeleton zeon-skeleton-avatar";
@@ -294,19 +328,30 @@ export function renderLoading(): HTMLElement {
 
     const name = document.createElement("div");
     name.className = "zeon-skeleton zeon-skeleton-name";
+    name.style.width = nameWidth;
     meta.appendChild(name);
+
+    const spacer = document.createElement("div");
+    spacer.className = "zeon-skeleton-spacer";
+    meta.appendChild(spacer);
+
+    const time = document.createElement("div");
+    time.className = "zeon-skeleton zeon-skeleton-time";
+    meta.appendChild(time);
+
     item.appendChild(meta);
 
-    for (const w of lines) {
+    // Body lines — indented to align with text
+    for (const w of bodyLines) {
       const line = document.createElement("div");
       line.className = "zeon-skeleton zeon-skeleton-line";
       line.style.width = w;
-      line.style.marginLeft = "38px";
       item.appendChild(line);
     }
 
     list.appendChild(item);
   }
 
-  return list;
+  wrap.appendChild(list);
+  return wrap;
 }
