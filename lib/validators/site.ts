@@ -20,7 +20,23 @@ export const CreateSiteSchema = z.object({
   radius: z.number().int().min(0).max(24).optional().default(8),
 });
 
-export const UpdateSiteSchema = CreateSiteSchema.partial();
+export const UpdateSiteSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  domain: z
+    .string()
+    .min(1)
+    .max(253)
+    .regex(/^[a-zA-Z0-9.-]+$/, "Invalid domain")
+    .optional(),
+  autoApprove: z.boolean().optional(),
+  allowedOrigins: z.array(z.string().url()).optional(),
+  theme: ThemeSchema.optional(),
+  primaryColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Must be a 6-digit hex color")
+    .optional(),
+  radius: z.number().int().min(0).max(24).optional(),
+});
 
 export type CreateSiteInput = z.infer<typeof CreateSiteSchema>;
 export type UpdateSiteInput = z.infer<typeof UpdateSiteSchema>;
