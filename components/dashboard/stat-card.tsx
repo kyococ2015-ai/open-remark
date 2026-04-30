@@ -1,10 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
+import type { ComponentType } from "react";
 
 type Props = {
   title: string;
   value: number | string;
-  icon: LucideIcon;
+  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" | "false" }>;
   description?: string;
   variant?: "default" | "warning" | "success" | "destructive";
 };

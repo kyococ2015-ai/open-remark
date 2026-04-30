@@ -6,15 +6,15 @@ import type { CreateCommentInput } from "@/lib/validators/comment";
 
 export async function getCommentsBySite(
   siteId: string,
-  filters: { status?: CommentStatus; page?: number; limit?: number } = {},
+  filters: { status?: CommentStatus; slug?: string; page?: number; limit?: number } = {},
 ) {
-  const { status, page = 1, limit = 50 } = filters;
+  const { status, slug, page = 1, limit = 50 } = filters;
   const skip = (page - 1) * limit;
 
   const [comments, total] = await Promise.all([
     db.comment.findMany({
       where: {
-        page: { siteId },
+        page: { siteId, ...(slug && { slug }) },
         ...(status && { status }),
       },
       include: {
@@ -29,7 +29,7 @@ export async function getCommentsBySite(
       take: limit,
     }),
     db.comment.count({
-      where: { page: { siteId }, ...(status && { status }) },
+      where: { page: { siteId, ...(slug && { slug }) }, ...(status && { status }) },
     }),
   ]);
 

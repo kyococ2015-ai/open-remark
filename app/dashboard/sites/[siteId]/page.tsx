@@ -3,17 +3,14 @@ import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { getSiteByIdForOwner } from "@/lib/services/site-service";
 import { getSiteCommentStats } from "@/lib/services/moderation-service";
-import { PageHeader } from "@/components/dashboard/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Button } from "@/components/ui/button";
 import {
-  MessageSquare,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  Settings,
-  Code,
-} from "lucide-react";
+  RiMessage2Line,
+  RiCheckboxCircleLine,
+  RiTimeLine,
+  RiAlertLine,
+} from "@remixicon/react";
 
 type Props = { params: Promise<{ siteId: string }> };
 
@@ -33,51 +30,30 @@ export default async function SiteOverviewPage({ params }: Props) {
 
   return (
     <div>
-      <PageHeader
-        title={site.name}
-        description={site.domain}
-        action={
-          <div className="flex gap-2">
-            <Button asChild size="sm">
-              <Link href={`/dashboard/sites/${siteId}/install`}>
-                <Code className="mr-1 h-3.5 w-3.5" />
-                Integration
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/dashboard/sites/${siteId}/settings`}>
-                <Settings className="mr-1 h-3.5 w-3.5" />
-                Settings
-              </Link>
-            </Button>
-          </div>
-        }
-      />
-
       <div className="p-6 space-y-6">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Comments"
             value={stats.total}
-            icon={MessageSquare}
+            icon={RiMessage2Line}
           />
           <StatCard
             title="Pending Review"
             value={stats.pending}
-            icon={Clock}
+            icon={RiTimeLine}
             variant="warning"
             description={stats.pending > 0 ? "Needs attention" : "All clear"}
           />
           <StatCard
             title="Approved"
             value={stats.approved}
-            icon={CheckCircle}
+            icon={RiCheckboxCircleLine}
             variant="success"
           />
           <StatCard
             title="Spam"
             value={stats.spam}
-            icon={AlertTriangle}
+            icon={RiAlertLine}
             variant="destructive"
           />
         </div>

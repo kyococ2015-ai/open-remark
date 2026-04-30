@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect, notFound } from "next/navigation";
 import { getSiteByIdForOwner } from "@/lib/services/site-service";
-import { PageHeader } from "@/components/dashboard/page-header";
 import { InstallSnippet } from "@/components/dashboard/install-snippet";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -95,11 +94,6 @@ export function Comments({ slug }: { slug: string }) {
 
   return (
     <div>
-      <PageHeader
-        title="Integration setup"
-        description={`Get ${site.name} up and running in 3 steps`}
-      />
-
       <div className="p-6 space-y-10 max-w-3xl">
         {/* Step 1 */}
         <div className="space-y-4">

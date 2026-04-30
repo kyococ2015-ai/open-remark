@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
-import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -138,7 +137,6 @@ export default function SiteSettingsPage() {
 
   return (
     <div>
-      <PageHeader title="Site Settings" description={site.name} />
       <div className="p-6 max-w-2xl space-y-6">
         <Card>
           <CardHeader>
