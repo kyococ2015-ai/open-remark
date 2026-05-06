@@ -295,8 +295,17 @@ class ZeonWidget {
   }
 }
 
+function detectAppUrl(): string {
+  const script = document.currentScript as HTMLScriptElement | null;
+  if (script?.src) {
+    const url = new URL(script.src);
+    return `${url.protocol}//${url.host}`;
+  }
+  return __APP_URL__;
+}
+
 function mount() {
-  const appUrl = __APP_URL__;
+  const appUrl = detectAppUrl();
   const elements = document.querySelectorAll<HTMLElement>("[data-zeon-comments]");
 
   for (const el of elements) {

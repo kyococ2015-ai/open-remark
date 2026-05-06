@@ -609,8 +609,16 @@
       );
     }
   };
+  function detectAppUrl() {
+    const script = document.currentScript;
+    if (script?.src) {
+      const url = new URL(script.src);
+      return `${url.protocol}//${url.host}`;
+    }
+    return "http://localhost:3000";
+  }
   function mount() {
-    const appUrl = "http://localhost:3000";
+    const appUrl = detectAppUrl();
     const elements = document.querySelectorAll("[data-zeon-comments]");
     for (const el of elements) {
       const siteKey = el.dataset.siteKey;
