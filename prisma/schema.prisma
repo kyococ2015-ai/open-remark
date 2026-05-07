@@ -94,6 +94,8 @@ model Site {
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   pages Page[]
+
+  @@index([ownerId])
 }
 
 model Page {
@@ -108,6 +110,7 @@ model Page {
   comments Comment[]
 
   @@unique([siteId, slug])
+  @@index([siteId])
 }
 
 model Comment {
@@ -128,6 +131,11 @@ model Comment {
   replies  Comment[] @relation("Replies")
 
   moderationLogs ModerationLog[]
+
+  @@index([pageId, status, createdAt])
+  @@index([parentId])
+  @@index([authorEmail])
+  @@index([status, createdAt])
 }
 
 model ModerationLog {
@@ -138,4 +146,7 @@ model ModerationLog {
 
   commentId String
   comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([commentId, createdAt])
+  @@index([adminEmail, createdAt])
 }
