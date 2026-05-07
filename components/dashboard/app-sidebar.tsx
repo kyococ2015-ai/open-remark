@@ -69,7 +69,7 @@ export function AppSidebar({ user }: Props) {
             <SidebarMenuButton size="lg" asChild className="hover:bg-transparent active:bg-transparent">
               <Link href="/dashboard/sites">
                 {/* Logo mark */}
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+                <div className="flex size-8 shrink-0 items-center justify-center bg-primary text-primary-foreground shadow-sm">
                   <RiMessage2Fill className="size-4" aria-hidden="true" />
                 </div>
                 <div className="flex flex-col leading-tight">
@@ -85,24 +85,24 @@ export function AppSidebar({ user }: Props) {
       </SidebarHeader>
 
       {/* ── New site shortcut ────────────────────────────── */}
-      <div className="px-2 pb-1 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+      <div className="px-3 pb-1 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
         <Link
           href="/dashboard/sites/new"
-          className="flex w-full items-center gap-2 rounded-md border border-dashed px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+          className="flex w-full items-center gap-2 px-3 py-2 text-sm text-sidebar-foreground/60 transition-colors hover:text-sidebar-foreground rounded-md group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
           title="New site"
         >
-          <RiAddLine className="size-3.5 shrink-0" aria-hidden="true" />
+          <RiAddLine className="size-4 shrink-0" aria-hidden="true" />
           <span className="group-data-[collapsible=icon]:hidden">New site</span>
         </Link>
       </div>
 
-      <SidebarSeparator />
+      <SidebarSeparator className="mx-3 w-auto bg-sidebar-border/50" />
 
       {/* ── Nav ─────────────────────────────────────────── */}
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup className="px-3 py-2">
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-0.5">
               {navItems.map((item) => {
                 const active =
                   item.href === "/dashboard"
@@ -114,6 +114,7 @@ export function AppSidebar({ user }: Props) {
                       asChild
                       isActive={active}
                       tooltip={item.label}
+                      className="relative rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:font-medium data-[active=true]:[&_svg]:text-sidebar-primary transition-colors"
                     >
                       <Link href={item.href}>
                         <item.icon aria-hidden="true" />
@@ -140,9 +141,9 @@ export function AppSidebar({ user }: Props) {
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   tooltip={user.name ?? user.email ?? "Account"}
                 >
-                  <Avatar className="size-7 rounded-lg shrink-0">
+                  <Avatar className="size-7 shrink-0">
                     <AvatarImage src={user.image ?? ""} alt={user.name ?? ""} />
-                    <AvatarFallback className="rounded-lg text-xs font-semibold bg-primary/10 text-primary">
+                    <AvatarFallback className="text-xs font-semibold bg-primary/10 text-primary">
                       {initials}
                     </AvatarFallback>
                   </Avatar>

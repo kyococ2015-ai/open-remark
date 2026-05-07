@@ -78,13 +78,13 @@ function NavContent({ siteId, siteName, siteDomain, pages, onNavigate }: Props &
               key={href}
               href={`/dashboard/sites/${siteId}${href}`}
               onClick={onNavigate}
-              className={`flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors ${
+              className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors ${
                 active
-                  ? "bg-primary text-primary-foreground font-medium"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  ? "bg-accent text-accent-foreground font-medium"
+                  : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
               }`}
             >
-              <Icon className="size-4 shrink-0" />
+              <Icon className={`size-4 shrink-0 ${active ? "text-primary" : ""}`} />
               {label}
             </Link>
           );
@@ -111,10 +111,10 @@ function NavContent({ siteId, siteName, siteDomain, pages, onNavigate }: Props &
                     key={p.id}
                     href={`/dashboard/sites/${siteId}/comments?slug=${encodeURIComponent(p.slug)}`}
                     onClick={onNavigate}
-                    className={`flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm transition-colors group ${
+                    className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-colors group ${
                       isPageActive
                         ? "bg-accent text-foreground font-medium"
-                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                        : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
                     }`}
                     title={p.slug}
                   >

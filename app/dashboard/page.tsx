@@ -4,15 +4,14 @@ import { getOwnerOverview } from "@/lib/services/moderation-service";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import { formatDistanceToNow } from "date-fns";
 import {
   RiMessage2Line,
   RiCheckboxCircleLine,
   RiTimeLine,
-  RiAlertLine,
   RiGlobalLine,
   RiArrowRightLine,
 } from "@remixicon/react";
@@ -25,9 +24,9 @@ export default async function OverviewPage() {
     <div>
       <PageHeader title="Overview" description="Summary of all your sites and comments" />
 
-      <div className="p-6 flex flex-col gap-6">
+      <div className="p-8 flex flex-col gap-8">
         {/* Stats grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 border-b pb-8">
           <StatCard
             title="Total Sites"
             value={overview.totalSites}
@@ -55,40 +54,43 @@ export default async function OverviewPage() {
 
         {/* Pending alert */}
         {overview.pendingComments > 0 && (
-          <div className="rounded-lg border border-warning/20 bg-warning/10 p-4 flex items-center justify-between">
+          <div className="border-l-2 border-warning px-4 py-3 flex items-center justify-between">
             <p className="text-sm text-warning">
               <strong>{overview.pendingComments}</strong> comment
               {overview.pendingComments !== 1 ? "s" : ""} waiting for review across your sites
             </p>
-            <Button asChild size="sm" variant="outline" className="border-warning/30">
+            <Button asChild size="sm" variant="outline">
               <Link href="/dashboard/sites">Review now</Link>
             </Button>
           </div>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Recent sites */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-base">Your Sites</CardTitle>
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* Sites list */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                Your Sites
+              </h2>
               <Button asChild variant="ghost" size="sm">
                 <Link href="/dashboard/sites" className="flex items-center gap-1">
                   View all <RiArrowRightLine className="size-3.5" />
                 </Link>
               </Button>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-2">
+            </div>
+            <Separator />
+            <div className="flex flex-col">
               {overview.sites.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No sites yet.</p>
+                <p className="text-sm text-muted-foreground py-4">No sites yet.</p>
               ) : (
                 overview.sites.map((site) => (
                   <Link
                     key={site.id}
                     href={`/dashboard/sites/${site.id}`}
-                    className="flex items-center gap-3 rounded-md p-2.5 transition-colors hover:bg-accent"
+                    className="flex items-center gap-4 py-4 border-b transition-all hover:border-l-2 hover:border-primary hover:pl-3"
                   >
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
-                      <RiGlobalLine className="size-4 text-muted-foreground" />
+                    <div className="flex size-9 shrink-0 items-center justify-center bg-muted text-sm font-medium">
+                      {site.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{site.name}</p>
@@ -101,23 +103,24 @@ export default async function OverviewPage() {
                   </Link>
                 ))
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Recent comments */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Recent Comments</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              Recent Comments
+            </h2>
+            <Separator />
+            <div className="flex flex-col">
               {overview.recentComments.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No comments yet.</p>
+                <p className="text-sm text-muted-foreground py-4">No comments yet.</p>
               ) : (
                 overview.recentComments.map((comment) => (
                   <Link
                     key={comment.id}
                     href={`/dashboard/sites/${comment.page.site.id}/comments?status=${comment.status}`}
-                    className="flex items-center gap-3 rounded-md p-2.5 transition-colors hover:bg-accent"
+                    className="flex items-center gap-4 py-4 border-b transition-all hover:border-l-2 hover:border-primary hover:pl-3"
                   >
                     <Avatar className="size-8 shrink-0">
                       <AvatarFallback className="text-xs">
@@ -137,7 +140,7 @@ export default async function OverviewPage() {
                                   ? "destructive"
                                   : "outline"
                           }
-                          className="text-xs h-4 px-1"
+                          className="text-xs h-4 px-1 rounded-none"
                         >
                           {comment.status.toLowerCase()}
                         </Badge>
@@ -152,8 +155,8 @@ export default async function OverviewPage() {
                   </Link>
                 ))
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>

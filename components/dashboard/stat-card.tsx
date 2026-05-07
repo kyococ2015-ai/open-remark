@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ComponentType } from "react";
 
 type Props = {
@@ -9,23 +8,11 @@ type Props = {
   variant?: "default" | "warning" | "success" | "destructive";
 };
 
-const variantClasses = {
-  default: {
-    value: "text-foreground",
-    icon: "bg-muted text-muted-foreground",
-  },
-  warning: {
-    value: "text-warning",
-    icon: "bg-warning/10 text-warning",
-  },
-  success: {
-    value: "text-success",
-    icon: "bg-success/10 text-success",
-  },
-  destructive: {
-    value: "text-destructive",
-    icon: "bg-destructive/10 text-destructive",
-  },
+const valueColor = {
+  default: "text-foreground",
+  warning: "text-warning",
+  success: "text-success",
+  destructive: "text-destructive",
 };
 
 export function StatCard({
@@ -35,26 +22,20 @@ export function StatCard({
   description,
   variant = "default",
 }: Props) {
-  const classes = variantClasses[variant];
-
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {title}
-        </CardTitle>
-        <div className={`flex size-8 items-center justify-center rounded-md ${classes.icon}`}>
-          <Icon className="size-4" aria-hidden="true" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className={`text-2xl font-bold tabular-nums ${classes.value}`}>
-          {value}
-        </div>
-        {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
-        )}
-      </CardContent>
-    </Card>
+        </span>
+      </div>
+      <div className={`text-3xl font-bold tabular-nums ${valueColor[variant]}`}>
+        {value}
+      </div>
+      {description && (
+        <p className="text-xs text-muted-foreground">{description}</p>
+      )}
+    </div>
   );
 }
