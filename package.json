@@ -14,6 +14,11 @@
     "db:generate": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
+    "db:status": "npx tsx scripts/db-manager.ts status",
+    "db:sync": "npx tsx scripts/db-manager.ts sync",
+    "db:reset-dev": "npx tsx scripts/db-manager.ts reset-dev",
+    "db:benchmark:seed": "npx tsx scripts/benchmark/seed-benchmark-data.ts",
+    "db:benchmark:run": "npx tsx scripts/benchmark/run-benchmark.ts",
     "widget:build": "tsx widget/build.ts",
     "widget:dev": "NODE_ENV=development tsx widget/build.ts"
   },
