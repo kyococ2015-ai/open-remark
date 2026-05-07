@@ -14,7 +14,7 @@
     "db:generate": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "widget:build": "NODE_ENV=production tsx widget/build.ts",
+    "widget:build": "tsx widget/build.ts",
     "widget:dev": "NODE_ENV=development tsx widget/build.ts"
   },
   "prisma": {
@@ -52,6 +52,7 @@
     "esbuild": "^0.28.0",
     "eslint": "^9.39.4",
     "eslint-config-next": "16.1.7",
+    "lightningcss": "^1.32.0",
     "postcss": "^8",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",

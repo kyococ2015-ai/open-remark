@@ -13,38 +13,38 @@
   font-size: 14px;
   line-height: 1.6;
 
-  --zeon-bg:         #ffffff;
-  --zeon-text:       #0f172a;
-  --zeon-border:     #e2e8f0;
-  --zeon-muted:      #64748b;
-  --zeon-primary:    #0f172a;
-  --zeon-primary-fg: #ffffff;
-  --zeon-subtle:     #f1f5f9;
-  --zeon-accent:     #f1f5f9;
-  --zeon-radius:     8px;
+  --z-bg:         #ffffff;
+  --z-text:       #0f172a;
+  --z-border:     #e2e8f0;
+  --z-muted:      #64748b;
+  --z-primary:    #0f172a;
+  --z-primary-fg: #ffffff;
+  --z-subtle:     #f1f5f9;
+  --z-accent:     #f1f5f9;
+  --z-radius:     8px;
 
-  --zeon-radius-sm:  calc(var(--zeon-radius) * 0.6);
-  --zeon-radius-lg:  calc(var(--zeon-radius) * 1.5);
+  --z-radius-sm:  calc(var(--z-radius) * 0.6);
+  --z-radius-lg:  calc(var(--z-radius) * 1.5);
 
   /* Skeleton-specific tokens — always distinct base vs highlight */
-  --zeon-skel-base:  #e8edf2;
-  --zeon-skel-glow:  #f8fafc;
+  --z-skel-base:  #e8edf2;
+  --z-skel-glow:  #f8fafc;
 
-  color: var(--zeon-text);
+  color: var(--z-text);
 }
 
 /* AUTO theme: follow OS preference. JS-injected explicit theme overrides win
    because they appear after this stylesheet in the shadow root. */
 @media (prefers-color-scheme: dark) {
   :host {
-    --zeon-bg:         #0f172a;
-    --zeon-text:       #f8fafc;
-    --zeon-border:     #1e293b;
-    --zeon-muted:      #94a3b8;
-    --zeon-subtle:     #1e293b;
-    --zeon-accent:     #1e293b;
-    --zeon-skel-base:  #1e293b;
-    --zeon-skel-glow:  #334155;
+    --z-bg:         #0f172a;
+    --z-text:       #f8fafc;
+    --z-border:     #1e293b;
+    --z-muted:      #94a3b8;
+    --z-subtle:     #1e293b;
+    --z-accent:     #1e293b;
+    --z-skel-base:  #1e293b;
+    --z-skel-glow:  #334155;
   }
 }
 
@@ -55,88 +55,88 @@
 }
 
 /* ─── Root container ─────────────────────────────────────────────────────── */
-.zeon-root {
-  background: var(--zeon-bg);
-  border: 1px solid var(--zeon-border);
-  border-radius: var(--zeon-radius-lg);
+.z-root {
+  background: var(--z-bg);
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-lg);
   overflow: hidden;
 }
 
 /* ─── Header ─────────────────────────────────────────────────────────────── */
-.zeon-header {
+.z-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px 13px;
-  border-bottom: 1px solid var(--zeon-border);
+  border-bottom: 1px solid var(--z-border);
 }
 
-.zeon-header h2 {
+.z-header h2 {
   font-size: 14px;
   font-weight: 600;
-  color: var(--zeon-text);
+  color: var(--z-text);
   letter-spacing: -0.01em;
 }
 
 /* ─── Auth bar ───────────────────────────────────────────────────────────── */
-.zeon-auth-bar {
+.z-auth-bar {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  border-bottom: 1px solid var(--zeon-border);
-  background: var(--zeon-subtle);
+  border-bottom: 1px solid var(--z-border);
+  background: var(--z-subtle);
   min-height: 48px;
 }
 
 /* ─── Avatars ────────────────────────────────────────────────────────────── */
-.zeon-avatar,
-.zeon-avatar-placeholder {
+.z-avatar,
+.z-avatar-placeholder {
   width: 30px;
   height: 30px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.zeon-avatar {
-  background: var(--zeon-subtle);
+.z-avatar {
+  background: var(--z-subtle);
   object-fit: cover;
 }
 
-.zeon-avatar-placeholder {
-  background: var(--zeon-subtle);
-  border: 1px solid var(--zeon-border);
+.z-avatar-placeholder {
+  background: var(--z-subtle);
+  border: 1px solid var(--z-border);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
   font-weight: 700;
-  color: var(--zeon-muted);
+  color: var(--z-muted);
   letter-spacing: 0.03em;
 }
 
-.zeon-avatar-sm,
-.zeon-avatar-placeholder-sm {
+.z-avatar-sm,
+.z-avatar-placeholder-sm {
   width: 24px;
   height: 24px;
   font-size: 9px;
 }
 
-.zeon-user-name {
+.z-user-name {
   font-size: 13px;
   font-weight: 500;
   flex: 1;
-  color: var(--zeon-text);
+  color: var(--z-text);
 }
 
 /* ─── Buttons ────────────────────────────────────────────────────────────── */
-.zeon-btn {
+.z-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   padding: 6px 14px;
-  border-radius: var(--zeon-radius-sm);
+  border-radius: var(--z-radius-sm);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -148,152 +148,152 @@
   user-select: none;
 }
 
-.zeon-btn:focus-visible {
-  outline: 2px solid var(--zeon-primary);
+.z-btn:focus-visible {
+  outline: 2px solid var(--z-primary);
   outline-offset: 2px;
 }
 
-.zeon-btn:disabled {
+.z-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-.zeon-btn-primary {
-  background: var(--zeon-primary);
-  color: var(--zeon-primary-fg);
-  border-color: var(--zeon-primary);
+.z-btn-primary {
+  background: var(--z-primary);
+  color: var(--z-primary-fg);
+  border-color: var(--z-primary);
 }
 
-.zeon-btn-primary:hover:not(:disabled) {
+.z-btn-primary:hover:not(:disabled) {
   opacity: 0.88;
 }
 
-.zeon-btn-ghost {
+.z-btn-ghost {
   background: transparent;
-  color: var(--zeon-muted);
-  border-color: var(--zeon-border);
+  color: var(--z-muted);
+  border-color: var(--z-border);
 }
 
-.zeon-btn-ghost:hover:not(:disabled) {
-  background: var(--zeon-accent);
-  color: var(--zeon-text);
+.z-btn-ghost:hover:not(:disabled) {
+  background: var(--z-accent);
+  color: var(--z-text);
 }
 
-.zeon-btn-sm {
+.z-btn-sm {
   padding: 3px 9px;
   font-size: 12px;
-  border-radius: calc(var(--zeon-radius-sm) * 0.85);
+  border-radius: calc(var(--z-radius-sm) * 0.85);
 }
 
 /* Google sign-in button */
-.zeon-btn-google {
-  background: var(--zeon-bg);
-  color: var(--zeon-text);
-  border-color: var(--zeon-border);
+.z-btn-google {
+  background: var(--z-bg);
+  color: var(--z-text);
+  border-color: var(--z-border);
   font-size: 13px;
   padding: 6px 14px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
-.zeon-btn-google:hover:not(:disabled) {
-  background: var(--zeon-accent);
+.z-btn-google:hover:not(:disabled) {
+  background: var(--z-accent);
 }
 
-.zeon-btn-google svg {
+.z-btn-google svg {
   flex-shrink: 0;
 }
 
 /* ─── Comment form ───────────────────────────────────────────────────────── */
-.zeon-form {
+.z-form {
   padding: 12px 16px;
-  border-bottom: 1px solid var(--zeon-border);
+  border-bottom: 1px solid var(--z-border);
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.zeon-form textarea {
+.z-form textarea {
   width: 100%;
   min-height: 80px;
   max-height: 360px;
   padding: 9px 11px;
-  border: 1px solid var(--zeon-border);
-  border-radius: var(--zeon-radius-sm);
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-sm);
   font-family: inherit;
   font-size: 13px;
   line-height: 1.55;
   resize: none;
   overflow-y: hidden;
-  background: var(--zeon-bg);
-  color: var(--zeon-text);
+  background: var(--z-bg);
+  color: var(--z-text);
   transition: border-color 0.12s, box-shadow 0.12s;
   display: block;
 }
 
-.zeon-form textarea:focus {
+.z-form textarea:focus {
   outline: none;
-  border-color: var(--zeon-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zeon-primary) 12%, transparent);
+  border-color: var(--z-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--z-primary) 12%, transparent);
 }
 
-.zeon-form textarea::placeholder {
-  color: var(--zeon-muted);
+.z-form textarea::placeholder {
+  color: var(--z-muted);
 }
 
-.zeon-form textarea:disabled {
+.z-form textarea:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.zeon-form-footer {
+.z-form-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
-.zeon-char-counter {
+.z-char-counter {
   font-size: 11px;
-  color: var(--zeon-muted);
+  color: var(--z-muted);
   font-variant-numeric: tabular-nums;
   transition: color 0.12s;
 }
 
-.zeon-char-counter-warn {
+.z-char-counter-warn {
   color: #f59e0b;
 }
 
-.zeon-char-counter-over {
+.z-char-counter-over {
   color: #ef4444;
   font-weight: 600;
 }
 
 /* Reply indicator */
-.zeon-reply-indicator {
+.z-reply-indicator {
   padding: 6px 10px 6px 12px;
-  background: var(--zeon-accent);
-  border: 1px solid var(--zeon-border);
-  border-left: 3px solid var(--zeon-primary);
-  border-radius: var(--zeon-radius-sm);
+  background: var(--z-accent);
+  border: 1px solid var(--z-border);
+  border-left: 3px solid var(--z-primary);
+  border-radius: var(--z-radius-sm);
   font-size: 12px;
-  color: var(--zeon-muted);
+  color: var(--z-muted);
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.zeon-reply-indicator strong {
-  color: var(--zeon-text);
+.z-reply-indicator strong {
+  color: var(--z-text);
   font-weight: 600;
 }
 
-.zeon-reply-indicator-cancel {
+.z-reply-indicator-cancel {
   margin-left: auto;
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--zeon-muted);
+  color: var(--z-muted);
   padding: 2px 4px;
   border-radius: 4px;
   font-size: 14px;
@@ -304,18 +304,18 @@
   justify-content: center;
 }
 
-.zeon-reply-indicator-cancel:hover {
-  background: var(--zeon-border);
-  color: var(--zeon-text);
+.z-reply-indicator-cancel:hover {
+  background: var(--z-border);
+  color: var(--z-text);
 }
 
 /* ─── Comments list ──────────────────────────────────────────────────────── */
-.zeon-list {
+.z-list {
   list-style: none;
 }
 
 /* Empty state */
-.zeon-empty {
+.z-empty {
   padding: 40px 16px;
   text-align: center;
   display: flex;
@@ -324,64 +324,64 @@
   gap: 10px;
 }
 
-.zeon-empty-icon {
+.z-empty-icon {
   width: 40px;
   height: 40px;
-  color: var(--zeon-border);
+  color: var(--z-border);
   opacity: 0.8;
 }
 
-.zeon-empty-title {
+.z-empty-title {
   font-size: 14px;
   font-weight: 600;
-  color: var(--zeon-text);
+  color: var(--z-text);
 }
 
-.zeon-empty-desc {
+.z-empty-desc {
   font-size: 13px;
-  color: var(--zeon-muted);
+  color: var(--z-muted);
 }
 
 /* ─── Comment item ───────────────────────────────────────────────────────── */
-.zeon-comment {
+.z-comment {
   padding: 14px 16px;
-  border-bottom: 1px solid var(--zeon-border);
+  border-bottom: 1px solid var(--z-border);
 }
 
-.zeon-comment:last-child {
+.z-comment:last-child {
   border-bottom: none;
 }
 
-.zeon-comment-meta {
+.z-comment-meta {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 6px;
 }
 
-.zeon-comment-author {
+.z-comment-author {
   font-weight: 600;
   font-size: 13px;
-  color: var(--zeon-text);
+  color: var(--z-text);
 }
 
-.zeon-comment-time {
+.z-comment-time {
   font-size: 12px;
-  color: var(--zeon-muted);
+  color: var(--z-muted);
   margin-left: auto;
 }
 
-.zeon-comment-body {
+.z-comment-body {
   font-size: 13.5px;
   line-height: 1.65;
-  color: var(--zeon-text);
+  color: var(--z-text);
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: break-word;
   padding-left: 38px; /* align under author name */
 }
 
-.zeon-comment-actions {
+.z-comment-actions {
   margin-top: 6px;
   padding-left: 38px;
   display: flex;
@@ -389,51 +389,51 @@
 }
 
 /* ─── Replies ────────────────────────────────────────────────────────────── */
-.zeon-replies {
+.z-replies {
   margin-top: 12px;
   margin-left: 38px;
   padding-left: 14px;
-  border-left: 2px solid var(--zeon-border);
+  border-left: 2px solid var(--z-border);
   list-style: none;
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 
-.zeon-reply {
+.z-reply {
   padding: 10px 0;
-  border-bottom: 1px solid var(--zeon-border);
+  border-bottom: 1px solid var(--z-border);
 }
 
-.zeon-reply:last-child {
+.z-reply:last-child {
   border-bottom: none;
   padding-bottom: 2px;
 }
 
-.zeon-reply .zeon-comment-body {
+.z-reply .z-comment-body {
   padding-left: 32px;
 }
 
-.zeon-reply .zeon-comment-meta {
+.z-reply .z-comment-meta {
   margin-bottom: 4px;
 }
 
 /* ─── Pending badge ──────────────────────────────────────────────────────── */
-.zeon-pending-badge {
+.z-pending-badge {
   display: inline-flex;
   align-items: center;
   padding: 1px 7px;
   border-radius: 99px;
   font-size: 11px;
   font-weight: 500;
-  background: color-mix(in srgb, #f59e0b 12%, var(--zeon-bg));
+  background: color-mix(in srgb, #f59e0b 12%, var(--z-bg));
   color: #b45309;
   border: 1px solid color-mix(in srgb, #f59e0b 25%, transparent);
   margin-left: 2px;
 }
 
 @media (prefers-color-scheme: dark) {
-  :host .zeon-pending-badge {
+  :host .z-pending-badge {
     background: color-mix(in srgb, #f59e0b 15%, transparent);
     color: #fbbf24;
     border-color: color-mix(in srgb, #f59e0b 30%, transparent);
@@ -441,91 +441,91 @@
 }
 
 /* ─── Loading skeleton ───────────────────────────────────────────────────── */
-.zeon-loading {
+.z-loading {
   padding: 0;
   list-style: none;
 }
 
 /* Auth bar placeholder shown during load */
-.zeon-skeleton-authbar {
+.z-skeleton-authbar {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  border-bottom: 1px solid var(--zeon-border);
-  background: var(--zeon-subtle);
+  border-bottom: 1px solid var(--z-border);
+  background: var(--z-subtle);
   min-height: 48px;
 }
 
-.zeon-skeleton-item {
+.z-skeleton-item {
   padding: 14px 16px;
-  border-bottom: 1px solid var(--zeon-border);
+  border-bottom: 1px solid var(--z-border);
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.zeon-skeleton-item:last-child {
+.z-skeleton-item:last-child {
   border-bottom: none;
 }
 
 /* Meta row: avatar | name | spacer | timestamp */
-.zeon-skeleton-meta {
+.z-skeleton-meta {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.zeon-skeleton-spacer {
+.z-skeleton-spacer {
   flex: 1;
 }
 
-.zeon-skeleton {
+.z-skeleton {
   background: linear-gradient(
     90deg,
-    var(--zeon-skel-base) 25%,
-    var(--zeon-skel-glow) 50%,
-    var(--zeon-skel-base) 75%
+    var(--z-skel-base) 25%,
+    var(--z-skel-glow) 50%,
+    var(--z-skel-base) 75%
   );
   background-size: 300% 100%;
   border-radius: 4px;
-  animation: zeon-shimmer 1.8s ease-in-out infinite;
+  animation: z-shimmer 1.8s ease-in-out infinite;
 }
 
-@keyframes zeon-shimmer {
+@keyframes z-shimmer {
   0%   { background-position: 100% 0; }
   100% { background-position: -100% 0; }
 }
 
-.zeon-skeleton-avatar {
+.z-skeleton-avatar {
   width: 30px;
   height: 30px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.zeon-skeleton-name {
+.z-skeleton-name {
   height: 11px;
   border-radius: 4px;
 }
 
-.zeon-skeleton-time {
+.z-skeleton-time {
   height: 10px;
   width: 44px;
   border-radius: 4px;
   flex-shrink: 0;
 }
 
-.zeon-skeleton-line {
+.z-skeleton-line {
   height: 11px;
   border-radius: 4px;
   margin-left: 38px;
 }
 
 /* ─── Error ──────────────────────────────────────────────────────────────── */
-.zeon-error {
+.z-error {
   padding: 10px 16px;
-  background: color-mix(in srgb, #ef4444 10%, var(--zeon-bg));
+  background: color-mix(in srgb, #ef4444 10%, var(--z-bg));
   color: #b91c1c;
   font-size: 13px;
   border-bottom: 1px solid color-mix(in srgb, #ef4444 20%, transparent);
@@ -535,19 +535,19 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :host .zeon-error {
+  :host .z-error {
     color: #fca5a5;
   }
 }
 
 /* ─── Accessibility ──────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .zeon-btn,
-  .zeon-form textarea {
+  .z-btn,
+  .z-form textarea {
     transition: none;
   }
-  .zeon-skeleton {
+  .z-skeleton {
     animation: none;
-    background: var(--zeon-subtle);
+    background: var(--z-subtle);
   }
 }

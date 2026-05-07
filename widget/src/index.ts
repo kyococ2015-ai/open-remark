@@ -47,33 +47,33 @@ function buildThemeStyle(cfg: WidgetThemeConfig): string {
 
   if (cfg.theme === "DARK") {
     lines.push(`:host {
-  --zeon-bg: #0f172a;
-  --zeon-text: #f8fafc;
-  --zeon-border: #1e293b;
-  --zeon-muted: #94a3b8;
-  --zeon-subtle: #1e293b;
-  --zeon-accent: #1e293b;
-  --zeon-skel-base: #1e293b;
-  --zeon-skel-glow: #334155;
+  --z-bg: #0f172a;
+  --z-text: #f8fafc;
+  --z-border: #1e293b;
+  --z-muted: #94a3b8;
+  --z-subtle: #1e293b;
+  --z-accent: #1e293b;
+  --z-skel-base: #1e293b;
+  --z-skel-glow: #334155;
 }`);
   } else if (cfg.theme === "LIGHT") {
     // Override the prefers-color-scheme dark fallback
     lines.push(`:host {
-  --zeon-bg: #ffffff;
-  --zeon-text: #0f172a;
-  --zeon-border: #e2e8f0;
-  --zeon-muted: #64748b;
-  --zeon-subtle: #f1f5f9;
-  --zeon-accent: #f1f5f9;
-  --zeon-skel-base: #e8edf2;
-  --zeon-skel-glow: #f8fafc;
+  --z-bg: #ffffff;
+  --z-text: #0f172a;
+  --z-border: #e2e8f0;
+  --z-muted: #64748b;
+  --z-subtle: #f1f5f9;
+  --z-accent: #f1f5f9;
+  --z-skel-base: #e8edf2;
+  --z-skel-glow: #f8fafc;
 }`);
   }
 
   lines.push(`:host {
-  --zeon-primary: ${cfg.primaryColor};
-  --zeon-primary-fg: ${readableOn(cfg.primaryColor)};
-  --zeon-radius: ${cfg.radius}px;
+  --z-primary: ${cfg.primaryColor};
+  --z-primary-fg: ${readableOn(cfg.primaryColor)};
+  --z-radius: ${cfg.radius}px;
 }`);
 
   return lines.join("\n");
@@ -129,7 +129,7 @@ class ZeonWidget {
     this.shadow.appendChild(this.themeStyle);
 
     this.root = document.createElement("div");
-    this.root.className = "zeon-root";
+    this.root.className = "z-root";
     this.shadow.appendChild(this.root);
 
     this.render();
@@ -213,9 +213,9 @@ class ZeonWidget {
 
     // Header with skeleton title instead of "0 Comments"
     const header = document.createElement("div");
-    header.className = "zeon-header";
+    header.className = "z-header";
     const titleSkel = document.createElement("div");
-    titleSkel.className = "zeon-skeleton zeon-skeleton-name";
+    titleSkel.className = "z-skeleton z-skeleton-name";
     titleSkel.style.width = "80px";
     titleSkel.style.height = "14px";
     titleSkel.setAttribute("aria-hidden", "true");
@@ -232,7 +232,7 @@ class ZeonWidget {
   }
 
   private renderErrorBanner(message: string) {
-    const existing = this.root.querySelector(".zeon-error");
+    const existing = this.root.querySelector(".z-error");
     if (existing) existing.remove();
     const banner = renderError(message);
     this.root.insertBefore(banner, this.root.firstChild);
@@ -241,7 +241,7 @@ class ZeonWidget {
 
   private buildHeader(): HTMLElement {
     const header = document.createElement("div");
-    header.className = "zeon-header";
+    header.className = "z-header";
     const heading = document.createElement("h2");
     const count = this.comments.length;
     heading.textContent = `${count} Comment${count !== 1 ? "s" : ""}`;
@@ -288,7 +288,7 @@ class ZeonWidget {
         }
         this.replyTo = comment;
         this.render();
-        const form = this.shadow.querySelector(".zeon-form");
+        const form = this.shadow.querySelector(".z-form");
         form?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }),
     );

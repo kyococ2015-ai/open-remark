@@ -18,6 +18,10 @@
 # production
 /build
 
+# Auto-generated files
+public/embed.js
+public/embed.debug.js
+
 # misc
 .DS_Store
 *.pem
@@ -43,5 +47,3 @@ prisma/dev.db-journal
 
 # env
 .env
-
-public/embed.js
