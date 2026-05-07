@@ -14,7 +14,7 @@
     "db:generate": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "widget:build": "tsx widget/build.ts",
+    "widget:build": "NODE_ENV=production tsx widget/build.ts",
     "widget:dev": "NODE_ENV=development tsx widget/build.ts"
   },
   "prisma": {
