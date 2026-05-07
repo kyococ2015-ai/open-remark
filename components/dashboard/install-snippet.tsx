@@ -33,9 +33,9 @@ export function InstallSnippet({ code, language = "html" }: Props) {
           onClick={copy}
         >
           {copied ? (
-            <Check className="h-3.5 w-3.5 text-green-600" />
+            <Check className="size-3.5 text-success" />
           ) : (
-            <Copy className="h-3.5 w-3.5" />
+            <Copy className="size-3.5" />
           )}
           {copied ? "Copied" : "Copy"}
         </Button>

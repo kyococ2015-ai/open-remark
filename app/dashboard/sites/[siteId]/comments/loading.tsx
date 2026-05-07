@@ -8,7 +8,7 @@ export default function CommentsLoading() {
         <div className="flex items-center justify-between px-3 py-2.5 border-b">
           <Skeleton className="h-4 w-16" />
         </div>
-        <div className="p-1.5 space-y-0.5">
+        <div className="p-1.5 flex flex-col gap-0.5">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton key={i} className="h-8 w-full" />
           ))}
@@ -25,7 +25,7 @@ export default function CommentsLoading() {
             ))}
           </div>
         </div>
-        <div className="p-6 space-y-3">
+        <div className="p-6 flex flex-col gap-3">
           {Array.from({ length: 10 }).map((_, i) => (
             <Skeleton key={i} className="h-16 w-full" />
           ))}

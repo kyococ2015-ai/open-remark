@@ -52,7 +52,7 @@ function NavContent({ siteId, siteName, siteDomain, pages, onNavigate }: Props &
   return (
     <div className="flex flex-col h-full">
       {/* Back + site identity */}
-      <div className="px-3 pt-4 pb-3 space-y-3">
+      <div className="px-3 pt-4 pb-3 flex flex-col gap-3">
         <Link
           href="/dashboard/sites"
           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors w-fit"
@@ -70,7 +70,7 @@ function NavContent({ siteId, siteName, siteDomain, pages, onNavigate }: Props &
       <Separator />
 
       {/* Primary nav */}
-      <nav className="px-2 py-3 space-y-0.5" aria-label="Site navigation">
+      <nav className="px-2 py-3 flex flex-col gap-0.5" aria-label="Site navigation">
         {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
           const active = isActive(href);
           return (
@@ -101,7 +101,7 @@ function NavContent({ siteId, siteName, siteDomain, pages, onNavigate }: Props &
             </p>
           </div>
           <ScrollArea className="flex-1 px-2">
-            <div className="space-y-0.5 pb-4">
+            <div className="flex flex-col gap-0.5 pb-4">
               {pages.map((p) => {
                 const isPageActive =
                   pathname.startsWith(`/dashboard/sites/${siteId}/comments`) &&
@@ -123,7 +123,7 @@ function NavContent({ siteId, siteName, siteDomain, pages, onNavigate }: Props &
                     {p._count.comments > 0 && (
                       <Badge
                         variant="secondary"
-                        className="h-4 min-w-4 px-1 text-[10px] leading-none"
+                        className="h-4 min-w-4 px-1 text-xs leading-none"
                       >
                         {p._count.comments}
                       </Badge>
@@ -148,7 +148,7 @@ export function SiteNav(props: Props) {
       <div className="md:hidden flex items-center gap-2 border-b px-4 py-2 bg-background sticky top-0 z-10">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Open navigation">
+            <Button variant="ghost" size="icon" className="size-8" aria-label="Open navigation">
               <RiMenuLine className="size-4" />
             </Button>
           </SheetTrigger>

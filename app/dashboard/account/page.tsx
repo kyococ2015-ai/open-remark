@@ -20,14 +20,14 @@ export default async function AccountPage() {
   return (
     <div>
       <PageHeader title="Account" description="Your profile and sign-out" />
-      <div className="p-6 max-w-md space-y-6">
+      <div className="p-6 max-w-md flex flex-col gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Profile</CardTitle>
             <CardDescription>Signed in via Google</CardDescription>
           </CardHeader>
           <CardContent className="flex items-center gap-4">
-            <Avatar className="h-14 w-14">
+            <Avatar className="size-14">
               <AvatarImage src={image ?? ""} alt={name ?? ""} />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>

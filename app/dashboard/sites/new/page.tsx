@@ -63,8 +63,8 @@ export default function NewSitePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1.5">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
                 <Label htmlFor="name">Site name</Label>
                 <Input
                   id="name"
@@ -77,7 +77,7 @@ export default function NewSitePage() {
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="flex flex-col gap-1.5">
                 <Label htmlFor="domain">Domain</Label>
                 <Input
                   id="domain"
@@ -98,7 +98,7 @@ export default function NewSitePage() {
                   type="checkbox"
                   id="autoApprove"
                   name="autoApprove"
-                  className="h-4 w-4 rounded border-input"
+                  className="size-4 rounded border-input"
                 />
                 <Label htmlFor="autoApprove" className="cursor-pointer">
                   Auto-approve comments (skip moderation queue)

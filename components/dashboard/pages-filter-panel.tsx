@@ -35,7 +35,7 @@ export function PagesFilterPanel({ siteId, pages, activeSlug, activeStatus }: Pr
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7"
+          className="size-7"
           onClick={() => setCollapsed(false)}
           aria-label="Show pages panel"
         >
@@ -55,7 +55,7 @@ export function PagesFilterPanel({ siteId, pages, activeSlug, activeStatus }: Pr
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 -mr-1"
+          className="size-6 -mr-1"
           onClick={() => setCollapsed(true)}
           aria-label="Collapse pages panel"
         >
@@ -95,7 +95,7 @@ export function PagesFilterPanel({ siteId, pages, activeSlug, activeStatus }: Pr
               {p.count > 0 && (
                 <Badge
                   variant="secondary"
-                  className="h-4 min-w-[1rem] px-1 text-[10px] leading-none shrink-0"
+                  className="h-4 min-w-4 px-1 text-xs leading-none shrink-0"
                 >
                   {p.count}
                 </Badge>

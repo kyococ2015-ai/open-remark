@@ -20,7 +20,7 @@ function StepHeader({
 }) {
   return (
     <div className="flex gap-4 items-start">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
         {number}
       </div>
       <div>
@@ -93,9 +93,9 @@ export function Comments({ slug }: { slug: string }) {
 
   return (
     <div>
-      <div className="p-6 space-y-10 max-w-3xl">
+      <div className="p-6 flex flex-col gap-10 max-w-3xl">
         {/* Step 1 */}
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <StepHeader
             number={1}
             title="Save your site key"
@@ -110,7 +110,7 @@ export function Comments({ slug }: { slug: string }) {
         <div className="ml-12 border-t" />
 
         {/* Step 2 */}
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <StepHeader
             number={2}
             title="Add the snippet to your site"
@@ -144,14 +144,14 @@ export function Comments({ slug }: { slug: string }) {
         <div className="ml-12 border-t" />
 
         {/* Step 3 */}
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <StepHeader
             number={3}
             title="Verify the integration"
             description="Open a page on your site where you added the snippet. You should see the Zeon Comments widget. Post a test comment to confirm everything works."
           />
           <div className="ml-12 flex items-center gap-2 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
+            <CheckCircle2 className="size-4 shrink-0 text-success" />
             Once comments appear on your page, you're all set.
           </div>
         </div>

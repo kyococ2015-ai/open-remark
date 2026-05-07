@@ -29,7 +29,7 @@ export default async function SiteOverviewPage({ params }: Props) {
 
   return (
     <div>
-      <div className="p-6 space-y-6">
+      <div className="p-6 flex flex-col gap-6">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Comments"
@@ -58,12 +58,12 @@ export default async function SiteOverviewPage({ params }: Props) {
         </div>
 
         {stats.pending > 0 && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-4 flex items-center justify-between">
-            <p className="text-sm text-amber-800 dark:text-amber-200">
+          <div className="rounded-lg border border-warning/20 bg-warning/10 p-4 flex items-center justify-between">
+            <p className="text-sm text-warning">
               <strong>{stats.pending}</strong> comment
               {stats.pending !== 1 ? "s" : ""} waiting for review
             </p>
-            <Button asChild size="sm" variant="outline" className="border-amber-300">
+            <Button asChild size="sm" variant="outline" className="border-warning/30">
               <Link href={`/dashboard/sites/${siteId}/comments?status=PENDING`}>
                 Review now
               </Link>

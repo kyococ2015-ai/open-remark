@@ -69,7 +69,7 @@ export default function HomePage() {
             href="/"
             className="flex items-center gap-2 font-semibold text-sm"
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-xs">
+            <div className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-xs">
               Z
             </div>
             Zeon Comments
@@ -81,7 +81,7 @@ export default function HomePage() {
             <Button asChild size="sm">
               <Link href="/sign-in">
                 Get started
-                <ArrowRight className="ml-1 h-3.5 w-3.5" aria-hidden="true" />
+                <ArrowRight className="ml-1 size-3.5" aria-hidden="true" />
               </Link>
             </Button>
           </div>
@@ -108,7 +108,7 @@ export default function HomePage() {
             <Button asChild size="lg">
               <Link href="/sign-in">
                 Start for free
-                <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                <ArrowRight className="ml-2 size-4" aria-hidden="true" />
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
@@ -127,9 +127,9 @@ export default function HomePage() {
             </p>
             <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
               <div className="flex items-center gap-1.5 px-4 py-3 border-b bg-muted/50">
-                <div className="h-2.5 w-2.5 rounded-full bg-red-400" aria-hidden="true" />
-                <div className="h-2.5 w-2.5 rounded-full bg-yellow-400" aria-hidden="true" />
-                <div className="h-2.5 w-2.5 rounded-full bg-green-400" aria-hidden="true" />
+                <div className="size-2.5 rounded-full bg-red-400" aria-hidden="true" />
+                <div className="size-2.5 rounded-full bg-yellow-400" aria-hidden="true" />
+                <div className="size-2.5 rounded-full bg-green-400" aria-hidden="true" />
                 <span className="ml-2 text-xs text-muted-foreground font-mono">
                   your-post.html
                 </span>
@@ -153,10 +153,10 @@ export default function HomePage() {
             {features.map((f) => (
               <div
                 key={f.title}
-                className="rounded-lg border bg-card p-5 space-y-2"
+                className="rounded-lg border bg-card p-5 flex flex-col gap-2"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10">
-                  <f.icon className="h-4 w-4 text-primary" aria-hidden="true" />
+                <div className="flex size-9 items-center justify-center rounded-md bg-primary/10">
+                  <f.icon className="size-4 text-primary" aria-hidden="true" />
                 </div>
                 <h3 className="font-semibold">{f.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
@@ -173,7 +173,7 @@ export default function HomePage() {
             <h2 className="text-2xl font-bold text-center mb-12 text-balance">
               Up and running in minutes
             </h2>
-            <ol className="space-y-8" aria-label="Setup steps">
+            <ol className="flex flex-col gap-8" aria-label="Setup steps">
               {[
                 {
                   step: "1",
@@ -197,7 +197,7 @@ export default function HomePage() {
                 },
               ].map((item) => (
                 <li key={item.step} className="flex gap-4">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
                     {item.step}
                   </div>
                   <div>
@@ -221,7 +221,7 @@ export default function HomePage() {
           <Button asChild size="lg">
             <Link href="/sign-in">
               Get started free
-              <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                <ArrowRight className="ml-2 size-4" aria-hidden="true" />
             </Link>
           </Button>
         </section>
@@ -233,7 +233,7 @@ export default function HomePage() {
           <div
             className="flex items-center gap-2"
           >
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-primary text-primary-foreground font-bold text-xs" aria-hidden="true">
+            <div className="flex size-6 items-center justify-center rounded bg-primary text-primary-foreground font-bold text-xs" aria-hidden="true">
               Z
             </div>
             <span>Zeon Comments</span>

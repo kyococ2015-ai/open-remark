@@ -33,7 +33,7 @@ export default async function SitesPage() {
         action={
           <Button asChild size="sm">
             <Link href="/dashboard/sites/new">
-              <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
+                      <Plus className="mr-1 size-4" aria-hidden="true" />
               Add Site
             </Link>
           </Button>
@@ -43,7 +43,7 @@ export default async function SitesPage() {
       <div className="p-6">
         {sites.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-20 text-center">
-            <Globe className="h-10 w-10 text-muted-foreground mb-4" aria-hidden="true" />
+            <Globe className="size-10 text-muted-foreground mb-4" aria-hidden="true" />
             <h3 className="font-semibold text-lg mb-1 text-balance">No sites yet</h3>
             <p className="text-muted-foreground text-sm mb-4 max-w-sm">
               Register your first site to start embedding the comment widget on
@@ -51,7 +51,7 @@ export default async function SitesPage() {
             </p>
             <Button asChild>
               <Link href="/dashboard/sites/new">
-                <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+                <Plus className="mr-2 size-4" aria-hidden="true" />
                 Add your first site
               </Link>
             </Button>
@@ -64,8 +64,8 @@ export default async function SitesPage() {
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted">
-                          <Globe className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
+                          <Globe className="size-4 text-muted-foreground" aria-hidden="true" />
                         </div>
                         <div className="min-w-0">
                           <CardTitle className="text-sm font-semibold truncate">
@@ -80,8 +80,8 @@ export default async function SitesPage() {
                         variant="outline"
                         className={
                           site.autoApprove
-                            ? "shrink-0 border-green-200 bg-green-500/10 text-green-700 dark:border-green-800 dark:text-green-400"
-                            : "shrink-0 border-amber-200 bg-amber-500/10 text-amber-700 dark:border-amber-800 dark:text-amber-400"
+                            ? "shrink-0 border-success/20 bg-success/10 text-success dark:border-success/20 dark:text-success"
+                            : "shrink-0 border-warning/20 bg-warning/10 text-warning dark:border-warning/20 dark:text-warning"
                         }
                       >
                         {site.autoApprove ? "Auto-approve" : "Moderated"}
@@ -89,15 +89,15 @@ export default async function SitesPage() {
                     </div>
                   </CardHeader>
 
-                  <CardContent className="flex-1 pb-3 space-y-2">
+                  <CardContent className="flex-1 pb-3 flex flex-col gap-2">
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      <FileText className="size-3.5 shrink-0" aria-hidden="true" />
                       <span>
                         {site._count.pages} page{site._count.pages !== 1 ? "s" : ""} with comments
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
-                      <Key className="h-3.5 w-3.5 shrink-0 font-sans" aria-hidden="true" />
+                      <Key className="size-3.5 shrink-0 font-sans" aria-hidden="true" />
                       <span className="truncate">{site.siteKey.slice(0, 16)}…</span>
                     </div>
                   </CardContent>
@@ -107,7 +107,7 @@ export default async function SitesPage() {
                   <CardFooter className="pt-3 gap-2">
                     <Button asChild variant="outline" size="sm" className="flex-1">
                       <Link href={`/dashboard/sites/${site.id}/comments`}>
-                        <MessageSquare className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                        <MessageSquare className="mr-1.5 size-3.5" aria-hidden="true" />
                         Comments
                       </Link>
                     </Button>
@@ -120,7 +120,7 @@ export default async function SitesPage() {
                           aria-label={`Integration steps for ${site.name}`}
                         >
                           <Link href={`/dashboard/sites/${site.id}/install`}>
-                            <Code className="h-3.5 w-3.5" aria-hidden="true" />
+                            <Code className="size-3.5" aria-hidden="true" />
                           </Link>
                         </Button>
                       </TooltipTrigger>
@@ -135,7 +135,7 @@ export default async function SitesPage() {
                           aria-label={`Settings for ${site.name}`}
                         >
                           <Link href={`/dashboard/sites/${site.id}/settings`}>
-                            <Settings className="h-3.5 w-3.5" aria-hidden="true" />
+                            <Settings className="size-3.5" aria-hidden="true" />
                           </Link>
                         </Button>
                       </TooltipTrigger>

@@ -66,7 +66,7 @@ export default async function CommentsPage({ params, searchParams }: Props) {
           <div className="flex items-center gap-2 min-w-0">
             <h1 className="text-base font-semibold shrink-0">Comments</h1>
             {slug && (
-              <Badge variant="secondary" className="max-w-[200px] truncate font-normal text-xs">
+              <Badge variant="secondary" className="max-w-52 truncate font-normal text-xs">
                 {slug}
               </Badge>
             )}

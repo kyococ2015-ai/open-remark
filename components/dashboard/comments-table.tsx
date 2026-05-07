@@ -117,7 +117,7 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                 <TableRow key={c.id}>
                   <TableCell>
                     <div className="flex items-center gap-2 min-w-0">
-                      <Avatar className="h-7 w-7 shrink-0">
+                      <Avatar className="size-7 shrink-0">
                         <AvatarImage src={c.authorImage ?? ""} />
                         <AvatarFallback className="text-xs">
                           {c.authorName.slice(0, 2).toUpperCase()}
@@ -137,7 +137,7 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                     <p className="text-sm line-clamp-2">{c.body}</p>
                   </TableCell>
                   <TableCell>
-                    <p className="text-xs font-mono text-muted-foreground truncate max-w-[140px]">
+                    <p className="text-xs font-mono text-muted-foreground truncate max-w-36">
                       {c.page.slug}
                     </p>
                   </TableCell>
@@ -152,19 +152,19 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          disabled={busy === c.id}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-7"
+                            disabled={busy === c.id}
                           aria-label={`Actions for comment by ${c.authorName}`}
                         >
-                          <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+                          <MoreHorizontal className="size-4" aria-hidden="true" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => setPreview(c)}>
-                          <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
+                          <Eye className="mr-2 size-4" aria-hidden="true" />
                           View full
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -172,7 +172,7 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                           <DropdownMenuItem
                             onClick={() => act(c.id, CommentStatus.APPROVED)}
                           >
-                            <Check className="mr-2 h-4 w-4 text-green-600" aria-hidden="true" />
+                            <Check className="mr-2 size-4 text-success" aria-hidden="true" />
                             Approve
                           </DropdownMenuItem>
                         )}
@@ -180,7 +180,7 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                           <DropdownMenuItem
                             onClick={() => act(c.id, CommentStatus.SPAM)}
                           >
-                            <ShieldAlert className="mr-2 h-4 w-4 text-amber-600" aria-hidden="true" />
+                            <ShieldAlert className="mr-2 size-4 text-warning" aria-hidden="true" />
                             Mark as spam
                           </DropdownMenuItem>
                         )}
@@ -189,7 +189,7 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                           className="text-destructive"
                           onClick={() => setDeleteTarget(c)}
                         >
-                          <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                          <Trash2 className="mr-2 size-4" aria-hidden="true" />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>

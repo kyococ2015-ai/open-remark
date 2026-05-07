@@ -128,22 +128,22 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
     radius !== site.radius;
 
   return (
-    <div className="p-6 max-w-2xl space-y-6">
+    <div className="p-6 max-w-2xl flex flex-col gap-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-base">General</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSave} className="space-y-4">
-            <div className="space-y-1.5">
+          <form onSubmit={handleSave} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="name">Site name</Label>
               <Input id="name" name="name" defaultValue={site.name} required />
             </div>
-            <div className="space-y-1.5">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="domain">Domain</Label>
               <Input id="domain" name="domain" defaultValue={site.domain} required />
             </div>
-            <div className="space-y-1.5">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="allowedOrigins">
                 Allowed origins (one per line)
               </Label>
@@ -165,7 +165,7 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
                 id="autoApprove"
                 name="autoApprove"
                 defaultChecked={site.autoApprove}
-                className="h-4 w-4 rounded border-input"
+                className="size-4 rounded border-input"
               />
               <Label htmlFor="autoApprove" className="cursor-pointer">
                 Auto-approve comments
@@ -186,9 +186,9 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
             globally — visitors don&apos;t configure anything.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-5">
+        <CardContent className="flex flex-col gap-5">
           {/* Theme */}
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label>Theme</Label>
             <div className="grid grid-cols-3 gap-2">
               {(["AUTO", "LIGHT", "DARK"] as const).map((t) => (
@@ -212,7 +212,7 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
           </div>
 
           {/* Primary color */}
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="primaryColor">Primary color</Label>
             <div className="flex items-center gap-2">
               <input
@@ -227,7 +227,7 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
                 value={primaryColor}
                 onChange={(e) => setPrimaryColor(e.target.value)}
                 pattern="^#[0-9a-fA-F]{6}$"
-                className="font-mono uppercase max-w-[140px]"
+                className="font-mono uppercase max-w-36"
               />
               <div className="flex flex-wrap gap-1.5 ml-2">
                 {PRESET_COLORS.map((c) => (
@@ -235,7 +235,7 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
                     key={c}
                     type="button"
                     onClick={() => setPrimaryColor(c)}
-                    className="h-6 w-6 rounded-full border border-input transition-transform hover:scale-110"
+                    className="size-6 rounded-full border border-input transition-transform hover:scale-110"
                     style={{ backgroundColor: c }}
                     aria-label={`Use ${c}`}
                   />
@@ -248,7 +248,7 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
           </div>
 
           {/* Radius */}
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="radius">Border radius</Label>
               <span className="text-xs text-muted-foreground tabular-nums">
@@ -267,7 +267,7 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
           </div>
 
           {/* Live preview */}
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label>Preview</Label>
             <div
               className="rounded-lg border p-4"

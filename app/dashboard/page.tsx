@@ -25,7 +25,7 @@ export default async function OverviewPage() {
     <div>
       <PageHeader title="Overview" description="Summary of all your sites and comments" />
 
-      <div className="p-6 space-y-6">
+      <div className="p-6 flex flex-col gap-6">
         {/* Stats grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
@@ -55,12 +55,12 @@ export default async function OverviewPage() {
 
         {/* Pending alert */}
         {overview.pendingComments > 0 && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-4 flex items-center justify-between">
-            <p className="text-sm text-amber-800 dark:text-amber-200">
+          <div className="rounded-lg border border-warning/20 bg-warning/10 p-4 flex items-center justify-between">
+            <p className="text-sm text-warning">
               <strong>{overview.pendingComments}</strong> comment
               {overview.pendingComments !== 1 ? "s" : ""} waiting for review across your sites
             </p>
-            <Button asChild size="sm" variant="outline" className="border-amber-300">
+            <Button asChild size="sm" variant="outline" className="border-warning/30">
               <Link href="/dashboard/sites">Review now</Link>
             </Button>
           </div>
@@ -77,7 +77,7 @@ export default async function OverviewPage() {
                 </Link>
               </Button>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="flex flex-col gap-2">
               {overview.sites.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No sites yet.</p>
               ) : (
@@ -87,7 +87,7 @@ export default async function OverviewPage() {
                     href={`/dashboard/sites/${site.id}`}
                     className="flex items-center gap-3 rounded-md p-2.5 transition-colors hover:bg-accent"
                   >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
                       <RiGlobalLine className="size-4 text-muted-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -109,7 +109,7 @@ export default async function OverviewPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Recent Comments</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="flex flex-col gap-2">
               {overview.recentComments.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No comments yet.</p>
               ) : (
@@ -119,8 +119,8 @@ export default async function OverviewPage() {
                     href={`/dashboard/sites/${comment.page.site.id}/comments?status=${comment.status}`}
                     className="flex items-center gap-3 rounded-md p-2.5 transition-colors hover:bg-accent"
                   >
-                    <Avatar className="h-8 w-8 shrink-0">
-                      <AvatarFallback className="text-[10px]">
+                    <Avatar className="size-8 shrink-0">
+                      <AvatarFallback className="text-xs">
                         {comment.authorName.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -137,7 +137,7 @@ export default async function OverviewPage() {
                                   ? "destructive"
                                   : "outline"
                           }
-                          className="text-[10px] h-4 px-1"
+                          className="text-xs h-4 px-1"
                         >
                           {comment.status.toLowerCase()}
                         </Badge>

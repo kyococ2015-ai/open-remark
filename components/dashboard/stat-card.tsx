@@ -15,12 +15,12 @@ const variantClasses = {
     icon: "bg-muted text-muted-foreground",
   },
   warning: {
-    value: "text-amber-600 dark:text-amber-400",
-    icon: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    value: "text-warning",
+    icon: "bg-warning/10 text-warning",
   },
   success: {
-    value: "text-green-600 dark:text-green-400",
-    icon: "bg-green-500/10 text-green-600 dark:text-green-400",
+    value: "text-success",
+    icon: "bg-success/10 text-success",
   },
   destructive: {
     value: "text-destructive",
@@ -43,8 +43,8 @@ export function StatCard({
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
-        <div className={`flex h-8 w-8 items-center justify-center rounded-md ${classes.icon}`}>
-          <Icon className="h-4 w-4" aria-hidden="true" />
+        <div className={`flex size-8 items-center justify-center rounded-md ${classes.icon}`}>
+          <Icon className="size-4" aria-hidden="true" />
         </div>
       </CardHeader>
       <CardContent>

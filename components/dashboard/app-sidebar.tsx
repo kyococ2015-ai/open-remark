@@ -74,7 +74,7 @@ export function AppSidebar({ user }: Props) {
                 </div>
                 <div className="flex flex-col leading-tight">
                   <span className="font-bold text-sm tracking-tight">Zeon Comments</span>
-                  <span className="text-[10px] text-muted-foreground font-normal">
+                  <span className="text-xs text-muted-foreground font-normal">
                     Comment platform
                   </span>
                 </div>
@@ -142,13 +142,13 @@ export function AppSidebar({ user }: Props) {
                 >
                   <Avatar className="size-7 rounded-lg shrink-0">
                     <AvatarImage src={user.image ?? ""} alt={user.name ?? ""} />
-                    <AvatarFallback className="rounded-lg text-[11px] font-semibold bg-primary/10 text-primary">
+                    <AvatarFallback className="rounded-lg text-xs font-semibold bg-primary/10 text-primary">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden overflow-hidden">
                     <p className="text-sm font-semibold truncate">{user.name}</p>
-                    <p className="text-[11px] text-muted-foreground truncate">
+                    <p className="text-xs text-muted-foreground truncate">
                       {user.email}
                     </p>
                   </div>

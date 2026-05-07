@@ -2,9 +2,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardLoading() {
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 flex flex-col gap-6">
       {/* Page header */}
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <Skeleton className="h-7 w-32" />
         <Skeleton className="h-4 w-64" />
       </div>
@@ -18,7 +18,7 @@ export default function DashboardLoading() {
 
       {/* Two-column layout */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <Skeleton className="h-5 w-24" />
             <Skeleton className="h-8 w-20" />
@@ -27,7 +27,7 @@ export default function DashboardLoading() {
             <Skeleton key={i} className="h-14 w-full" />
           ))}
         </div>
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           <Skeleton className="h-5 w-32" />
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-14 w-full" />
