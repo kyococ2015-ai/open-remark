@@ -1,5 +1,5 @@
 import { auth, signOut } from "@/lib/auth";
-import { redirect } from "next/navigation";
+
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,9 +14,7 @@ import { Separator } from "@/components/ui/separator";
 
 export default async function AccountPage() {
   const session = await auth();
-  if (!session?.user) redirect("/sign-in");
-
-  const { name, email, image } = session.user;
+  const { name, email, image } = session!.user as { name: string; email: string; image: string | null };
   const initials = (name ?? email ?? "U").slice(0, 2).toUpperCase();
 
   return (

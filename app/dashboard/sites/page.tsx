@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { getSitesByOwner } from "@/lib/services/site-service";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
@@ -24,9 +23,7 @@ import { Globe, Plus, MessageSquare, Settings, Code, FileText, Key } from "lucid
 
 export default async function SitesPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect("/sign-in");
-
-  const sites = await getSitesByOwner(session.user.id);
+  const sites = await getSitesByOwner(session!.user!.id as string);
 
   return (
     <div>

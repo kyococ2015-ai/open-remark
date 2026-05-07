@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getSiteByIdForOwner } from "@/lib/services/site-service";
 import { InstallSnippet } from "@/components/dashboard/install-snippet";
 import { Button } from "@/components/ui/button";
@@ -36,11 +36,10 @@ function StepHeader({
 export default async function InstallPage({ params }: Props) {
   const { siteId } = await params;
   const session = await auth();
-  if (!session?.user?.id) redirect("/sign-in");
 
   let site;
   try {
-    site = await getSiteByIdForOwner(siteId, session.user.id);
+    site = await getSiteByIdForOwner(siteId, session!.user!.id as string);
   } catch {
     notFound();
   }

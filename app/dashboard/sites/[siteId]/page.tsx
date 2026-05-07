@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth";
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getSiteByIdForOwner } from "@/lib/services/site-service";
 import { getSiteCommentStats } from "@/lib/services/moderation-service";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -17,11 +17,10 @@ type Props = { params: Promise<{ siteId: string }> };
 export default async function SiteOverviewPage({ params }: Props) {
   const { siteId } = await params;
   const session = await auth();
-  if (!session?.user?.id) redirect("/sign-in");
 
   let site;
   try {
-    site = await getSiteByIdForOwner(siteId, session.user.id);
+    site = await getSiteByIdForOwner(siteId, session!.user!.id as string);
   } catch {
     notFound();
   }

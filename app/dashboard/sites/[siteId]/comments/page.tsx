@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getSiteByIdForOwner } from "@/lib/services/site-service";
 import { getCommentsBySite } from "@/lib/services/comment-service";
 import { getPagesForSite } from "@/lib/services/page-service";
@@ -22,11 +22,10 @@ export default async function CommentsPage({ params, searchParams }: Props) {
   const { status, slug } = await searchParams;
 
   const session = await auth();
-  if (!session?.user?.id) redirect("/sign-in");
 
   let site;
   try {
-    site = await getSiteByIdForOwner(siteId, session.user.id);
+    site = await getSiteByIdForOwner(siteId, session!.user!.id as string);
   } catch {
     notFound();
   }

@@ -50,3 +50,53 @@ export async function getSiteCommentStats(siteId: string) {
   ]);
   return { total, pending, approved, spam };
 }
+
+export async function getOwnerOverview(ownerId: string) {
+  const sites = await db.site.findMany({
+    where: { ownerId },
+    include: {
+      _count: { select: { pages: true } },
+      pages: {
+        include: {
+          _count: { select: { comments: true } },
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+  });
+
+  const siteIds = sites.map((s) => s.id);
+
+  const [totalComments, pendingComments, approvedComments, spamComments, recentComments] =
+    await Promise.all([
+      db.comment.count({ where: { page: { siteId: { in: siteIds } } } }),
+      db.comment.count({
+        where: { page: { siteId: { in: siteIds } }, status: CommentStatus.PENDING },
+      }),
+      db.comment.count({
+        where: { page: { siteId: { in: siteIds } }, status: CommentStatus.APPROVED },
+      }),
+      db.comment.count({
+        where: { page: { siteId: { in: siteIds } }, status: CommentStatus.SPAM },
+      }),
+      db.comment.findMany({
+        where: { page: { siteId: { in: siteIds } } },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        include: {
+          page: { select: { slug: true, site: { select: { name: true, id: true } } } },
+        },
+      }),
+    ]);
+
+  return {
+    totalSites: sites.length,
+    totalComments,
+    pendingComments,
+    approvedComments,
+    spamComments,
+    sites,
+    recentComments,
+  };
+}
