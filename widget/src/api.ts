@@ -4,9 +4,12 @@ export async function fetchComments(
   appUrl: string,
   siteKey: string,
   slug: string,
+  token?: string,
 ): Promise<{ comments: CommentData[]; config: WidgetThemeConfig }> {
   const url = `${appUrl}/api/widget/comments?siteKey=${encodeURIComponent(siteKey)}&slug=${encodeURIComponent(slug)}`;
-  const res = await fetch(url);
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(url, { headers });
   if (!res.ok) throw new Error("Failed to fetch comments");
   return res.json();
 }
@@ -33,6 +36,22 @@ export async function postComment(
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error ?? "Failed to post comment");
   }
+  return res.json();
+}
+
+export async function likeComment(
+  appUrl: string,
+  token: string,
+  commentId: string,
+): Promise<{ liked: boolean; count: number }> {
+  const res = await fetch(`${appUrl}/api/widget/comments/${commentId}/like`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to toggle like");
   return res.json();
 }
 
