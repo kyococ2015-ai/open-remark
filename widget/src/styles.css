@@ -1,12 +1,5 @@
 /* Zeon Comments Widget — scoped inside shadow DOM */
 
-/* ─── Design tokens ───────────────────────────────────────────────────────── */
-/*
- * Defaults are the LIGHT theme. The widget JS injects a :host override that
- * applies the dashboard appearance (theme + primaryColor + radius) on load.
- * The @media block below is the AUTO theme fallback: if the dashboard sets
- * theme=AUTO, no override is injected and the OS preference takes effect.
- */
 :host {
   display: block;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -26,15 +19,12 @@
   --z-radius-sm:  calc(var(--z-radius) * 0.6);
   --z-radius-lg:  calc(var(--z-radius) * 1.5);
 
-  /* Skeleton-specific tokens — always distinct base vs highlight */
   --z-skel-base:  #e8edf2;
   --z-skel-glow:  #f8fafc;
 
   color: var(--z-text);
 }
 
-/* AUTO theme: follow OS preference. JS-injected explicit theme overrides win
-   because they appear after this stylesheet in the shadow root. */
 @media (prefers-color-scheme: dark) {
   :host {
     --z-bg:         #0f172a;
@@ -186,7 +176,6 @@
   border-radius: calc(var(--z-radius-sm) * 0.85);
 }
 
-/* Google sign-in button */
 .z-btn-google {
   background: var(--z-bg);
   color: var(--z-text);
@@ -314,7 +303,6 @@
   list-style: none;
 }
 
-/* Empty state */
 .z-empty {
   padding: 40px 16px;
   text-align: center;
@@ -352,11 +340,21 @@
   border-bottom: none;
 }
 
+.z-comment-content {
+  display: flex;
+  gap: 10px;
+}
+
+.z-comment-right {
+  flex: 1;
+  min-width: 0;
+}
+
 .z-comment-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+  gap: 6px;
+  margin-bottom: 2px;
 }
 
 .z-comment-author {
@@ -365,10 +363,9 @@
   color: var(--z-text);
 }
 
-.z-comment-time {
-  font-size: 12px;
+.z-comment-username {
+  font-size: 13px;
   color: var(--z-muted);
-  margin-left: auto;
 }
 
 .z-comment-body {
@@ -378,21 +375,128 @@
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: break-word;
-  padding-left: 38px; /* align under author name */
 }
 
 .z-comment-actions {
-  margin-top: 6px;
-  padding-left: 38px;
+  margin-top: 8px;
   display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.z-comment-action-time {
+  font-size: 12px;
+  color: var(--z-muted);
+}
+
+.z-action-btn {
+  display: inline-flex;
+  align-items: center;
   gap: 4px;
+  padding: 4px 8px;
+  border-radius: var(--z-radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--z-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.12s, color 0.12s;
+  font-family: inherit;
+}
+
+.z-action-btn:hover {
+  background: var(--z-accent);
+  color: var(--z-text);
+}
+
+.z-action-btn-active {
+  color: var(--z-primary);
+}
+
+.z-action-btn-active:hover {
+  color: var(--z-primary);
+  background: color-mix(in srgb, var(--z-primary) 12%, transparent);
+}
+
+/* ─── Inline reply ───────────────────────────────────────────────────────── */
+.z-inline-reply {
+  margin-top: 12px;
+  margin-left: 40px;
+}
+
+.z-inline-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-sm);
+  background: var(--z-bg);
+}
+
+.z-inline-form-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.z-inline-form-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--z-muted);
+}
+
+.z-inline-form textarea {
+  width: 100%;
+  min-height: 60px;
+  max-height: 240px;
+  padding: 8px 10px;
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-sm);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.55;
+  resize: none;
+  overflow-y: hidden;
+  background: var(--z-bg);
+  color: var(--z-text);
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.z-inline-form textarea:focus {
+  outline: none;
+  border-color: var(--z-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--z-primary) 12%, transparent);
+}
+
+.z-inline-form textarea::placeholder {
+  color: var(--z-muted);
+}
+
+.z-inline-form textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.z-inline-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.z-inline-form-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* ─── Replies ────────────────────────────────────────────────────────────── */
 .z-replies {
   margin-top: 12px;
-  margin-left: 38px;
-  padding-left: 14px;
+  margin-left: 40px;
+  padding-left: 12px;
   border-left: 2px solid var(--z-border);
   list-style: none;
   display: flex;
@@ -411,11 +515,11 @@
 }
 
 .z-reply .z-comment-body {
-  padding-left: 32px;
+  padding-left: 0;
 }
 
 .z-reply .z-comment-meta {
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 /* ─── Pending badge ──────────────────────────────────────────────────────── */
@@ -429,7 +533,6 @@
   background: color-mix(in srgb, #f59e0b 12%, var(--z-bg));
   color: #b45309;
   border: 1px solid color-mix(in srgb, #f59e0b 25%, transparent);
-  margin-left: 2px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -446,7 +549,6 @@
   list-style: none;
 }
 
-/* Auth bar placeholder shown during load */
 .z-skeleton-authbar {
   display: flex;
   align-items: center;
@@ -469,7 +571,6 @@
   border-bottom: none;
 }
 
-/* Meta row: avatar | name | spacer | timestamp */
 .z-skeleton-meta {
   display: flex;
   align-items: center;
@@ -543,7 +644,8 @@
 /* ─── Accessibility ──────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .z-btn,
-  .z-form textarea {
+  .z-form textarea,
+  .z-inline-form textarea {
     transition: none;
   }
   .z-skeleton {
