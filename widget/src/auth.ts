@@ -1,4 +1,4 @@
-import type { AuthState, CommentAuthor } from "./types";
+import type { AuthState, AuthUser } from "./types";
 import { exchangeGoogleToken } from "./api";
 
 const STORAGE_KEY = "zeon_widget_token";
@@ -7,7 +7,7 @@ export function loadStoredAuth(): AuthState {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return { status: "idle" };
-    const parsed = JSON.parse(raw) as { token: string; user: CommentAuthor; exp: number };
+    const parsed = JSON.parse(raw) as { token: string; user: AuthUser; exp: number };
     if (Date.now() > parsed.exp) {
       sessionStorage.removeItem(STORAGE_KEY);
       return { status: "idle" };
@@ -18,7 +18,7 @@ export function loadStoredAuth(): AuthState {
   }
 }
 
-export function saveAuth(token: string, user: CommentAuthor) {
+export function saveAuth(token: string, user: AuthUser) {
   const exp = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user, exp }));
 }
@@ -30,7 +30,7 @@ export function clearAuth() {
 export async function signInWithGoogle(
   appUrl: string,
   googleClientId: string,
-): Promise<{ token: string; user: CommentAuthor }> {
+): Promise<{ token: string; user: AuthUser }> {
   return new Promise((resolve, reject) => {
     const width = 500;
     const height = 600;
@@ -61,23 +61,23 @@ export async function signInWithGoogle(
     const handler = async (e: MessageEvent) => {
       if (e.origin !== appUrl) return;
       if (e.data?.type !== "ZEON_GOOGLE_TOKEN") return;
-      // Clear the closed-popup timer immediately so it can't race and reject
       clearInterval(timer);
       window.removeEventListener("message", handler);
       popup.close();
       try {
         const idToken = e.data.idToken as string;
         const token = await exchangeGoogleToken(appUrl, idToken);
-        // Decode JWT payload (no verify needed client-side)
         const payload = JSON.parse(atob(token.split(".")[1])) as {
           sub: string;
           name: string;
           image?: string;
+          commenterId: string;
         };
-        const user: CommentAuthor = {
+        const user: AuthUser = {
           email: payload.sub,
           name: payload.name,
           image: payload.image,
+          commenterId: payload.commenterId,
         };
         saveAuth(token, user);
         resolve({ token, user });
@@ -88,7 +88,6 @@ export async function signInWithGoogle(
 
     window.addEventListener("message", handler);
 
-    // Detect popup closed without auth
     timer = setInterval(() => {
       if (popup.closed) {
         clearInterval(timer);
