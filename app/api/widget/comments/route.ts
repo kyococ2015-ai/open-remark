@@ -31,7 +31,17 @@ export async function GET(req: NextRequest) {
     if (!siteKey || !slug) throw new ApiError("siteKey and slug required", 400);
 
     const site = await getSiteBySiteKey(siteKey);
-    const comments = await getApprovedCommentsForPage(site.id, slug);
+
+    // Extract user email from optional auth header for personalized like state
+    let userEmail: string | undefined;
+    const authHeader = req.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.slice(7);
+      const payload = await verifyWidgetToken(token);
+      if (payload) userEmail = payload.sub;
+    }
+
+    const comments = await getApprovedCommentsForPage(site.id, slug, userEmail);
     return buildCorsResponse(req, {
       comments,
       config: {
@@ -75,7 +85,7 @@ export async function POST(req: NextRequest) {
 
     const comment = await createComment(
       parsed.data,
-      { email: payload.sub, name: payload.name, image: payload.image },
+      payload.commenterId,
       site.autoApprove,
     );
 
