@@ -5,28 +5,35 @@ export type WidgetConfig = {
   appUrl: string;
 };
 
-export type CommentAuthor = {
+export type Commenter = {
+  id: string;
   name: string;
-  email: string;
-  image?: string;
+  username: string;
+  image: string | null;
 };
 
 export type CommentData = {
   id: string;
   body: string;
-  authorName: string;
-  authorEmail: string;
-  authorImage: string | null;
   status: "PENDING" | "APPROVED";
   createdAt: string;
-  parentId: string | null;
+  likeCount: number;
+  hasLiked: boolean;
+  commenter: Commenter;
   replies: CommentData[];
+};
+
+export type AuthUser = {
+  name: string;
+  email: string;
+  image?: string;
+  commenterId: string;
 };
 
 export type AuthState =
   | { status: "idle" }
   | { status: "loading" }
-  | { status: "authenticated"; token: string; user: CommentAuthor }
+  | { status: "authenticated"; token: string; user: AuthUser }
   | { status: "error"; message: string };
 
 export type WidgetThemeConfig = {
