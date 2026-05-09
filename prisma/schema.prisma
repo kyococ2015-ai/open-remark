@@ -81,12 +81,11 @@ model Site {
   name           String
   domain         String
   siteKey        String   @unique @default(cuid())
-  allowedOrigins String   @default("[]") // JSON array stored as string for SQLite
+  allowedOrigins String   @default("[]")
   autoApprove    Boolean  @default(false)
-  // Embed appearance — controlled entirely from the dashboard
-  theme          String   @default("AUTO") // "AUTO" | "LIGHT" | "DARK"
-  primaryColor   String   @default("#0f172a") // hex
-  radius         Int      @default(8) // px
+  theme          String   @default("AUTO")
+  primaryColor   String   @default("#0f172a")
+  radius         Int      @default(8)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -113,15 +112,24 @@ model Page {
   @@index([siteId])
 }
 
+model Commenter {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  name      String
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comments Comment[]
+}
+
 model Comment {
-  id          String        @id @default(cuid())
-  body        String
-  authorName  String
-  authorEmail String
-  authorImage String?
-  status      CommentStatus @default(PENDING)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id        String        @id @default(cuid())
+  body      String
+  status    CommentStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
   pageId String
   page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
@@ -130,12 +138,29 @@ model Comment {
   parent   Comment?  @relation("Replies", fields: [parentId], references: [id])
   replies  Comment[] @relation("Replies")
 
+  commenterId String
+  commenter   Commenter @relation(fields: [commenterId], references: [id], onDelete: Cascade)
+
+  likes CommentLike[]
+
   moderationLogs ModerationLog[]
 
   @@index([pageId, status, createdAt])
   @@index([parentId])
-  @@index([authorEmail])
+  @@index([commenterId])
   @@index([status, createdAt])
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  commentId String
+  userEmail String
+  createdAt DateTime @default(now())
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userEmail])
+  @@index([commentId])
 }
 
 model ModerationLog {
