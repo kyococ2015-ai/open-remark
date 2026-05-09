@@ -377,6 +377,12 @@
   overflow-wrap: break-word;
 }
 
+.z-comment-mention {
+  color: var(--z-primary);
+  font-weight: 500;
+  cursor: default;
+}
+
 .z-comment-actions {
   margin-top: 8px;
   display: flex;

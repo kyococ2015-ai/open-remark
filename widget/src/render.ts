@@ -33,6 +33,36 @@ function avatarEl(name: string, image: string | null, small = false): HTMLElemen
   return el;
 }
 
+function renderCommentBody(text: string): HTMLElement {
+  const p = document.createElement("p");
+  p.className = "z-comment-body";
+
+  const mentionRegex = /@([a-z0-9]+)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = mentionRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      p.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+    }
+    const mentionSpan = document.createElement("span");
+    mentionSpan.className = "z-comment-mention";
+    mentionSpan.textContent = match[0];
+    p.appendChild(mentionSpan);
+    lastIndex = mentionRegex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    p.appendChild(document.createTextNode(text.slice(lastIndex)));
+  }
+
+  if (p.childNodes.length === 0) {
+    p.textContent = text;
+  }
+
+  return p;
+}
+
 const HEART_OUTLINE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
 const HEART_FILLED = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
 const REPLY_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
@@ -86,9 +116,7 @@ function renderCommentItem(
 
   right.appendChild(meta);
 
-  const body = document.createElement("p");
-  body.className = "z-comment-body";
-  body.textContent = comment.body;
+  const body = renderCommentBody(comment.body);
   right.appendChild(body);
 
   const actions = document.createElement("div");
