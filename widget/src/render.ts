@@ -1,4 +1,4 @@
-import type { CommentData, AuthState } from "./types";
+import type { CommentData, AuthState, Commenter } from "./types";
 
 export function formatRelativeTime(isoDate: string): string {
   const diff = Date.now() - new Date(isoDate).getTime();
@@ -14,7 +14,7 @@ export function formatRelativeTime(isoDate: string): string {
   );
 }
 
-function avatarEl(name: string, image: string | null | undefined, small = false): HTMLElement {
+function avatarEl(name: string, image: string | null, small = false): HTMLElement {
   if (image) {
     const img = document.createElement("img");
     img.src = image;
@@ -33,24 +33,49 @@ function avatarEl(name: string, image: string | null | undefined, small = false)
   return el;
 }
 
+const HEART_OUTLINE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+const HEART_FILLED = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+const REPLY_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+
 function renderCommentItem(
   comment: CommentData,
   depth: number,
   onReply: (comment: CommentData) => void,
+  onLike: (comment: CommentData) => void,
+  replyingToId: string | null,
+  currentUser: Commenter | null,
+  onSubmitReply: (body: string, parentId: string) => void,
+  onCancelReply: () => void,
+  isSubmitting: boolean,
 ): HTMLElement {
   const li = document.createElement("li");
   li.className = depth === 0 ? "z-comment" : "z-reply";
   li.dataset.id = comment.id;
 
-  // Meta row
+  const isReplying = replyingToId === comment.id;
+  const isTopLevel = depth === 0;
+  const avatarSize = isTopLevel ? false : true;
+
+  const content = document.createElement("div");
+  content.className = "z-comment-content";
+
+  content.appendChild(avatarEl(comment.commenter.name, comment.commenter.image, avatarSize));
+
+  const right = document.createElement("div");
+  right.className = "z-comment-right";
+
   const meta = document.createElement("div");
   meta.className = "z-comment-meta";
-  meta.appendChild(avatarEl(comment.authorName, comment.authorImage, depth > 0));
 
-  const authorEl = document.createElement("span");
-  authorEl.className = "z-comment-author";
-  authorEl.textContent = comment.authorName;
-  meta.appendChild(authorEl);
+  const nameEl = document.createElement("span");
+  nameEl.className = "z-comment-author";
+  nameEl.textContent = comment.commenter.name;
+  meta.appendChild(nameEl);
+
+  const userEl = document.createElement("span");
+  userEl.className = "z-comment-username";
+  userEl.textContent = `@${comment.commenter.username}`;
+  meta.appendChild(userEl);
 
   if (comment.status === "PENDING") {
     const badge = document.createElement("span");
@@ -59,41 +84,73 @@ function renderCommentItem(
     meta.appendChild(badge);
   }
 
-  const timeEl = document.createElement("time");
-  timeEl.className = "z-comment-time";
-  timeEl.dateTime = comment.createdAt;
-  timeEl.textContent = formatRelativeTime(comment.createdAt);
-  meta.appendChild(timeEl);
+  right.appendChild(meta);
 
-  li.appendChild(meta);
-
-  // Body — indented to align under author name
   const body = document.createElement("p");
   body.className = "z-comment-body";
   body.textContent = comment.body;
-  li.appendChild(body);
+  right.appendChild(body);
 
-  // Actions (reply only at top level)
-  if (depth === 0) {
-    const actions = document.createElement("div");
-    actions.className = "z-comment-actions";
+  const actions = document.createElement("div");
+  actions.className = "z-comment-actions";
 
-    const replyBtn = document.createElement("button");
-    replyBtn.className = "z-btn z-btn-ghost z-btn-sm";
-    replyBtn.textContent = "Reply";
-    replyBtn.type = "button";
-    replyBtn.addEventListener("click", () => onReply(comment));
-    actions.appendChild(replyBtn);
-    li.appendChild(actions);
+  const timeEl = document.createElement("time");
+  timeEl.className = "z-comment-action-time";
+  timeEl.dateTime = comment.createdAt;
+  timeEl.textContent = formatRelativeTime(comment.createdAt);
+  actions.appendChild(timeEl);
+
+  const likeBtn = document.createElement("button");
+  likeBtn.className = "z-action-btn" + (comment.hasLiked ? " z-action-btn-active" : "");
+  likeBtn.type = "button";
+  likeBtn.innerHTML = `${comment.hasLiked ? HEART_FILLED : HEART_OUTLINE}<span>${comment.likeCount}</span>`;
+  likeBtn.addEventListener("click", () => onLike(comment));
+  actions.appendChild(likeBtn);
+
+  const replyBtn = document.createElement("button");
+  replyBtn.className = "z-action-btn";
+  replyBtn.type = "button";
+  replyBtn.innerHTML = `${REPLY_ICON}<span>Reply</span>`;
+  replyBtn.addEventListener("click", () => onReply(comment));
+  actions.appendChild(replyBtn);
+
+  right.appendChild(actions);
+  content.appendChild(right);
+  li.appendChild(content);
+
+  if (isReplying && currentUser) {
+    const formWrap = document.createElement("div");
+    formWrap.className = "z-inline-reply";
+    formWrap.appendChild(
+      renderInlineReplyForm(
+        comment,
+        currentUser,
+        onSubmitReply,
+        onCancelReply,
+        isSubmitting,
+      ),
+    );
+    li.appendChild(formWrap);
   }
 
-  // Replies
   if (comment.replies?.length > 0) {
     const repliesList = document.createElement("ul");
     repliesList.className = "z-replies";
-    repliesList.setAttribute("aria-label", `Replies to ${comment.authorName}`);
+    repliesList.setAttribute("aria-label", `Replies to ${comment.commenter.name}`);
     for (const reply of comment.replies) {
-      repliesList.appendChild(renderCommentItem(reply, depth + 1, onReply));
+      repliesList.appendChild(
+        renderCommentItem(
+          reply,
+          depth + 1,
+          onReply,
+          onLike,
+          replyingToId,
+          currentUser,
+          onSubmitReply,
+          onCancelReply,
+          isSubmitting,
+        ),
+      );
     }
     li.appendChild(repliesList);
   }
@@ -101,9 +158,95 @@ function renderCommentItem(
   return li;
 }
 
+function renderInlineReplyForm(
+  replyTo: CommentData,
+  currentUser: Commenter,
+  onSubmit: (body: string, parentId: string) => void,
+  onCancel: () => void,
+  isSubmitting: boolean,
+): HTMLElement {
+  const MAX_CHARS = 2000;
+
+  const wrap = document.createElement("div");
+  wrap.className = "z-inline-form";
+
+  const header = document.createElement("div");
+  header.className = "z-inline-form-header";
+  header.appendChild(avatarEl(currentUser.name, currentUser.image, true));
+
+  const label = document.createElement("span");
+  label.className = "z-inline-form-label";
+  label.textContent = `Reply to ${replyTo.commenter.name}`;
+  header.appendChild(label);
+  wrap.appendChild(header);
+
+  const textarea = document.createElement("textarea");
+  textarea.placeholder = `Reply to ${replyTo.commenter.name}…`;
+  textarea.setAttribute("aria-label", `Reply to ${replyTo.commenter.name}`);
+  textarea.rows = 2;
+  textarea.disabled = isSubmitting;
+  wrap.appendChild(textarea);
+
+  const footer = document.createElement("div");
+  footer.className = "z-inline-form-footer";
+
+  const counter = document.createElement("span");
+  counter.className = "z-char-counter";
+  counter.setAttribute("aria-live", "polite");
+  counter.textContent = `0 / ${MAX_CHARS}`;
+  footer.appendChild(counter);
+
+  const btnWrap = document.createElement("div");
+  btnWrap.className = "z-inline-form-btns";
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "z-btn z-btn-ghost z-btn-sm";
+  cancelBtn.type = "button";
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.addEventListener("click", onCancel);
+  btnWrap.appendChild(cancelBtn);
+
+  const submitBtn = document.createElement("button");
+  submitBtn.className = "z-btn z-btn-primary z-btn-sm";
+  submitBtn.type = "button";
+  submitBtn.textContent = isSubmitting ? "Posting…" : "Reply";
+  submitBtn.disabled = isSubmitting;
+  submitBtn.addEventListener("click", async () => {
+    const body = textarea.value.trim();
+    if (!body || body.length > MAX_CHARS) {
+      textarea.focus();
+      return;
+    }
+    await onSubmit(body, replyTo.id);
+  });
+  btnWrap.appendChild(submitBtn);
+  footer.appendChild(btnWrap);
+  wrap.appendChild(footer);
+
+  textarea.addEventListener("input", () => {
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+    const len = textarea.value.length;
+    counter.textContent = `${len} / ${MAX_CHARS}`;
+    counter.classList.toggle("z-char-counter-warn", len >= MAX_CHARS * 0.9 && len < MAX_CHARS);
+    counter.classList.toggle("z-char-counter-over", len > MAX_CHARS);
+    submitBtn.disabled = isSubmitting || len === 0 || len > MAX_CHARS;
+  });
+
+  setTimeout(() => textarea.focus(), 0);
+
+  return wrap;
+}
+
 export function renderCommentList(
   comments: CommentData[],
   onReply: (comment: CommentData) => void,
+  onLike: (comment: CommentData) => void,
+  replyingToId: string | null,
+  currentUser: Commenter | null,
+  onSubmitReply: (body: string, parentId: string) => void,
+  onCancelReply: () => void,
+  isSubmitting: boolean,
 ): HTMLElement {
   if (comments.length === 0) {
     const el = document.createElement("div");
@@ -136,7 +279,19 @@ export function renderCommentList(
   list.className = "z-list";
   list.setAttribute("aria-label", "Comments");
   for (const c of comments) {
-    list.appendChild(renderCommentItem(c, 0, onReply));
+    list.appendChild(
+      renderCommentItem(
+        c,
+        0,
+        onReply,
+        onLike,
+        replyingToId,
+        currentUser,
+        onSubmitReply,
+        onCancelReply,
+        isSubmitting,
+      ),
+    );
   }
   return list;
 }
@@ -150,7 +305,7 @@ export function renderAuthBar(
   bar.className = "z-auth-bar";
 
   if (auth.status === "authenticated") {
-    bar.appendChild(avatarEl(auth.user.name, auth.user.image));
+    bar.appendChild(avatarEl(auth.user.name, auth.user.image ?? null));
     const name = document.createElement("span");
     name.className = "z-user-name";
     name.textContent = auth.user.name;
@@ -194,7 +349,7 @@ export function renderCommentForm(
   if (replyTo) {
     const indicator = document.createElement("div");
     indicator.className = "z-reply-indicator";
-    indicator.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" /></svg>Replying to <strong>${replyTo.authorName}</strong>`;
+    indicator.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" /></svg>Replying to <strong>${replyTo.commenter.name}</strong>`;
     const cancelBtn = document.createElement("button");
     cancelBtn.type = "button";
     cancelBtn.className = "z-reply-indicator-cancel";
@@ -206,15 +361,16 @@ export function renderCommentForm(
   }
 
   const textarea = document.createElement("textarea");
-  textarea.placeholder = replyTo ? `Reply to ${replyTo.authorName}…` : "Write a comment…";
+  textarea.placeholder = replyTo
+    ? `Reply to ${replyTo.commenter.name}…`
+    : "Write a comment…";
   textarea.setAttribute(
     "aria-label",
-    replyTo ? `Reply to ${replyTo.authorName}` : "Write a comment",
+    replyTo ? `Reply to ${replyTo.commenter.name}` : "Write a comment",
   );
   textarea.rows = 3;
   textarea.disabled = isSubmitting;
 
-  // Auto-grow
   textarea.addEventListener("input", () => {
     textarea.style.height = "auto";
     textarea.style.height = `${textarea.scrollHeight}px`;
@@ -269,7 +425,6 @@ export function renderError(message: string): HTMLElement {
   return el;
 }
 
-/** Skeleton for the auth bar (shown while theme + comments load). */
 export function renderLoadingAuthBar(): HTMLElement {
   const bar = document.createElement("div");
   bar.className = "z-skeleton-authbar";
@@ -303,10 +458,9 @@ export function renderLoading(): HTMLElement {
   wrap.setAttribute("aria-busy", "true");
   wrap.setAttribute("aria-label", "Loading comments");
 
-  // Comment skeletons: [nameWidth, [bodyLineWidths]]
   const items: [string, string[]][] = [
     ["110px", ["88%", "64%"]],
-    ["80px",  ["92%", "76%", "48%"]],
+    ["80px", ["92%", "76%", "48%"]],
     ["130px", ["70%", "84%"]],
   ];
 
@@ -317,7 +471,6 @@ export function renderLoading(): HTMLElement {
     const item = document.createElement("li");
     item.className = "z-skeleton-item";
 
-    // Meta row: avatar | name | spacer | timestamp
     const meta = document.createElement("div");
     meta.className = "z-skeleton-meta";
     meta.setAttribute("aria-hidden", "true");
@@ -341,7 +494,6 @@ export function renderLoading(): HTMLElement {
 
     item.appendChild(meta);
 
-    // Body lines — indented to align with text
     for (const w of bodyLines) {
       const line = document.createElement("div");
       line.className = "z-skeleton z-skeleton-line";
