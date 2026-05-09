@@ -1,10 +1,11 @@
 import type {
   AuthState,
   CommentData,
+  Commenter,
   WidgetConfig,
   WidgetThemeConfig,
 } from "./types";
-import { fetchComments, postComment } from "./api";
+import { fetchComments, postComment, likeComment } from "./api";
 import { loadStoredAuth, signInWithGoogle, clearAuth } from "./auth";
 import {
   renderAuthBar,
@@ -15,16 +16,10 @@ import {
   renderLoadingAuthBar,
 } from "./render";
 
-// Injected by esbuild define
 declare const __APP_URL__: string;
 declare const __GOOGLE_CLIENT_ID__: string;
 declare const __STYLES__: string;
 
-/**
- * Pick a readable foreground for a given hex background.
- * Used so the "Post comment" button text stays legible against any
- * primaryColor the dashboard owner picks.
- */
 function readableOn(hex: string): string {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex);
   if (!m) return "#ffffff";
@@ -36,12 +31,6 @@ function readableOn(hex: string): string {
   return lum > 0.6 ? "#0f172a" : "#ffffff";
 }
 
-/**
- * Build the per-site `:host { ... }` override that applies the dashboard
- * appearance settings. Theme=DARK forces the dark palette; theme=LIGHT
- * forces the light palette; theme=AUTO leaves prefers-color-scheme alone.
- * Always applies primaryColor and radius.
- */
 function buildThemeStyle(cfg: WidgetThemeConfig): string {
   const lines: string[] = [];
 
@@ -57,7 +46,6 @@ function buildThemeStyle(cfg: WidgetThemeConfig): string {
   --z-skel-glow: #334155;
 }`);
   } else if (cfg.theme === "LIGHT") {
-    // Override the prefers-color-scheme dark fallback
     lines.push(`:host {
   --z-bg: #ffffff;
   --z-text: #0f172a;
@@ -78,10 +66,6 @@ function buildThemeStyle(cfg: WidgetThemeConfig): string {
 
   return lines.join("\n");
 }
-
-// ─── Theme cache (localStorage) ───────────────────────────────────────────
-// Apply saved theme immediately in the constructor so the skeleton renders
-// with the correct colours before the API call completes.
 
 function themeKey(siteKey: string) {
   return `zeon_theme_${siteKey}`;
@@ -110,6 +94,7 @@ class ZeonWidget {
   private auth: AuthState;
   private comments: CommentData[] = [];
   private replyTo: CommentData | null = null;
+  private replyingToId: string | null = null;
   private isSubmitting = false;
 
   constructor(config: WidgetConfig) {
@@ -117,12 +102,10 @@ class ZeonWidget {
     this.shadow = config.container.attachShadow({ mode: "open" });
     this.auth = loadStoredAuth();
 
-    // Base styles
     const style = document.createElement("style");
     style.textContent = __STYLES__;
     this.shadow.appendChild(style);
 
-    // Theme overrides — populated from cache immediately, then refreshed after fetch
     this.themeStyle = document.createElement("style");
     const cached = loadCachedTheme(config.siteKey);
     if (cached) this.themeStyle.textContent = buildThemeStyle(cached);
@@ -136,6 +119,20 @@ class ZeonWidget {
     this.loadComments();
   }
 
+  private get token(): string | undefined {
+    return this.auth.status === "authenticated" ? this.auth.token : undefined;
+  }
+
+  private get currentUser(): Commenter | null {
+    if (this.auth.status !== "authenticated") return null;
+    return {
+      id: this.auth.user.commenterId,
+      name: this.auth.user.name,
+      username: this.auth.user.email.split("@")[0] ?? "user",
+      image: this.auth.user.image ?? null,
+    };
+  }
+
   private async loadComments() {
     this.renderLoadingState();
     try {
@@ -143,8 +140,8 @@ class ZeonWidget {
         this.config.appUrl,
         this.config.siteKey,
         this.config.slug,
+        this.token,
       );
-      // Update theme + persist for next page load
       this.themeStyle.textContent = buildThemeStyle(themeConfig);
       saveCachedTheme(this.config.siteKey, themeConfig);
       this.comments = comments;
@@ -161,6 +158,8 @@ class ZeonWidget {
       const googleClientId = __GOOGLE_CLIENT_ID__;
       const { token, user } = await signInWithGoogle(this.config.appUrl, googleClientId);
       this.auth = { status: "authenticated", token, user };
+      await this.loadComments();
+      return;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Sign-in failed";
       this.auth = { status: "error", message };
@@ -176,6 +175,7 @@ class ZeonWidget {
     clearAuth();
     this.auth = { status: "idle" };
     this.replyTo = null;
+    this.replyingToId = null;
     this.render();
   }
 
@@ -184,14 +184,28 @@ class ZeonWidget {
     this.isSubmitting = true;
     this.render();
     try {
+      let finalBody = body;
+      let finalParentId = parentId;
+      if (parentId) {
+        const target = this.findComment(parentId);
+        if (target && target.commenter) {
+          const isNestedReply = this.findParentComment(parentId) !== null;
+          if (isNestedReply) {
+            finalBody = `@${target.commenter.username} ${body}`;
+            finalParentId = target.parentId ?? parentId;
+          }
+        }
+      }
+
       const comment = await postComment(this.config.appUrl, this.auth.token, {
-        body,
+        body: finalBody,
         siteKey: this.config.siteKey,
         slug: this.config.slug,
-        parentId,
+        parentId: finalParentId,
       });
-      if (parentId) {
-        const parent = this.comments.find((c) => c.id === parentId);
+
+      if (finalParentId) {
+        const parent = this.comments.find((c) => c.id === finalParentId);
         if (parent) {
           parent.replies = [...(parent.replies ?? []), comment];
         }
@@ -199,6 +213,7 @@ class ZeonWidget {
         this.comments = [...this.comments, comment];
       }
       this.replyTo = null;
+      this.replyingToId = null;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to post";
       this.renderErrorBanner(message);
@@ -208,10 +223,58 @@ class ZeonWidget {
     }
   }
 
+  private async handleLike(comment: CommentData) {
+    if (this.auth.status !== "authenticated") {
+      this.handleSignIn();
+      return;
+    }
+    try {
+      const result = await likeComment(
+        this.config.appUrl,
+        this.auth.token,
+        comment.id,
+      );
+      comment.hasLiked = result.liked;
+      comment.likeCount = result.count;
+      this.render();
+    } catch {
+      this.renderErrorBanner("Failed to update like");
+    }
+  }
+
+  private findComment(id: string): CommentData | null {
+    for (const c of this.comments) {
+      if (c.id === id) return c;
+      for (const r of c.replies ?? []) {
+        if (r.id === id) return r;
+      }
+    }
+    return null;
+  }
+
+  private findParentComment(replyId: string): CommentData | null {
+    for (const c of this.comments) {
+      if (c.replies?.some((r) => r.id === replyId)) return c;
+    }
+    return null;
+  }
+
+  private handleReplyClick(comment: CommentData) {
+    if (this.auth.status !== "authenticated") {
+      this.handleSignIn();
+      return;
+    }
+    this.replyingToId = comment.id;
+    this.render();
+  }
+
+  private handleCancelReply() {
+    this.replyingToId = null;
+    this.render();
+  }
+
   private renderLoadingState() {
     this.root.innerHTML = "";
-
-    // Header with skeleton title instead of "0 Comments"
     const header = document.createElement("div");
     header.className = "z-header";
     const titleSkel = document.createElement("div");
@@ -221,7 +284,6 @@ class ZeonWidget {
     titleSkel.setAttribute("aria-hidden", "true");
     header.appendChild(titleSkel);
     this.root.appendChild(header);
-
     this.root.appendChild(renderLoadingAuthBar());
     this.root.appendChild(renderLoading());
   }
@@ -251,7 +313,6 @@ class ZeonWidget {
 
   private render() {
     this.root.innerHTML = "";
-
     this.root.appendChild(this.buildHeader());
 
     if (this.auth.status === "error") {
@@ -281,16 +342,16 @@ class ZeonWidget {
     }
 
     this.root.appendChild(
-      renderCommentList(this.comments, (comment) => {
-        if (this.auth.status !== "authenticated") {
-          this.handleSignIn();
-          return;
-        }
-        this.replyTo = comment;
-        this.render();
-        const form = this.shadow.querySelector(".z-form");
-        form?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }),
+      renderCommentList(
+        this.comments,
+        (comment) => this.handleReplyClick(comment),
+        (comment) => this.handleLike(comment),
+        this.replyingToId,
+        this.currentUser,
+        (body, parentId) => this.handleSubmit(body, parentId),
+        () => this.handleCancelReply(),
+        this.isSubmitting,
+      ),
     );
   }
 }
@@ -325,5 +386,4 @@ if (document.readyState === "loading") {
   mount();
 }
 
-// Expose for manual init
 (window as unknown as Record<string, unknown>).ZeonComments = { mount };
