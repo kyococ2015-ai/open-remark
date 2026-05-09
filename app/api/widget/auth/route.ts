@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { signWidgetToken } from "@/lib/auth-widget";
+import { prisma } from "@/lib/prisma";
 import { corsHeaders } from "@/lib/cors";
 import { rateLimit } from "@/lib/rate-limit";
 import { ApiError, handleApiError } from "@/lib/api/error";
+
+async function generateUsername(name: string): Promise<string> {
+  const base = name.split(" ")[0].toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (!base) return "user";
+
+  let username = base;
+  let counter = 2;
+
+  while (await prisma.commenter.findUnique({ where: { username } })) {
+    username = `${base}${counter}`;
+    counter++;
+  }
+
+  return username;
+}
 
 export async function OPTIONS(req: NextRequest) {
   const origin = req.headers.get("origin") ?? "";
@@ -17,13 +33,10 @@ export async function POST(req: NextRequest) {
     const { ok: rateLimitOk } = rateLimit(`auth:${ip}`, 5, 60_000);
     if (!rateLimitOk) throw new ApiError("Rate limit exceeded", 429);
 
-    // This endpoint receives a Google id_token from the widget popup
-    // and issues a short-lived widget JWT
     const body = await req.json();
     const { idToken } = body as { idToken?: string };
     if (!idToken) throw new ApiError("idToken required", 400);
 
-    // Verify Google id_token
     const googleRes = await fetch(
       `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`,
     );
@@ -40,13 +53,28 @@ export async function POST(req: NextRequest) {
       throw new ApiError("Token audience mismatch", 401);
     }
 
+    const commenter = await prisma.commenter.upsert({
+      where: { email: googlePayload.email },
+      update: {},
+      create: {
+        email: googlePayload.email,
+        name: googlePayload.name,
+        image: googlePayload.picture,
+        username: await generateUsername(googlePayload.name),
+      },
+    });
+
     const widgetToken = await signWidgetToken({
       email: googlePayload.email,
       name: googlePayload.name,
       image: googlePayload.picture,
+      commenterId: commenter.id,
     });
 
-    return NextResponse.json({ token: widgetToken }, { status: 200, headers: corsHeaders(origin) });
+    return NextResponse.json(
+      { token: widgetToken },
+      { status: 200, headers: corsHeaders(origin) },
+    );
   } catch (err) {
     return handleApiError(err);
   }
