@@ -41,24 +41,36 @@ async function main() {
     },
   });
 
+  // Seed demo commenters
+  const commenters = await Promise.all(
+    [
+      { name: "Alice", email: "alice@example.com", username: "alice" },
+      { name: "Bob", email: "bob@example.com", username: "bob" },
+      { name: "Spammer", email: "spam@evil.com", username: "spammer" },
+    ].map((c) =>
+      db.commenter.upsert({
+        where: { email: c.email },
+        update: {},
+        create: c,
+      }),
+    ),
+  );
+
   // Seed demo comments
   const comments = [
     {
       body: "Great post! Really enjoyed reading this.",
-      authorName: "Alice",
-      authorEmail: "alice@example.com",
+      commenterId: commenters[0].id,
       status: CommentStatus.APPROVED,
     },
     {
       body: "Thanks for sharing, very helpful!",
-      authorName: "Bob",
-      authorEmail: "bob@example.com",
+      commenterId: commenters[1].id,
       status: CommentStatus.PENDING,
     },
     {
       body: "Buy cheap software at discount-software.ru!!!",
-      authorName: "Spammer",
-      authorEmail: "spam@evil.com",
+      commenterId: commenters[2].id,
       status: CommentStatus.SPAM,
     },
   ];

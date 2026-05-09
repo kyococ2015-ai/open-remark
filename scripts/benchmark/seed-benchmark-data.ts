@@ -215,7 +215,26 @@ async function seed() {
   console.log(`  ✅ ${pages.length} pages created\n`)
 
   // --------------------------------------------------------------------------
-  // 4. Create Comments (in batches for performance)
+  // 4. Create Commenters
+  // --------------------------------------------------------------------------
+  console.log("Creating commenters...")
+  const commenters = await Promise.all(
+    names.map((name, i) =>
+      prisma.commenter.upsert({
+        where: { email: `${name.toLowerCase()}@example.com` },
+        update: {},
+        create: {
+          name,
+          email: `${name.toLowerCase()}@example.com`,
+          username: name.toLowerCase() + (i + 1),
+        },
+      })
+    )
+  )
+  console.log(`  ✅ ${commenters.length} commenters created\n`)
+
+  // --------------------------------------------------------------------------
+  // 5. Create Comments (in batches for performance)
   // --------------------------------------------------------------------------
   console.log(`Creating ${TARGET_COMMENTS} comments...`)
   console.log("  This may take a minute...\n")
@@ -240,11 +259,11 @@ async function seed() {
     const batchData = Array.from({ length: batchSize }, () => {
       const page = randomElement(pages)
       const hasParent = Math.random() < 0.3 // 30% are replies
+      const commenter = randomElement(commenters)
 
       return {
         body: generateBody(5, 80),
-        authorName: randomElement(names),
-        authorEmail: `${randomElement(names).toLowerCase()}@${randomElement(domains)}`,
+        commenterId: commenter.id,
         status: randomElement(statuses),
         pageId: page.id,
         parentId:

@@ -19,6 +19,7 @@ export type CommentData = {
   createdAt: string;
   likeCount: number;
   hasLiked: boolean;
+  parentId: string | null;
   commenter: Commenter;
   replies: CommentData[];
 };

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { signWidgetToken } from "@/lib/auth-widget";
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { corsHeaders } from "@/lib/cors";
 import { rateLimit } from "@/lib/rate-limit";
 import { ApiError, handleApiError } from "@/lib/api/error";
@@ -12,7 +12,7 @@ async function generateUsername(name: string): Promise<string> {
   let username = base;
   let counter = 2;
 
-  while (await prisma.commenter.findUnique({ where: { username } })) {
+  while (await db.commenter.findUnique({ where: { username } })) {
     username = `${base}${counter}`;
     counter++;
   }
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       throw new ApiError("Token audience mismatch", 401);
     }
 
-    const commenter = await prisma.commenter.upsert({
+    const commenter = await db.commenter.upsert({
       where: { email: googlePayload.email },
       update: {},
       create: {

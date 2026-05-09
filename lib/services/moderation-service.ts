@@ -86,6 +86,7 @@ export async function getOwnerOverview(ownerId: string) {
         take: 5,
         include: {
           page: { select: { slug: true, site: { select: { name: true, id: true } } } },
+          commenter: { select: { name: true } },
         },
       }),
     ]);

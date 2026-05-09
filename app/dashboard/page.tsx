@@ -124,12 +124,12 @@ export default async function OverviewPage() {
                   >
                     <Avatar className="size-8 shrink-0">
                       <AvatarFallback className="text-xs">
-                        {comment.authorName.slice(0, 2).toUpperCase()}
+                        {comment.commenter.name.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium truncate">{comment.authorName}</p>
+                        <p className="text-sm font-medium truncate">{comment.commenter.name}</p>
                         <Badge
                           variant={
                             comment.status === "APPROVED"

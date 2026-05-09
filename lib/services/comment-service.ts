@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { db } from "@/lib/db";
 import { ApiError } from "@/lib/api/error";
 import { sanitizeBody } from "@/lib/sanitize";
 import { CommentStatus } from "@/generated/prisma/client";
@@ -8,6 +8,7 @@ function buildCommenterSelect() {
   return {
     id: true,
     name: true,
+    email: true,
     username: true,
     image: true,
   };
@@ -46,7 +47,7 @@ export async function getCommentsBySite(
   const skip = (page - 1) * limit;
 
   const [comments, total] = await Promise.all([
-    prisma.comment.findMany({
+    db.comment.findMany({
       where: {
         page: { siteId, ...(slug && { slug }) },
         ...(status && { status }),
@@ -64,7 +65,7 @@ export async function getCommentsBySite(
       skip,
       take: limit,
     }),
-    prisma.comment.count({
+    db.comment.count({
       where: { page: { siteId, ...(slug && { slug }) }, ...(status && { status }) },
     }),
   ]);
@@ -73,12 +74,12 @@ export async function getCommentsBySite(
 }
 
 export async function getApprovedCommentsForPage(siteId: string, slug: string, userEmail?: string) {
-  const page = await prisma.page.findUnique({
+  const page = await db.page.findUnique({
     where: { siteId_slug: { siteId, slug } },
   });
   if (!page) return [];
 
-  const raw = await prisma.comment.findMany({
+  const raw = await db.comment.findMany({
     where: {
       pageId: page.id,
       status: "APPROVED",
@@ -117,18 +118,18 @@ export async function createComment(
   const sanitized = sanitizeBody(data.body);
   if (!sanitized) throw new ApiError("Comment body is empty", 400);
 
-  const site = await prisma.site.findUniqueOrThrow({
+  const site = await db.site.findUniqueOrThrow({
     where: { siteKey: data.siteKey },
     select: { id: true },
   });
 
-  const page = await prisma.page.upsert({
+  const page = await db.page.upsert({
     where: { siteId_slug: { siteId: site.id, slug: data.slug } },
     update: {},
     create: { siteId: site.id, slug: data.slug, url: data.url },
   });
 
-  const raw = await prisma.comment.create({
+  const raw = await db.comment.create({
     data: {
       body: sanitized,
       pageId: page.id,
@@ -152,21 +153,21 @@ export async function createComment(
 }
 
 export async function toggleCommentLike(commentId: string, userEmail: string) {
-  const existing = await prisma.commentLike.findUnique({
+  const existing = await db.commentLike.findUnique({
     where: { commentId_userEmail: { commentId, userEmail } },
   });
 
   if (existing) {
-    await prisma.commentLike.delete({
+    await db.commentLike.delete({
       where: { id: existing.id },
     });
-    const count = await prisma.commentLike.count({ where: { commentId } });
+    const count = await db.commentLike.count({ where: { commentId } });
     return { liked: false, count };
   }
 
-  await prisma.commentLike.create({
+  await db.commentLike.create({
     data: { commentId, userEmail },
   });
-  const count = await prisma.commentLike.count({ where: { commentId } });
+  const count = await db.commentLike.count({ where: { commentId } });
   return { liked: true, count };
 }

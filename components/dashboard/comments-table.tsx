@@ -41,9 +41,11 @@ import { Check, MoreHorizontal, ShieldAlert, Trash2, Eye } from "lucide-react";
 type Comment = {
   id: string;
   body: string;
-  authorName: string;
-  authorEmail: string;
-  authorImage: string | null;
+  commenter: {
+    name: string;
+    email: string;
+    image: string | null;
+  };
   status: CommentStatus;
   createdAt: Date;
   page: { slug: string; url: string | null };
@@ -118,17 +120,17 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                   <TableCell>
                     <div className="flex items-center gap-2 min-w-0">
                       <Avatar className="size-7 shrink-0">
-                        <AvatarImage src={c.authorImage ?? ""} />
+                        <AvatarImage src={c.commenter.image ?? ""} />
                         <AvatarFallback className="text-xs">
-                          {c.authorName.slice(0, 2).toUpperCase()}
+                          {c.commenter.name.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate">
-                          {c.authorName}
+                          {c.commenter.name}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">
-                          {c.authorEmail}
+                          {c.commenter.email}
                         </p>
                       </div>
                     </div>
@@ -157,7 +159,7 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                             size="icon"
                             className="size-7"
                             disabled={busy === c.id}
-                          aria-label={`Actions for comment by ${c.authorName}`}
+                          aria-label={`Actions for comment by ${c.commenter.name}`}
                         >
                           <MoreHorizontal className="size-4" aria-hidden="true" />
                         </Button>
@@ -205,8 +207,8 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
       <Dialog open={!!preview} onOpenChange={() => setPreview(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Comment by {preview?.authorName}</DialogTitle>
-            <DialogDescription>{preview?.authorEmail}</DialogDescription>
+            <DialogTitle>Comment by {preview?.commenter.name}</DialogTitle>
+            <DialogDescription>{preview?.commenter.email}</DialogDescription>
           </DialogHeader>
           <div className="rounded-md bg-muted p-4 text-sm whitespace-pre-wrap">
             {preview?.body}

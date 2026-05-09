@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   MessageSquare,
   Globe,
@@ -8,7 +8,7 @@ import {
   Zap,
   Code2,
   ArrowRight,
-} from "lucide-react";
+} from "lucide-react"
 
 const features = [
   {
@@ -47,18 +47,18 @@ const features = [
     description:
       "Only your registered domains can post comments. No cross-site abuse.",
   },
-];
+]
 
 const embedSnippet = `<div
   data-zeon-comments
   data-site-key="YOUR_SITE_KEY"
   data-slug="/posts/hello-world"
 ></div>
-<script async src="https://your-domain.com/embed.js"></script>`;
+<script async src="https://zeon-comments.vercel.app/embed.js"></script>`
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-svh">
+    <div className="flex min-h-svh flex-col">
       {/* Nav */}
       <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur">
         <nav
@@ -67,9 +67,9 @@ export default function HomePage() {
         >
           <Link
             href="/"
-            className="flex items-center gap-2 font-semibold text-sm"
+            className="flex items-center gap-2 text-sm font-semibold"
           >
-            <div className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold text-xs">
+            <div className="flex size-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
               Z
             </div>
             Zeon Comments
@@ -94,12 +94,12 @@ export default function HomePage() {
           <Badge variant="secondary" className="mb-4">
             Open source · Self-hostable
           </Badge>
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl text-balance mb-6">
+          <h1 className="mb-6 text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">
             Comments for your
             <br />
             static website
           </h1>
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground text-balance mb-8">
+          <p className="mx-auto mb-8 max-w-2xl text-lg text-balance text-muted-foreground">
             Add a fully-featured comment system to any Astro, Hugo, or Next.js
             site in two lines of HTML. Google sign-in, threaded replies, spam
             protection, and a moderation dashboard — all included.
@@ -120,21 +120,30 @@ export default function HomePage() {
         </section>
 
         {/* Code snippet */}
-        <section className="bg-muted/40 border-y py-16">
+        <section className="border-y bg-muted/40 py-16">
           <div className="mx-auto max-w-3xl px-4">
-            <p className="text-center text-sm font-medium text-muted-foreground mb-6 uppercase tracking-wider">
+            <p className="mb-6 text-center text-sm font-medium tracking-wider text-muted-foreground uppercase">
               Embed in 2 lines
             </p>
-            <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
-              <div className="flex items-center gap-1.5 px-4 py-3 border-b bg-muted/50">
-                <div className="size-2.5 rounded-full bg-red-400" aria-hidden="true" />
-                <div className="size-2.5 rounded-full bg-yellow-400" aria-hidden="true" />
-                <div className="size-2.5 rounded-full bg-green-400" aria-hidden="true" />
-                <span className="ml-2 text-xs text-muted-foreground font-mono">
+            <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+              <div className="flex items-center gap-1.5 border-b bg-muted/50 px-4 py-3">
+                <div
+                  className="size-2.5 rounded-full bg-red-400"
+                  aria-hidden="true"
+                />
+                <div
+                  className="size-2.5 rounded-full bg-yellow-400"
+                  aria-hidden="true"
+                />
+                <div
+                  className="size-2.5 rounded-full bg-green-400"
+                  aria-hidden="true"
+                />
+                <span className="ml-2 font-mono text-xs text-muted-foreground">
                   your-post.html
                 </span>
               </div>
-              <pre className="p-6 text-sm font-mono leading-relaxed overflow-x-auto">
+              <pre className="overflow-x-auto p-6 font-mono text-sm leading-relaxed">
                 <code>{embedSnippet}</code>
               </pre>
             </div>
@@ -143,23 +152,23 @@ export default function HomePage() {
 
         {/* Features */}
         <section className="mx-auto max-w-5xl px-4 py-24">
-          <h2 className="text-2xl font-bold text-center mb-3 text-balance">
+          <h2 className="mb-3 text-center text-2xl font-bold text-balance">
             Everything you need, nothing you don&apos;t
           </h2>
-          <p className="text-center text-muted-foreground mb-12 text-balance">
+          <p className="mb-12 text-center text-balance text-muted-foreground">
             No tracking pixels, no cookie banners, no third-party data sharing.
           </p>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (
               <div
                 key={f.title}
-                className="rounded-lg border bg-card p-5 flex flex-col gap-2"
+                className="flex flex-col gap-2 rounded-lg border bg-card p-5"
               >
                 <div className="flex size-9 items-center justify-center rounded-md bg-primary/10">
                   <f.icon className="size-4 text-primary" aria-hidden="true" />
                 </div>
                 <h3 className="font-semibold">{f.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   {f.description}
                 </p>
               </div>
@@ -168,9 +177,9 @@ export default function HomePage() {
         </section>
 
         {/* How it works */}
-        <section className="bg-muted/40 border-y py-24">
+        <section className="border-y bg-muted/40 py-24">
           <div className="mx-auto max-w-3xl px-4">
-            <h2 className="text-2xl font-bold text-center mb-12 text-balance">
+            <h2 className="mb-12 text-center text-2xl font-bold text-balance">
               Up and running in minutes
             </h2>
             <ol className="flex flex-col gap-8" aria-label="Setup steps">
@@ -197,11 +206,11 @@ export default function HomePage() {
                 },
               ].map((item) => (
                 <li key={item.step} className="flex gap-4">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
                     {item.step}
                   </div>
                   <div>
-                    <h3 className="font-semibold mb-1">{item.title}</h3>
+                    <h3 className="mb-1 font-semibold">{item.title}</h3>
                     <p className="text-sm text-muted-foreground">{item.body}</p>
                   </div>
                 </li>
@@ -212,28 +221,30 @@ export default function HomePage() {
 
         {/* CTA */}
         <section className="mx-auto max-w-2xl px-4 py-24 text-center">
-          <h2 className="text-3xl font-bold mb-4 text-balance">
+          <h2 className="mb-4 text-3xl font-bold text-balance">
             Ready to add comments?
           </h2>
-          <p className="text-muted-foreground mb-8 text-balance">
-            Free to get started. Self-host on your own infrastructure if you prefer.
+          <p className="mb-8 text-balance text-muted-foreground">
+            Free to get started. Self-host on your own infrastructure if you
+            prefer.
           </p>
           <Button asChild size="lg">
             <Link href="/sign-in">
               Get started free
-                <ArrowRight className="ml-2 size-4" aria-hidden="true" />
+              <ArrowRight className="ml-2 size-4" aria-hidden="true" />
             </Link>
           </Button>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="border-t mt-auto">
-        <div className="mx-auto max-w-5xl px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <div
-            className="flex items-center gap-2"
-          >
-            <div className="flex size-6 items-center justify-center rounded bg-primary text-primary-foreground font-bold text-xs" aria-hidden="true">
+      <footer className="mt-auto border-t">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-muted-foreground sm:flex-row">
+          <div className="flex items-center gap-2">
+            <div
+              className="flex size-6 items-center justify-center rounded bg-primary text-xs font-bold text-primary-foreground"
+              aria-hidden="true"
+            >
               Z
             </div>
             <span>Zeon Comments</span>
@@ -242,5 +253,5 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
-  );
+  )
 }
