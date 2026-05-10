@@ -1,50 +1,50 @@
-import { auth } from "@/lib/auth";
-import { notFound } from "next/navigation";
-import { getSiteByIdForOwner } from "@/lib/services/site-service";
-import { InstallSnippet } from "@/components/dashboard/install-snippet";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { auth } from "@/lib/auth"
+import { notFound } from "next/navigation"
+import { getSiteByIdForOwner } from "@/lib/services/site-service"
+import { InstallSnippet } from "@/components/dashboard/install-snippet"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import Link from "next/link"
+import { CheckCircle2 } from "lucide-react"
 
-type Props = { params: Promise<{ siteId: string }> };
+type Props = { params: Promise<{ siteId: string }> }
 
 function StepHeader({
   number,
   title,
   description,
 }: {
-  number: number;
-  title: string;
-  description?: string;
+  number: number
+  title: string
+  description?: string
 }) {
   return (
-    <div className="flex gap-4 items-start">
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+    <div className="flex items-start gap-4">
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
         {number}
       </div>
       <div>
-        <h2 className="font-semibold text-base leading-tight">{title}</h2>
+        <h2 className="text-base leading-tight font-semibold">{title}</h2>
         {description && (
-          <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
         )}
       </div>
     </div>
-  );
+  )
 }
 
 export default async function InstallPage({ params }: Props) {
-  const { siteId } = await params;
-  const session = await auth();
+  const { siteId } = await params
+  const session = await auth()
 
-  let site;
+  let site
   try {
-    site = await getSiteByIdForOwner(siteId, session!.user!.id as string);
+    site = await getSiteByIdForOwner(siteId, session!.user!.id as string)
   } catch {
-    notFound();
+    notFound()
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://your-domain.com";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://your-domain.com"
 
   const htmlSnippet = `<!-- Zeon Comments -->
 <div
@@ -52,11 +52,11 @@ export default async function InstallPage({ params }: Props) {
   data-site-key="${site.siteKey}"
   data-slug="/your-post-slug"
 ></div>
-<script async src="${appUrl}/embed.js"></script>`;
+<script async src="${appUrl}/embed.js"></script>`
 
   const astroSnippet = `---
-// Pass the slug dynamically from Astro.params:
-const { slug } = Astro.params;
+// Pass the slug dynamically:
+const { slug } = Astro.props;
 ---
 
 <div
@@ -64,7 +64,7 @@ const { slug } = Astro.params;
   data-site-key="${site.siteKey}"
   data-slug={slug}
 ></div>
-<script async src="${appUrl}/embed.js"></script>`;
+<script async src="${appUrl}/embed.js"></script>`
 
   const hugoSnippet = `{{/* layouts/partials/comments.html */}}
 <div
@@ -72,7 +72,7 @@ const { slug } = Astro.params;
   data-site-key="${site.siteKey}"
   data-slug="{{ .RelPermalink }}"
 ></div>
-<script async src="${appUrl}/embed.js"></script>`;
+<script async src="${appUrl}/embed.js"></script>`
 
   const nextSnippet = `// components/Comments.tsx
 "use client";
@@ -89,11 +89,11 @@ export function Comments({ slug }: { slug: string }) {
       <Script src="${appUrl}/embed.js" strategy="lazyOnload" />
     </>
   );
-}`;
+}`
 
   return (
     <div>
-      <div className="p-6 flex flex-col gap-10 max-w-3xl">
+      <div className="flex max-w-3xl flex-col gap-10 p-6">
         {/* Step 1 */}
         <div className="flex flex-col gap-4">
           <StepHeader
@@ -151,7 +151,7 @@ export function Comments({ slug }: { slug: string }) {
             description="Open a page on your site where you added the snippet. You should see the Zeon Comments widget. Post a test comment to confirm everything works."
           />
           <div className="ml-12 flex items-center gap-2 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-            <CheckCircle2 className="size-4 shrink-0 text-success" />
+            <CheckCircle2 className="text-success size-4 shrink-0" />
             Once comments appear on your page, you're all set.
           </div>
         </div>
@@ -162,7 +162,9 @@ export function Comments({ slug }: { slug: string }) {
         {/* Done */}
         <div className="ml-12 flex gap-3">
           <Button asChild>
-            <Link href={`/dashboard/sites/${siteId}`}>Go to site dashboard</Link>
+            <Link href={`/dashboard/sites/${siteId}`}>
+              Go to site dashboard
+            </Link>
           </Button>
           <Button variant="outline" asChild>
             <Link href="/dashboard/sites">All sites</Link>
@@ -170,5 +172,5 @@ export function Comments({ slug }: { slug: string }) {
         </div>
       </div>
     </div>
-  );
+  )
 }
