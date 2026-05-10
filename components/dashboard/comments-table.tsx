@@ -36,7 +36,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Check, MoreHorizontal, ShieldAlert, Trash2, Eye } from "lucide-react";
+import { Check, MoreHorizontal, ShieldAlert, Trash2, Eye, Pencil } from "lucide-react";
 
 type Comment = {
   id: string;
@@ -48,6 +48,7 @@ type Comment = {
   };
   status: CommentStatus;
   createdAt: Date;
+  editedAt?: Date | null;
   page: { slug: string; url: string | null };
 };
 
@@ -72,10 +73,21 @@ async function patchComment(id: string, status: CommentStatus) {
   if (!res.ok) throw new Error("Failed");
 }
 
+async function patchCommentBody(id: string, body: string) {
+  const res = await fetch(`/api/v1/comments/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ body }),
+  });
+  if (!res.ok) throw new Error("Failed");
+}
+
 export function CommentsTable({ comments, onStatusChange }: Props) {
   const [busy, setBusy] = useState<string | null>(null);
   const [preview, setPreview] = useState<Comment | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Comment | null>(null);
+  const [editTarget, setEditTarget] = useState<Comment | null>(null);
+  const [editBody, setEditBody] = useState("");
 
   async function act(id: string, status: CommentStatus) {
     setBusy(id);
@@ -169,6 +181,10 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                           <Eye className="mr-2 size-4" aria-hidden="true" />
                           View full
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => { setEditTarget(c); setEditBody(c.body); }}>
+                          <Pencil className="mr-2 size-4" aria-hidden="true" />
+                          Edit
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         {c.status !== CommentStatus.APPROVED && (
                           <DropdownMenuItem
@@ -213,9 +229,14 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
           <div className="rounded-md bg-muted p-4 text-sm whitespace-pre-wrap">
             {preview?.body}
           </div>
-          <p className="text-xs text-muted-foreground">
-            On <span className="font-mono">{preview?.page.slug}</span>
-          </p>
+          <div className="flex items-center gap-2 mt-2">
+            <p className="text-xs text-muted-foreground">
+              On <span className="font-mono">{preview?.page.slug}</span>
+            </p>
+            {preview?.editedAt && (
+              <span className="text-xs text-muted-foreground">· edited</span>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -241,6 +262,45 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
               }}
             >
               Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editTarget} onOpenChange={() => setEditTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit comment</DialogTitle>
+            <DialogDescription>By {editTarget?.commenter.name}</DialogDescription>
+          </DialogHeader>
+          <textarea
+            className="w-full min-h-[100px] p-3 text-sm border rounded-md bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+            value={editBody}
+            onChange={(e) => setEditBody(e.target.value)}
+            disabled={busy === editTarget?.id}
+          />
+          <div className="flex gap-2 justify-end mt-2">
+            <Button variant="outline" onClick={() => setEditTarget(null)}>
+              Cancel
+            </Button>
+            <Button
+              disabled={busy === editTarget?.id || !editBody.trim()}
+              onClick={async () => {
+                if (!editTarget) return;
+                setBusy(editTarget.id);
+                try {
+                  await patchCommentBody(editTarget.id, editBody);
+                  toast.success("Comment updated");
+                  setEditTarget(null);
+                  onStatusChange?.();
+                } catch {
+                  toast.error("Update failed");
+                } finally {
+                  setBusy(null);
+                }
+              }}
+            >
+              Save
             </Button>
           </div>
         </DialogContent>
