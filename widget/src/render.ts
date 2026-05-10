@@ -77,12 +77,17 @@ function renderCommentItem(
   onSubmitReply: (body: string, parentId: string) => void,
   onCancelReply: () => void,
   isSubmitting: boolean,
+  editingId: string | null,
+  onEdit: (comment: CommentData) => void,
+  onCancelEdit: () => void,
+  onSubmitEdit: (commentId: string, body: string) => void,
 ): HTMLElement {
   const li = document.createElement("li");
   li.className = depth === 0 ? "z-comment" : "z-reply";
   li.dataset.id = comment.id;
 
   const isReplying = replyingToId === comment.id;
+  const isEditing = editingId === comment.id;
   const isTopLevel = depth === 0;
   const avatarSize = isTopLevel ? false : true;
 
@@ -116,35 +121,68 @@ function renderCommentItem(
 
   right.appendChild(meta);
 
-  const body = renderCommentBody(comment.body);
-  right.appendChild(body);
+  if (!isEditing) {
+    const body = renderCommentBody(comment.body);
+    right.appendChild(body);
 
-  const actions = document.createElement("div");
-  actions.className = "z-comment-actions";
+    const actions = document.createElement("div");
+    actions.className = "z-comment-actions";
 
-  const timeEl = document.createElement("time");
-  timeEl.className = "z-comment-action-time";
-  timeEl.dateTime = comment.createdAt;
-  timeEl.textContent = formatRelativeTime(comment.createdAt);
-  actions.appendChild(timeEl);
+    const timeEl = document.createElement("time");
+    timeEl.className = "z-comment-action-time";
+    timeEl.dateTime = comment.createdAt;
+    timeEl.textContent = formatRelativeTime(comment.createdAt);
+    actions.appendChild(timeEl);
 
-  const likeBtn = document.createElement("button");
-  likeBtn.className = "z-action-btn" + (comment.hasLiked ? " z-action-btn-active" : "");
-  likeBtn.type = "button";
-  likeBtn.innerHTML = `${comment.hasLiked ? HEART_FILLED : HEART_OUTLINE}<span>${comment.likeCount}</span>`;
-  likeBtn.addEventListener("click", () => onLike(comment));
-  actions.appendChild(likeBtn);
+    const likeBtn = document.createElement("button");
+    likeBtn.className = "z-action-btn" + (comment.hasLiked ? " z-action-btn-active" : "");
+    likeBtn.type = "button";
+    likeBtn.innerHTML = `${comment.hasLiked ? HEART_FILLED : HEART_OUTLINE}<span>${comment.likeCount}</span>`;
+    likeBtn.addEventListener("click", () => onLike(comment));
+    actions.appendChild(likeBtn);
 
-  const replyBtn = document.createElement("button");
-  replyBtn.className = "z-action-btn";
-  replyBtn.type = "button";
-  replyBtn.innerHTML = `${REPLY_ICON}<span>Reply</span>`;
-  replyBtn.addEventListener("click", () => onReply(comment));
-  actions.appendChild(replyBtn);
+    const replyBtn = document.createElement("button");
+    replyBtn.className = "z-action-btn";
+    replyBtn.type = "button";
+    replyBtn.innerHTML = `${REPLY_ICON}<span>Reply</span>`;
+    replyBtn.addEventListener("click", () => onReply(comment));
+    actions.appendChild(replyBtn);
 
-  right.appendChild(actions);
+    if (currentUser && currentUser.id === comment.commenter.id) {
+      const editBtn = document.createElement("button");
+      editBtn.className = "z-action-btn";
+      editBtn.type = "button";
+      editBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span>`;
+      editBtn.addEventListener("click", () => onEdit(comment));
+      actions.appendChild(editBtn);
+    }
+
+    if (comment.editedAt) {
+      const editedEl = document.createElement("span");
+      editedEl.className = "z-comment-action-edited";
+      editedEl.textContent = "· edited";
+      actions.appendChild(editedEl);
+    }
+
+    right.appendChild(actions);
+  }
+
   content.appendChild(right);
   li.appendChild(content);
+
+  if (isEditing) {
+    const editWrap = document.createElement("div");
+    editWrap.className = "z-inline-edit";
+    editWrap.appendChild(
+      renderInlineEditForm(
+        comment,
+        onSubmitEdit,
+        onCancelEdit,
+        isSubmitting,
+      ),
+    );
+    li.appendChild(editWrap);
+  }
 
   if (isReplying && currentUser) {
     const formWrap = document.createElement("div");
@@ -177,6 +215,10 @@ function renderCommentItem(
           onSubmitReply,
           onCancelReply,
           isSubmitting,
+          editingId,
+          onEdit,
+          onCancelEdit,
+          onSubmitEdit,
         ),
       );
     }
@@ -266,6 +308,76 @@ function renderInlineReplyForm(
   return wrap;
 }
 
+function renderInlineEditForm(
+  comment: CommentData,
+  onSubmit: (commentId: string, body: string) => void,
+  onCancel: () => void,
+  isSubmitting: boolean,
+): HTMLElement {
+  const MAX_CHARS = 5000;
+
+  const wrap = document.createElement("div");
+  wrap.className = "z-inline-form";
+
+  const textarea = document.createElement("textarea");
+  textarea.value = comment.body;
+  textarea.placeholder = "Edit your comment…";
+  textarea.setAttribute("aria-label", "Edit comment");
+  textarea.rows = 2;
+  textarea.disabled = isSubmitting;
+  wrap.appendChild(textarea);
+
+  const footer = document.createElement("div");
+  footer.className = "z-inline-form-footer";
+
+  const counter = document.createElement("span");
+  counter.className = "z-char-counter";
+  counter.setAttribute("aria-live", "polite");
+  counter.textContent = `${comment.body.length} / ${MAX_CHARS}`;
+  footer.appendChild(counter);
+
+  const btnWrap = document.createElement("div");
+  btnWrap.className = "z-inline-form-btns";
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "z-btn z-btn-ghost z-btn-sm";
+  cancelBtn.type = "button";
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.addEventListener("click", onCancel);
+  btnWrap.appendChild(cancelBtn);
+
+  const submitBtn = document.createElement("button");
+  submitBtn.className = "z-btn z-btn-primary z-btn-sm";
+  submitBtn.type = "button";
+  submitBtn.textContent = isSubmitting ? "Saving…" : "Save";
+  submitBtn.disabled = isSubmitting;
+  submitBtn.addEventListener("click", async () => {
+    const body = textarea.value.trim();
+    if (!body || body.length > MAX_CHARS) {
+      textarea.focus();
+      return;
+    }
+    await onSubmit(comment.id, body);
+  });
+  btnWrap.appendChild(submitBtn);
+  footer.appendChild(btnWrap);
+  wrap.appendChild(footer);
+
+  textarea.addEventListener("input", () => {
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+    const len = textarea.value.length;
+    counter.textContent = `${len} / ${MAX_CHARS}`;
+    counter.classList.toggle("z-char-counter-warn", len >= MAX_CHARS * 0.9 && len < MAX_CHARS);
+    counter.classList.toggle("z-char-counter-over", len > MAX_CHARS);
+    submitBtn.disabled = isSubmitting || len === 0 || len > MAX_CHARS;
+  });
+
+  setTimeout(() => textarea.focus(), 0);
+
+  return wrap;
+}
+
 export function renderCommentList(
   comments: CommentData[],
   onReply: (comment: CommentData) => void,
@@ -275,6 +387,10 @@ export function renderCommentList(
   onSubmitReply: (body: string, parentId: string) => void,
   onCancelReply: () => void,
   isSubmitting: boolean,
+  editingId: string | null,
+  onEdit: (comment: CommentData) => void,
+  onCancelEdit: () => void,
+  onSubmitEdit: (commentId: string, body: string) => void,
 ): HTMLElement {
   if (comments.length === 0) {
     const el = document.createElement("div");
@@ -318,6 +434,10 @@ export function renderCommentList(
         onSubmitReply,
         onCancelReply,
         isSubmitting,
+        editingId,
+        onEdit,
+        onCancelEdit,
+        onSubmitEdit,
       ),
     );
   }
