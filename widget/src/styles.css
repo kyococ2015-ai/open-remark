@@ -430,6 +430,78 @@
   background: color-mix(in srgb, var(--z-primary) 12%, transparent);
 }
 
+/* ─── Three-dot menu ─────────────────────────────────────────────────────── */
+.z-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: var(--z-radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--z-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.12s, color 0.12s;
+  font-family: inherit;
+}
+
+.z-menu-btn:hover {
+  background: var(--z-accent);
+  color: var(--z-text);
+}
+
+.z-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  background: var(--z-bg);
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  list-style: none;
+  padding: 4px;
+  min-width: 120px;
+  z-index: 10;
+}
+
+.z-menu-item {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  border-radius: calc(var(--z-radius-sm) * 0.7);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--z-text);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background-color 0.12s;
+}
+
+.z-menu-item:hover {
+  background: var(--z-accent);
+}
+
+.z-menu-item-danger {
+  color: #ef4444;
+}
+
+.z-menu-item-danger:hover {
+  background: color-mix(in srgb, #ef4444 8%, var(--z-bg));
+}
+
+.z-comment-actions-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 /* ─── Inline reply ───────────────────────────────────────────────────────── */
 .z-inline-reply {
   margin-top: 12px;
@@ -509,6 +581,37 @@
   gap: 8px;
 }
 
+/* ─── Delete confirmation ────────────────────────────────────────────────── */
+.z-delete-confirm {
+  padding: 10px 12px;
+  margin-top: 8px;
+  background: color-mix(in srgb, #ef4444 5%, var(--z-bg));
+  border: 1px solid color-mix(in srgb, #ef4444 20%, transparent);
+  border-radius: var(--z-radius-sm);
+}
+
+.z-delete-confirm-text {
+  font-size: 13px;
+  color: var(--z-text);
+  margin-bottom: 10px;
+}
+
+.z-delete-confirm-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.z-btn-danger {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
+.z-btn-danger:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
 /* ─── Replies ────────────────────────────────────────────────────────────── */
 .z-replies {
   margin-top: 12px;
@@ -537,6 +640,38 @@
 
 .z-reply .z-comment-meta {
   margin-bottom: 2px;
+}
+
+/* ─── Deleted comment state ──────────────────────────────────────────────── */
+.z-comment-deleted {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.z-comment-deleted-body {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--z-muted);
+}
+
+.z-avatar-deleted {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--z-subtle);
+  border: 1px solid var(--z-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--z-muted);
+  flex-shrink: 0;
+}
+
+.z-avatar-deleted-sm {
+  width: 24px;
+  height: 24px;
 }
 
 /* ─── Pending badge ──────────────────────────────────────────────────────── */
