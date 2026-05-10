@@ -148,7 +148,9 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                     </div>
                   </TableCell>
                   <TableCell className="max-w-xs">
-                    <p className="text-sm line-clamp-2">{c.body}</p>
+                    <p className={c.status === CommentStatus.DELETED ? "text-sm italic text-muted-foreground" : "text-sm line-clamp-2"}>
+                      {c.status === CommentStatus.DELETED ? "Comment Removed" : c.body}
+                    </p>
                   </TableCell>
                   <TableCell>
                     <p className="text-xs font-mono text-muted-foreground truncate max-w-36">
@@ -245,7 +247,7 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
           <DialogHeader>
             <DialogTitle>Delete comment?</DialogTitle>
             <DialogDescription>
-              This will mark the comment as deleted. The action cannot be undone.
+              This comment will be marked as deleted. Replies will remain visible.
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-2 justify-end mt-2">
