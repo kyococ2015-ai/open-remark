@@ -15,7 +15,7 @@ export type Commenter = {
 export type CommentData = {
   id: string;
   body: string;
-  status: "PENDING" | "APPROVED";
+  status: "PENDING" | "APPROVED" | "DELETED";
   createdAt: string;
   editedAt: string | null;
   likeCount: number;
