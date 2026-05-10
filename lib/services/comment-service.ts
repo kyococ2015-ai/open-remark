@@ -59,11 +59,11 @@ export async function getCommentsBySite(
       include: {
         page: { select: { slug: true, url: true } },
         commenter: { select: buildCommenterSelect() },
-        replies: {
-          where: { status: CommentStatus.APPROVED },
-          orderBy: { createdAt: "asc" },
-          include: { commenter: { select: buildCommenterSelect() } },
-        },
+    replies: {
+      where: { status: { in: [CommentStatus.APPROVED, CommentStatus.DELETED] } },
+      orderBy: { createdAt: "asc" as const },
+      include: { commenter: { select: buildCommenterSelect() } },
+    },
       },
       orderBy: { createdAt: "desc" },
       skip,
@@ -86,7 +86,7 @@ export async function getApprovedCommentsForPage(siteId: string, slug: string, u
   const raw = await db.comment.findMany({
     where: {
       pageId: page.id,
-      status: "APPROVED",
+      status: { in: [CommentStatus.APPROVED, CommentStatus.DELETED] },
       parentId: null,
     },
     select: buildCommentSelect(userEmail),
@@ -169,6 +169,27 @@ export async function updateCommentBody(commentId: string, body: string) {
   const raw = await db.comment.update({
     where: { id: commentId },
     data: { body: sanitized, editedAt: new Date() },
+    select: buildCommentSelect(),
+  });
+
+  return {
+    id: raw.id,
+    body: raw.body,
+    status: raw.status,
+    createdAt: raw.createdAt.toISOString(),
+    editedAt: raw.editedAt?.toISOString() ?? null,
+    likeCount: raw._count.likes,
+    hasLiked: false,
+    parentId: raw.parentId,
+    commenter: raw.commenter,
+    replies: [],
+  };
+}
+
+export async function deleteComment(commentId: string) {
+  const raw = await db.comment.update({
+    where: { id: commentId },
+    data: { status: "DELETED" },
     select: buildCommentSelect(),
   });
 
