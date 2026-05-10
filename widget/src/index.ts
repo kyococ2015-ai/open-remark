@@ -5,7 +5,7 @@ import type {
   WidgetConfig,
   WidgetThemeConfig,
 } from "./types";
-import { fetchComments, postComment, likeComment } from "./api";
+import { fetchComments, postComment, likeComment, updateComment } from "./api";
 import { loadStoredAuth, signInWithGoogle, clearAuth } from "./auth";
 import {
   renderAuthBar,
@@ -95,6 +95,7 @@ class ZeonWidget {
   private comments: CommentData[] = [];
   private replyTo: CommentData | null = null;
   private replyingToId: string | null = null;
+  private isEditingId: string | null = null;
   private isSubmitting = false;
 
   constructor(config: WidgetConfig) {
@@ -176,6 +177,7 @@ class ZeonWidget {
     this.auth = { status: "idle" };
     this.replyTo = null;
     this.replyingToId = null;
+    this.isEditingId = null;
     this.render();
   }
 
@@ -273,6 +275,43 @@ class ZeonWidget {
     this.render();
   }
 
+  private handleEditClick(comment: CommentData) {
+    if (this.auth.status !== "authenticated") return;
+    this.isEditingId = comment.id;
+    this.render();
+  }
+
+  private handleCancelEdit() {
+    this.isEditingId = null;
+    this.render();
+  }
+
+  private async handleSubmitEdit(commentId: string, body: string) {
+    if (this.auth.status !== "authenticated") return;
+    this.isSubmitting = true;
+    this.render();
+    try {
+      const updated = await updateComment(
+        this.config.appUrl,
+        this.auth.token,
+        commentId,
+        body,
+      );
+      const target = this.findComment(commentId);
+      if (target) {
+        target.body = updated.body;
+        target.editedAt = updated.editedAt;
+      }
+      this.isEditingId = null;
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to update";
+      this.renderErrorBanner(message);
+    } finally {
+      this.isSubmitting = false;
+      this.render();
+    }
+  }
+
   private renderLoadingState() {
     this.root.innerHTML = "";
     const header = document.createElement("div");
@@ -351,6 +390,10 @@ class ZeonWidget {
         (body, parentId) => this.handleSubmit(body, parentId),
         () => this.handleCancelReply(),
         this.isSubmitting,
+        this.isEditingId,
+        (comment) => this.handleEditClick(comment),
+        () => this.handleCancelEdit(),
+        (id, body) => this.handleSubmitEdit(id, body),
       ),
     );
   }
