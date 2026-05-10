@@ -130,6 +130,7 @@ model Comment {
   status    CommentStatus @default(PENDING)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+  editedAt  DateTime?
 
   pageId String
   page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
