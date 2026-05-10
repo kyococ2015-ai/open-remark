@@ -33,6 +33,16 @@ function avatarEl(name: string, image: string | null, small = false): HTMLElemen
   return el;
 }
 
+function deletedAvatarEl(small = false): HTMLElement {
+  const el = document.createElement("div");
+  el.className = small
+    ? "z-avatar-deleted z-avatar-deleted-sm"
+    : "z-avatar-deleted";
+  el.setAttribute("aria-hidden", "true");
+  el.innerHTML = `<svg width="${small ? 12 : 14}" height="${small ? 12 : 14}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg>`;
+  return el;
+}
+
 function renderCommentBody(text: string): HTMLElement {
   const p = document.createElement("p");
   p.className = "z-comment-body";
@@ -81,6 +91,10 @@ function renderCommentItem(
   onEdit: (comment: CommentData) => void,
   onCancelEdit: () => void,
   onSubmitEdit: (commentId: string, body: string) => void,
+  deletingId: string | null,
+  onDelete: (comment: CommentData) => void,
+  onCancelDelete: () => void,
+  onConfirmDelete: (commentId: string) => void,
 ): HTMLElement {
   const li = document.createElement("li");
   li.className = depth === 0 ? "z-comment" : "z-reply";
@@ -90,6 +104,48 @@ function renderCommentItem(
   const isEditing = editingId === comment.id;
   const isTopLevel = depth === 0;
   const avatarSize = isTopLevel ? false : true;
+
+  if (comment.status === "DELETED") {
+    const deletedWrap = document.createElement("div");
+    deletedWrap.className = "z-comment-deleted";
+    deletedWrap.appendChild(deletedAvatarEl(avatarSize));
+    const deletedBody = document.createElement("span");
+    deletedBody.className = "z-comment-deleted-body";
+    deletedBody.textContent = "Comment Removed";
+    deletedWrap.appendChild(deletedBody);
+    li.appendChild(deletedWrap);
+
+    if (comment.replies?.length > 0) {
+      const repliesList = document.createElement("ul");
+      repliesList.className = "z-replies";
+      repliesList.setAttribute("aria-label", "Replies");
+      for (const reply of comment.replies) {
+        repliesList.appendChild(
+          renderCommentItem(
+            reply,
+            depth + 1,
+            onReply,
+            onLike,
+            replyingToId,
+            currentUser,
+            onSubmitReply,
+            onCancelReply,
+            isSubmitting,
+            editingId,
+            onEdit,
+            onCancelEdit,
+            onSubmitEdit,
+            deletingId,
+            onDelete,
+            onCancelDelete,
+            onConfirmDelete,
+          ),
+        );
+      }
+      li.appendChild(repliesList);
+    }
+    return li;
+  }
 
   const content = document.createElement("div");
   content.className = "z-comment-content";
@@ -149,12 +205,54 @@ function renderCommentItem(
     actions.appendChild(replyBtn);
 
     if (currentUser && currentUser.id === comment.commenter.id) {
-      const editBtn = document.createElement("button");
-      editBtn.className = "z-action-btn";
-      editBtn.type = "button";
-      editBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>Edit</span>`;
-      editBtn.addEventListener("click", () => onEdit(comment));
-      actions.appendChild(editBtn);
+      const menuWrap = document.createElement("div");
+      menuWrap.className = "z-comment-actions-wrap";
+
+      const menuBtn = document.createElement("button");
+      menuBtn.className = "z-menu-btn";
+      menuBtn.type = "button";
+      menuBtn.setAttribute("aria-label", "More options");
+      menuBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>`;
+
+      const dropdown = document.createElement("ul");
+      dropdown.className = "z-menu-dropdown";
+      dropdown.style.display = "none";
+
+      const editItem = document.createElement("button");
+      editItem.className = "z-menu-item";
+      editItem.type = "button";
+      editItem.textContent = "Edit";
+      editItem.addEventListener("click", () => {
+        dropdown.style.display = "none";
+        onEdit(comment);
+      });
+
+      const deleteItem = document.createElement("button");
+      deleteItem.className = "z-menu-item z-menu-item-danger";
+      deleteItem.type = "button";
+      deleteItem.textContent = "Delete";
+      deleteItem.addEventListener("click", () => {
+        dropdown.style.display = "none";
+        onDelete(comment);
+      });
+
+      dropdown.appendChild(editItem);
+      dropdown.appendChild(deleteItem);
+      menuWrap.appendChild(menuBtn);
+      menuWrap.appendChild(dropdown);
+      actions.appendChild(menuWrap);
+
+      menuBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = dropdown.style.display === "block";
+        dropdown.style.display = isOpen ? "none" : "block";
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!menuWrap.contains(e.target as Node)) {
+          dropdown.style.display = "none";
+        }
+      });
     }
 
     if (comment.editedAt) {
@@ -199,6 +297,36 @@ function renderCommentItem(
     li.appendChild(formWrap);
   }
 
+  if (deletingId === comment.id) {
+    const confirmWrap = document.createElement("div");
+    confirmWrap.className = "z-delete-confirm";
+
+    const confirmText = document.createElement("p");
+    confirmText.className = "z-delete-confirm-text";
+    confirmText.textContent = "Delete this comment? This action cannot be undone.";
+    confirmWrap.appendChild(confirmText);
+
+    const btnWrap = document.createElement("div");
+    btnWrap.className = "z-delete-confirm-btns";
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.className = "z-btn z-btn-ghost z-btn-sm";
+    cancelBtn.type = "button";
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.addEventListener("click", onCancelDelete);
+    btnWrap.appendChild(cancelBtn);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "z-btn z-btn-danger z-btn-sm";
+    deleteBtn.type = "button";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.addEventListener("click", () => onConfirmDelete(comment.id));
+    btnWrap.appendChild(deleteBtn);
+
+    confirmWrap.appendChild(btnWrap);
+    li.appendChild(confirmWrap);
+  }
+
   if (comment.replies?.length > 0) {
     const repliesList = document.createElement("ul");
     repliesList.className = "z-replies";
@@ -219,6 +347,10 @@ function renderCommentItem(
           onEdit,
           onCancelEdit,
           onSubmitEdit,
+          deletingId,
+          onDelete,
+          onCancelDelete,
+          onConfirmDelete,
         ),
       );
     }
@@ -391,6 +523,10 @@ export function renderCommentList(
   onEdit: (comment: CommentData) => void,
   onCancelEdit: () => void,
   onSubmitEdit: (commentId: string, body: string) => void,
+  deletingId: string | null,
+  onDelete: (comment: CommentData) => void,
+  onCancelDelete: () => void,
+  onConfirmDelete: (commentId: string) => void,
 ): HTMLElement {
   if (comments.length === 0) {
     const el = document.createElement("div");
@@ -438,6 +574,10 @@ export function renderCommentList(
         onEdit,
         onCancelEdit,
         onSubmitEdit,
+        deletingId,
+        onDelete,
+        onCancelDelete,
+        onConfirmDelete,
       ),
     );
   }
