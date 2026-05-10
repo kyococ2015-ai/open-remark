@@ -395,6 +395,11 @@
   color: var(--z-muted);
 }
 
+.z-comment-action-edited {
+  font-size: 12px;
+  color: var(--z-muted);
+}
+
 .z-action-btn {
   display: inline-flex;
   align-items: center;
@@ -427,6 +432,12 @@
 
 /* ─── Inline reply ───────────────────────────────────────────────────────── */
 .z-inline-reply {
+  margin-top: 12px;
+  margin-left: 40px;
+}
+
+/* ─── Inline edit ────────────────────────────────────────────────────────── */
+.z-inline-edit {
   margin-top: 12px;
   margin-left: 40px;
 }
