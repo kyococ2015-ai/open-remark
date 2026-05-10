@@ -21,6 +21,7 @@ function buildCommentSelect(userEmail?: string) {
     body: true,
     status: true,
     createdAt: true,
+    editedAt: true,
     parentId: true,
     commenter: { select: buildCommenterSelect() },
     _count: { select: { likes: true } },
@@ -31,6 +32,7 @@ function buildCommentSelect(userEmail?: string) {
         body: true,
         status: true,
         createdAt: true,
+        editedAt: true,
         parentId: true,
         commenter: { select: buildCommenterSelect() },
         _count: { select: { likes: true } },
@@ -96,6 +98,7 @@ export async function getApprovedCommentsForPage(siteId: string, slug: string, u
     body: c.body,
     status: c.status,
     createdAt: c.createdAt.toISOString(),
+    editedAt: c.editedAt?.toISOString() ?? null,
     likeCount: c._count.likes,
     hasLiked: userEmail ? c.likes.length > 0 : false,
     parentId: c.parentId,
@@ -105,6 +108,7 @@ export async function getApprovedCommentsForPage(siteId: string, slug: string, u
       body: r.body,
       status: r.status,
       createdAt: r.createdAt.toISOString(),
+      editedAt: r.editedAt?.toISOString() ?? null,
       likeCount: r._count.likes,
       hasLiked: userEmail ? r.likes.length > 0 : false,
       parentId: r.parentId,
@@ -149,7 +153,32 @@ export async function createComment(
     body: raw.body,
     status: raw.status,
     createdAt: raw.createdAt.toISOString(),
+    editedAt: raw.editedAt?.toISOString() ?? null,
     likeCount: 0,
+    hasLiked: false,
+    parentId: raw.parentId,
+    commenter: raw.commenter,
+    replies: [],
+  };
+}
+
+export async function updateCommentBody(commentId: string, body: string) {
+  const sanitized = sanitizeBody(body);
+  if (!sanitized) throw new ApiError("Comment body is empty", 400);
+
+  const raw = await db.comment.update({
+    where: { id: commentId },
+    data: { body: sanitized, editedAt: new Date() },
+    select: buildCommentSelect(),
+  });
+
+  return {
+    id: raw.id,
+    body: raw.body,
+    status: raw.status,
+    createdAt: raw.createdAt.toISOString(),
+    editedAt: raw.editedAt?.toISOString() ?? null,
+    likeCount: raw._count.likes,
     hasLiked: false,
     parentId: raw.parentId,
     commenter: raw.commenter,
