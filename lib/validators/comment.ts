@@ -13,5 +13,10 @@ export const UpdateCommentStatusSchema = z.object({
   status: z.nativeEnum(CommentStatus),
 });
 
+export const UpdateCommentBodySchema = z.object({
+  body: z.string().min(1).max(5000),
+});
+
 export type CreateCommentInput = z.infer<typeof CreateCommentSchema>;
 export type UpdateCommentStatusInput = z.infer<typeof UpdateCommentStatusSchema>;
+export type UpdateCommentBodyInput = z.infer<typeof UpdateCommentBodySchema>;
