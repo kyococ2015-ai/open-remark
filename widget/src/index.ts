@@ -5,7 +5,7 @@ import type {
   WidgetConfig,
   WidgetThemeConfig,
 } from "./types";
-import { fetchComments, postComment, likeComment, updateComment } from "./api";
+import { fetchComments, postComment, likeComment, updateComment, deleteComment } from "./api";
 import { loadStoredAuth, signInWithGoogle, clearAuth } from "./auth";
 import {
   renderAuthBar,
@@ -96,6 +96,7 @@ class ZeonWidget {
   private replyTo: CommentData | null = null;
   private replyingToId: string | null = null;
   private isEditingId: string | null = null;
+  private deletingId: string | null = null;
   private isSubmitting = false;
 
   constructor(config: WidgetConfig) {
@@ -286,6 +287,42 @@ class ZeonWidget {
     this.render();
   }
 
+  private handleDeleteClick(comment: CommentData) {
+    if (this.auth.status !== "authenticated") return;
+    this.deletingId = comment.id;
+    this.render();
+  }
+
+  private handleCancelDelete() {
+    this.deletingId = null;
+    this.render();
+  }
+
+  private async handleConfirmDelete(commentId: string) {
+    if (this.auth.status !== "authenticated") return;
+    this.isSubmitting = true;
+    this.render();
+    try {
+      const updated = await deleteComment(
+        this.config.appUrl,
+        this.auth.token,
+        commentId,
+      );
+      const target = this.findComment(commentId);
+      if (target) {
+        target.status = updated.status;
+        target.body = updated.body;
+      }
+      this.deletingId = null;
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to delete";
+      this.renderErrorBanner(message);
+    } finally {
+      this.isSubmitting = false;
+      this.render();
+    }
+  }
+
   private async handleSubmitEdit(commentId: string, body: string) {
     if (this.auth.status !== "authenticated") return;
     this.isSubmitting = true;
@@ -394,6 +431,10 @@ class ZeonWidget {
         (comment) => this.handleEditClick(comment),
         () => this.handleCancelEdit(),
         (id, body) => this.handleSubmitEdit(id, body),
+        this.deletingId,
+        (comment) => this.handleDeleteClick(comment),
+        () => this.handleCancelDelete(),
+        (id) => this.handleConfirmDelete(id),
       ),
     );
   }
