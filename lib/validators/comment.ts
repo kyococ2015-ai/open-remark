@@ -13,10 +13,13 @@ export const UpdateCommentStatusSchema = z.object({
   status: z.nativeEnum(CommentStatus),
 });
 
-export const UpdateCommentBodySchema = z.object({
-  body: z.string().min(1).max(5000),
+export const UpdateCommentSchema = z.object({
+  body: z.string().min(1).max(5000).optional(),
+  status: z.nativeEnum(CommentStatus).optional(),
+}).refine((data) => data.body !== undefined || data.status !== undefined, {
+  message: "Either body or status is required",
 });
 
 export type CreateCommentInput = z.infer<typeof CreateCommentSchema>;
 export type UpdateCommentStatusInput = z.infer<typeof UpdateCommentStatusSchema>;
-export type UpdateCommentBodyInput = z.infer<typeof UpdateCommentBodySchema>;
+export type UpdateCommentInput = z.infer<typeof UpdateCommentSchema>;
