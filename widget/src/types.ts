@@ -17,6 +17,7 @@ export type CommentData = {
   body: string;
   status: "PENDING" | "APPROVED";
   createdAt: string;
+  editedAt: string | null;
   likeCount: number;
   hasLiked: boolean;
   parentId: string | null;

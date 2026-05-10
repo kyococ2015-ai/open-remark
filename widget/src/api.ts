@@ -55,6 +55,27 @@ export async function likeComment(
   return res.json();
 }
 
+export async function updateComment(
+  appUrl: string,
+  token: string,
+  commentId: string,
+  body: string,
+): Promise<CommentData> {
+  const res = await fetch(`${appUrl}/api/widget/comments/${commentId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ body }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error ?? "Failed to update comment");
+  }
+  return res.json();
+}
+
 export async function exchangeGoogleToken(
   appUrl: string,
   idToken: string,
