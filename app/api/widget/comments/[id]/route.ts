@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { UpdateCommentBodySchema } from "@/lib/validators/comment";
-import { updateCommentBody } from "@/lib/services/comment-service";
+import { UpdateCommentSchema } from "@/lib/validators/comment";
+import { updateCommentBody, deleteComment } from "@/lib/services/comment-service";
 import { verifyWidgetToken } from "@/lib/auth-widget";
 import { corsHeaders } from "@/lib/cors";
 import { db } from "@/lib/db";
@@ -35,7 +35,7 @@ export async function PATCH(
     if (!payload) throw new ApiError("Invalid token", 401);
 
     const body = await req.json();
-    const parsed = UpdateCommentBodySchema.safeParse(body);
+    const parsed = UpdateCommentSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
     }
@@ -50,8 +50,17 @@ export async function PATCH(
       throw new ApiError("Forbidden", 403);
     }
 
-    const updated = await updateCommentBody(id, parsed.data.body);
-    return buildCorsResponse(req, updated);
+    if (parsed.data.body !== undefined) {
+      const updated = await updateCommentBody(id, parsed.data.body);
+      return buildCorsResponse(req, updated);
+    }
+
+    if (parsed.data.status !== undefined) {
+      const updated = await deleteComment(id);
+      return buildCorsResponse(req, updated);
+    }
+
+    throw new ApiError("Invalid update", 400);
   } catch (err) {
     return handleApiError(err);
   }
