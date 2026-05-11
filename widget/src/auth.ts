@@ -124,10 +124,7 @@ export async function signInWithGoogle(
 
       try {
         const code = e.data.code as string;
-        const verifier = sessionStorage.getItem(OAUTH_VERIFIER_KEY);
-        if (!verifier) throw new Error("Missing PKCE verifier");
-
-        const token = await exchangeGoogleToken(appUrl, code, verifier);
+        const token = await exchangeGoogleToken(appUrl, code, codeVerifier);
         const payload = JSON.parse(atob(token.split(".")[1])) as {
           sub: string;
           name: string;
