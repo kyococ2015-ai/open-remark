@@ -29,7 +29,9 @@ export default function NewSitePage() {
       domain: form.get("domain") as string,
       autoApprove: form.get("autoApprove") === "on",
       allowedOrigins: [(form.get("domain") as string)
-        ? `https://${form.get("domain")}`
+        ? (form.get("domain") as string).match(/^https?:\/\//)
+          ? (form.get("domain") as string)
+          : `https://${form.get("domain")}`
         : ""],
     };
 
@@ -82,14 +84,14 @@ export default function NewSitePage() {
                 <Input
                   id="domain"
                   name="domain"
-                  placeholder="myblog.com"
+                  placeholder="myblog.com or http://localhost:3000"
                   required
-                  pattern="[a-zA-Z0-9.-]+"
+                  pattern="[a-zA-Z0-9.:\/\-]+"
                   autoComplete="off"
                   spellCheck={false}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Without https:// — e.g. myblog.com
+                  e.g. myblog.com or http://localhost:3000
                 </p>
               </div>
 

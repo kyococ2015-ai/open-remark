@@ -24,7 +24,15 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const parsed = CreateSiteSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
+      const flat = parsed.error.flatten();
+      const messages = [
+        ...flat.formErrors,
+        ...Object.values(flat.fieldErrors).flat(),
+      ].filter(Boolean);
+      return NextResponse.json(
+        { error: messages.join("; ") || "Validation failed" },
+        { status: 422 },
+      );
     }
 
     const site = await createSite(session.user.id, parsed.data);

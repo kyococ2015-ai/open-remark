@@ -32,7 +32,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const body = await req.json();
     const parsed = UpdateSiteSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
+      const flat = parsed.error.flatten();
+      const messages = [
+        ...flat.formErrors,
+        ...Object.values(flat.fieldErrors).flat(),
+      ].filter(Boolean);
+      return NextResponse.json(
+        { error: messages.join("; ") || "Validation failed" },
+        { status: 422 },
+      );
     }
 
     const site = await updateSite(siteId, session.user.id, parsed.data);

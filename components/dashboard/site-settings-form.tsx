@@ -71,8 +71,8 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name: form.get("name"),
-        domain: form.get("domain"),
+        name: (form.get("name") as string) || "",
+        domain: (form.get("domain") as string) || "",
         autoApprove: form.get("autoApprove") === "on",
         allowedOrigins: originsRaw,
       }),

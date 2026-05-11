@@ -8,9 +8,9 @@ export const CreateSiteSchema = z.object({
     .string()
     .min(1)
     .max(253)
-    .regex(/^[a-zA-Z0-9.-]+$/, "Invalid domain"),
+    .regex(/^[a-zA-Z0-9.:\/\-]+$/, "Invalid domain"),
   autoApprove: z.boolean().optional().default(false),
-  allowedOrigins: z.array(z.string().url()).optional().default([]),
+  allowedOrigins: z.array(z.string().refine((v) => v === "*" || z.string().url().safeParse(v).success, "Must be a valid URL or *")).optional().default([]),
   theme: ThemeSchema.optional().default("AUTO"),
   primaryColor: z
     .string()
@@ -26,10 +26,10 @@ export const UpdateSiteSchema = z.object({
     .string()
     .min(1)
     .max(253)
-    .regex(/^[a-zA-Z0-9.-]+$/, "Invalid domain")
+    .regex(/^[a-zA-Z0-9.:\/\-]+$/, "Invalid domain")
     .optional(),
   autoApprove: z.boolean().optional(),
-  allowedOrigins: z.array(z.string().url()).optional(),
+  allowedOrigins: z.array(z.string().refine((v) => v === "*" || z.string().url().safeParse(v).success, "Must be a valid URL or *")).optional(),
   theme: ThemeSchema.optional(),
   primaryColor: z
     .string()
