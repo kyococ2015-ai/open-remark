@@ -6,7 +6,7 @@ import {
 } from "@/lib/services/comment-service";
 import { getSiteBySiteKey } from "@/lib/services/site-service";
 import { verifyWidgetToken } from "@/lib/auth-widget";
-import { isOriginAllowed, corsHeaders } from "@/lib/cors";
+import { isOriginAllowed, getEffectiveOrigin, corsHeaders } from "@/lib/cors";
 import { rateLimit } from "@/lib/rate-limit";
 import { handleApiError, ApiError } from "@/lib/api/error";
 
@@ -79,7 +79,8 @@ export async function POST(req: NextRequest) {
 
     const site = await getSiteBySiteKey(parsed.data.siteKey);
 
-    if (!isOriginAllowed(origin, site.allowedOrigins)) {
+    const effectiveOrigin = getEffectiveOrigin(req);
+    if (!isOriginAllowed(effectiveOrigin, site.allowedOrigins)) {
       throw new ApiError("Origin not allowed", 403);
     }
 
