@@ -49,7 +49,6 @@
   background: var(--z-bg);
   border: 1px solid var(--z-border);
   border-radius: var(--z-radius-lg);
-  overflow: hidden;
 }
 
 /* ─── Header ─────────────────────────────────────────────────────────────── */
