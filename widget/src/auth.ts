@@ -42,9 +42,8 @@ export async function signInWithGoogle(
         new URLSearchParams({
           client_id: googleClientId,
           redirect_uri: `${appUrl}/api/widget/oauth-callback`,
-          response_type: "id_token",
+          response_type: "code",
           scope: "openid email profile",
-          nonce: Math.random().toString(36).slice(2),
           prompt: "select_account",
         }),
       "zeon-google-signin",
@@ -60,13 +59,13 @@ export async function signInWithGoogle(
 
     const handler = async (e: MessageEvent) => {
       if (e.origin !== appUrl) return;
-      if (e.data?.type !== "ZEON_GOOGLE_TOKEN") return;
+      if (e.data?.type !== "ZEON_GOOGLE_CODE") return;
       clearInterval(timer);
       window.removeEventListener("message", handler);
       popup.close();
       try {
-        const idToken = e.data.idToken as string;
-        const token = await exchangeGoogleToken(appUrl, idToken);
+        const code = e.data.code as string;
+        const token = await exchangeGoogleToken(appUrl, code);
         const payload = JSON.parse(atob(token.split(".")[1])) as {
           sub: string;
           name: string;

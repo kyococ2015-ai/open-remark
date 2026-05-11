@@ -34,8 +34,29 @@ export async function POST(req: NextRequest) {
     if (!rateLimitOk) throw new ApiError("Rate limit exceeded", 429);
 
     const body = await req.json();
-    const { idToken } = body as { idToken?: string };
-    if (!idToken) throw new ApiError("idToken required", 400);
+    const { code } = body as { code?: string };
+    if (!code) throw new ApiError("code required", 400);
+
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        code,
+        client_id: process.env.AUTH_GOOGLE_ID!,
+        client_secret: process.env.AUTH_GOOGLE_SECRET!,
+        redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/widget/oauth-callback`,
+        grant_type: "authorization_code",
+      }),
+    });
+
+    if (!tokenRes.ok) {
+      const errText = await tokenRes.text();
+      console.error("Google token exchange failed:", errText);
+      throw new ApiError("Invalid Google authorization code", 401);
+    }
+
+    const tokenData = (await tokenRes.json()) as { id_token: string };
+    const idToken = tokenData.id_token;
 
     const googleRes = await fetch(
       `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`,
