@@ -2,6 +2,39 @@ import type { AuthState, AuthUser } from "./types";
 import { exchangeGoogleToken } from "./api";
 
 const STORAGE_KEY = "zeon_widget_token";
+const OAUTH_VERIFIER_KEY = "zeon_oauth_verifier";
+const OAUTH_STATE_KEY = "zeon_oauth_state";
+
+function base64url(bytes: Uint8Array): string {
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+function generateCodeVerifier(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return base64url(array);
+}
+
+async function generateCodeChallenge(verifier: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return base64url(new Uint8Array(digest));
+}
+
+function generateState(): string {
+  const array = new Uint8Array(16);
+  crypto.getRandomValues(array);
+  return base64url(array);
+}
+
+function clearOAuthSession() {
+  sessionStorage.removeItem(OAUTH_VERIFIER_KEY);
+  sessionStorage.removeItem(OAUTH_STATE_KEY);
+}
 
 export function loadStoredAuth(): AuthState {
   try {
@@ -31,6 +64,13 @@ export async function signInWithGoogle(
   appUrl: string,
   googleClientId: string,
 ): Promise<{ token: string; user: AuthUser }> {
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
+  const state = generateState();
+
+  sessionStorage.setItem(OAUTH_VERIFIER_KEY, codeVerifier);
+  sessionStorage.setItem(OAUTH_STATE_KEY, state);
+
   return new Promise((resolve, reject) => {
     const width = 500;
     const height = 600;
@@ -45,27 +85,49 @@ export async function signInWithGoogle(
           response_type: "code",
           scope: "openid email profile",
           prompt: "select_account",
+          code_challenge: codeChallenge,
+          code_challenge_method: "S256",
+          state,
         }),
       "zeon-google-signin",
       `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no`,
     );
 
     if (!popup) {
+      clearOAuthSession();
       reject(new Error("Popup blocked. Please allow popups for this site."));
       return;
     }
 
     let timer: ReturnType<typeof setInterval>;
 
+    const cleanup = () => {
+      clearInterval(timer);
+      window.removeEventListener("message", handler);
+      clearOAuthSession();
+    };
+
     const handler = async (e: MessageEvent) => {
       if (e.origin !== appUrl) return;
       if (e.data?.type !== "ZEON_GOOGLE_CODE") return;
-      clearInterval(timer);
-      window.removeEventListener("message", handler);
+
+      const savedState = sessionStorage.getItem(OAUTH_STATE_KEY);
+      if (e.data.state !== savedState) {
+        cleanup();
+        popup.close();
+        reject(new Error("Invalid OAuth state — possible CSRF attack"));
+        return;
+      }
+
+      cleanup();
       popup.close();
+
       try {
         const code = e.data.code as string;
-        const token = await exchangeGoogleToken(appUrl, code);
+        const verifier = sessionStorage.getItem(OAUTH_VERIFIER_KEY);
+        if (!verifier) throw new Error("Missing PKCE verifier");
+
+        const token = await exchangeGoogleToken(appUrl, code, verifier);
         const payload = JSON.parse(atob(token.split(".")[1])) as {
           sub: string;
           name: string;
@@ -89,8 +151,7 @@ export async function signInWithGoogle(
 
     timer = setInterval(() => {
       if (popup.closed) {
-        clearInterval(timer);
-        window.removeEventListener("message", handler);
+        cleanup();
         reject(new Error("Sign-in cancelled"));
       }
     }, 500);

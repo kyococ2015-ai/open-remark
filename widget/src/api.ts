@@ -99,11 +99,12 @@ export async function deleteComment(
 export async function exchangeGoogleToken(
   appUrl: string,
   code: string,
+  codeVerifier: string,
 ): Promise<string> {
   const res = await fetch(`${appUrl}/api/widget/auth`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code }),
+    body: JSON.stringify({ code, codeVerifier }),
   });
   if (!res.ok) throw new Error("Auth failed");
   const { token } = await res.json();

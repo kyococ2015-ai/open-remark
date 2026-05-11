@@ -5,6 +5,7 @@ import { NextRequest } from "next/server";
 // then closes itself.
 export function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
+  const state = req.nextUrl.searchParams.get("state");
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><title>Signing in…</title></head>
@@ -13,12 +14,13 @@ export function GET(req: NextRequest) {
 (function () {
   try {
     var code = ${code ? JSON.stringify(code) : "null"};
+    var state = ${state ? JSON.stringify(state) : "null"};
     if (code && window.opener) {
       // targetOrigin is '*' because window.opener is on the third-party
       // site that embedded the widget, not our origin. The receiving widget
       // validates e.origin === appUrl before acting on the message.
       window.opener.postMessage(
-        { type: 'ZEON_GOOGLE_CODE', code: code },
+        { type: 'ZEON_GOOGLE_CODE', code: code, state: state },
         '*'
       );
     }

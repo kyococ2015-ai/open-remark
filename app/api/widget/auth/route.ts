@@ -34,8 +34,9 @@ export async function POST(req: NextRequest) {
     if (!rateLimitOk) throw new ApiError("Rate limit exceeded", 429);
 
     const body = await req.json();
-    const { code } = body as { code?: string };
+    const { code, codeVerifier } = body as { code?: string; codeVerifier?: string };
     if (!code) throw new ApiError("code required", 400);
+    if (!codeVerifier) throw new ApiError("code_verifier required", 400);
 
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -46,6 +47,7 @@ export async function POST(req: NextRequest) {
         client_secret: process.env.AUTH_GOOGLE_SECRET!,
         redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/widget/oauth-callback`,
         grant_type: "authorization_code",
+        code_verifier: codeVerifier,
       }),
     });
 
