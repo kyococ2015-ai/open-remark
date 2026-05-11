@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "prisma generate && yarn widget:build && next dev --turbopack",
     "build": "prisma generate && yarn widget:build && next build",
     "start": "next start",
     "lint": "eslint",
@@ -15,8 +15,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:status": "npx tsx scripts/db-manager.ts status",
-    "db:sync": "npx tsx scripts/db-manager.ts sync",
-    "db:reset-dev": "npx tsx scripts/db-manager.ts reset-dev",
+    "db:reset": "npx tsx scripts/db-manager.ts reset",
     "db:benchmark:seed": "npx tsx scripts/benchmark/seed-benchmark-data.ts",
     "db:benchmark:run": "npx tsx scripts/benchmark/run-benchmark.ts",
     "widget:build": "tsx widget/build.ts",

@@ -139,7 +139,6 @@ export function AppSidebar({ user }: Props) {
                 <SidebarMenuButton
                   size="lg"
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                  tooltip={user.name ?? user.email ?? "Account"}
                 >
                   <Avatar className="size-7 shrink-0">
                     <AvatarImage src={user.image ?? ""} alt={user.name ?? ""} />

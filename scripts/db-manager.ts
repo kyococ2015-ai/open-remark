@@ -2,20 +2,18 @@
 /**
  * DATABASE MANAGER
  * =================
- * Handles dual-database setup: Production vs Development
- * 
+ * Helper script for common database operations.
+ *
  * Usage:
  *   npx tsx scripts/db-manager.ts [command]
- * 
+ *
  * Commands:
- *   status     - Check migration status on both databases
- *   sync       - Apply migrations to both databases (prod first, then dev)
- *   reset-dev  - Reset development database (DANGEROUS: destroys dev data only)
- *   validate   - Validate schema
- * 
+ *   status     - Check migration status
+ *   reset      - Reset database (DANGEROUS: destroys all data)
+ *   validate   - Validate Prisma schema
+ *
  * Environment:
- *   DATABASE_URL              - Production database (immutable)
- *   DATABASE_URL_DEVELOPMENT  - Development database (safe for experiments)
+ *   DATABASE_URL  - PostgreSQL connection string
  */
 
 import { execSync } from "child_process"
@@ -24,8 +22,7 @@ import { config } from "dotenv"
 // Load .env file
 config()
 
-const DB_PROD = process.env.DATABASE_URL
-const DB_DEV = process.env.DATABASE_URL_DEVELOPMENT
+const DB_URL = process.env.DATABASE_URL
 
 function run(cmd: string, env: Record<string, string> = {}) {
   const fullEnv = { ...process.env, ...env }
@@ -51,96 +48,31 @@ function banner(title: string) {
 async function status() {
   banner("DATABASE STATUS")
 
-  console.log(`Production DB:    ${getDbName(DB_PROD)}`)
-  console.log(`Development DB:   ${getDbName(DB_DEV)}\n`)
+  console.log(`Database: ${getDbName(DB_URL)}\n`)
 
-  if (!DB_PROD || !DB_DEV) {
-    console.error("❌ Missing database URLs in .env")
-    console.error("   Required: DATABASE_URL and DATABASE_URL_DEVELOPMENT")
+  if (!DB_URL) {
+    console.error("❌ DATABASE_URL not set in .env")
     process.exit(1)
   }
 
-  console.log("📊 Production Database:")
   try {
-    run("npx prisma migrate status", { DATABASE_URL: DB_PROD })
-  } catch (e) {
-    console.log("   Could not connect or no migrations\n")
-  }
-
-  console.log("\n📊 Development Database:")
-  try {
-    run("npx prisma migrate status", { DATABASE_URL: DB_DEV })
+    run("npx prisma migrate status")
   } catch (e) {
     console.log("   Could not connect or no migrations\n")
   }
 }
 
-async function sync() {
-  banner("SYNC DATABASES")
+async function reset() {
+  banner("RESET DATABASE")
 
-  if (!DB_PROD || !DB_DEV) {
-    console.error("❌ Missing database URLs in .env")
+  if (!DB_URL) {
+    console.error("❌ DATABASE_URL not set")
     process.exit(1)
   }
 
-  console.log(`Production DB:    ${getDbName(DB_PROD)}`)
-  console.log(`Development DB:   ${getDbName(DB_DEV)}\n`)
-
-  console.log("⚠️  This will apply pending migrations to BOTH databases.")
-  console.log("   Production will use 'migrate deploy' (safe)")
-  console.log("   Development will use 'migrate dev' (allows drift)\n")
-
-  const readline = await import("readline")
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  })
-
-  const answer = await new Promise<string>((resolve) => {
-    rl.question("Proceed? (yes/no): ", resolve)
-  })
-  rl.close()
-
-  if (answer.toLowerCase() !== "yes") {
-    console.log("\n❌ Aborted.")
-    process.exit(0)
-  }
-
-  // Sync Production (safe, no prompts)
-  console.log("\n🔄 Syncing PRODUCTION database...")
-  try {
-    run("npx prisma migrate deploy", { DATABASE_URL: DB_PROD })
-    console.log("✅ Production synced\n")
-  } catch (e) {
-    console.error("❌ Production sync failed:", e)
-    process.exit(1)
-  }
-
-  // Sync Development
-  console.log("🔄 Syncing DEVELOPMENT database...")
-  try {
-    run("npx prisma migrate deploy", { DATABASE_URL: DB_DEV })
-    console.log("✅ Development synced\n")
-  } catch (e) {
-    console.error("❌ Development sync failed:", e)
-    process.exit(1)
-  }
-
-  console.log("🎉 Both databases are now in sync!")
-}
-
-async function resetDev() {
-  banner("RESET DEVELOPMENT DATABASE")
-
-  if (!DB_DEV) {
-    console.error("❌ DATABASE_URL_DEVELOPMENT not set")
-    process.exit(1)
-  }
-
-  console.log(`Target DB: ${getDbName(DB_DEV)}`)
+  console.log(`Target DB: ${getDbName(DB_URL)}`)
   console.log("\n⚠️  ⚠️  ⚠️  DANGER ZONE  ⚠️  ⚠️  ⚠️")
-  console.log("   This will DESTROY ALL DATA in the development database.")
-  console.log("   Production database will NOT be affected.\n")
+  console.log("   This will DESTROY ALL DATA in the database.\n")
 
   const readline = await import("readline")
   const rl = readline.createInterface({
@@ -149,19 +81,19 @@ async function resetDev() {
   })
 
   const answer = await new Promise<string>((resolve) => {
-    rl.question('Type "destroy dev data" to confirm: ', resolve)
+    rl.question('Type "destroy all data" to confirm: ', resolve)
   })
   rl.close()
 
-  if (answer !== "destroy dev data") {
+  if (answer !== "destroy all data") {
     console.log("\n❌ Aborted. Confirmation phrase did not match.")
     process.exit(0)
   }
 
-  console.log("\n💥 Resetting development database...")
+  console.log("\n💥 Resetting database...")
   try {
-    run("npx prisma migrate reset --force", { DATABASE_URL: DB_DEV })
-    console.log("✅ Development database reset complete")
+    run("npx prisma migrate reset --force")
+    console.log("✅ Database reset complete")
   } catch (e) {
     console.error("❌ Reset failed:", e)
     process.exit(1)
@@ -186,11 +118,8 @@ switch (command) {
   case "status":
     status()
     break
-  case "sync":
-    sync()
-    break
-  case "reset-dev":
-    resetDev()
+  case "reset":
+    reset()
     break
   case "validate":
     validate()
@@ -201,15 +130,14 @@ Database Manager
 ================
 
 Commands:
-  status     Check migration status on both databases
-  sync       Apply migrations to both databases safely
-  reset-dev  Reset development database (destructive)
+  status     Check migration status
+  reset      Reset database (destructive)
   validate   Validate Prisma schema
 
 Examples:
   npx tsx scripts/db-manager.ts status
-  npx tsx scripts/db-manager.ts sync
-  npx tsx scripts/db-manager.ts reset-dev
+  npx tsx scripts/db-manager.ts reset
+  npx tsx scripts/db-manager.ts validate
 `)
     process.exit(1)
 }

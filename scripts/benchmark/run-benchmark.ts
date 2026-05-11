@@ -4,16 +4,11 @@ import { config } from "dotenv"
 
 config()
 
-const dbUrl = process.env.DATABASE_URL_DEVELOPMENT || process.env.DATABASE_URL
+const dbUrl = process.env.DATABASE_URL
 
-if (!process.env.DATABASE_URL_DEVELOPMENT) {
-  console.error("❌ DATABASE_URL_DEVELOPMENT not set!")
-  console.error("   Benchmarks must run on the development database only.")
-  process.exit(1)
-}
-
-if (dbUrl === process.env.DATABASE_URL && !process.env.FORCE_BENCHMARK_ON_PROD) {
-  console.error("❌ SAFETY BLOCK: Would run on production database!")
+if (!dbUrl) {
+  console.error("❌ DATABASE_URL not set!")
+  console.error("   Benchmarks require DATABASE_URL to be set.")
   process.exit(1)
 }
 
@@ -53,7 +48,7 @@ function pad(s: string | number, n: number) {
 // ── main ───────────────────────────────────────────────────────────────────
 
 async function benchmark() {
-  console.log("\n🔍  Index Benchmark  —  50k comments on dev DB\n")
+  console.log("\n🔍  Index Benchmark  —  50k comments\n")
 
   // 1. Data volume
   const counts = await prisma.$queryRaw<[{ table_name: string; row_count: bigint }]>`

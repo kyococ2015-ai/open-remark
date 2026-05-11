@@ -18,10 +18,7 @@ cp .env.example .env
 yarn db:migrate
 yarn db:seed        # optional demo data
 
-# 4. Widget
-yarn widget:dev     # builds public/embed.js
-
-# 5. Run
+# 4. Run (also builds widget + generates Prisma client)
 yarn dev
 ```
 

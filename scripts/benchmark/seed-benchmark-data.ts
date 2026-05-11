@@ -16,20 +16,28 @@ import { config } from "dotenv"
 // Load .env file
 config()
 
-// Safety check: seeding MUST use development database
-const dbUrl = process.env.DATABASE_URL_DEVELOPMENT || process.env.DATABASE_URL
+const dbUrl = process.env.DATABASE_URL
 
-if (!process.env.DATABASE_URL_DEVELOPMENT) {
-  console.error("❌ DATABASE_URL_DEVELOPMENT not set!")
-  console.error("   Benchmark seeding must run on the development database only.")
-  console.error("   Set DATABASE_URL_DEVELOPMENT in your .env file")
+if (!dbUrl) {
+  console.error("❌ DATABASE_URL not set!")
+  console.error("   Set DATABASE_URL in your .env file")
   process.exit(1)
 }
 
-// Extra safety: prevent running on production
-if (dbUrl === process.env.DATABASE_URL && !process.env.FORCE_SEED_ON_PROD) {
-  console.error("❌ SAFETY BLOCK: Seed script is configured to use production database!")
-  console.error("   Set DATABASE_URL_DEVELOPMENT to use a separate dev database.")
+// Bare minimum guard: block remote/cloud databases unless explicitly forced
+function isLocalDatabase(url: string): boolean {
+  try {
+    const hostname = new URL(url).hostname
+    return hostname === "localhost" || hostname === "127.0.0.1" || hostname.endsWith(".local")
+  } catch {
+    return false
+  }
+}
+
+if (!isLocalDatabase(dbUrl) && !process.env.FORCE_SEED) {
+  console.error("❌ SAFETY BLOCK: DATABASE_URL points to a remote database.")
+  console.error("   Seeding is only allowed on local databases by default.")
+  console.error("   Set FORCE_SEED=1 to override this check.")
   process.exit(1)
 }
 

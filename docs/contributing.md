@@ -52,10 +52,7 @@ yarn db:migrate
 # 4. Seed demo data
 yarn db:seed
 
-# 5. Build the embed widget
-yarn widget:dev
-
-# 6. Start the dev server
+# 5. Start the dev server (also builds widget + generates Prisma client)
 yarn dev
 ```
 
@@ -126,7 +123,7 @@ The `__APP_URL__`, `__GOOGLE_CLIENT_ID__`, and `__STYLES__` constants are inject
 
 - [ ] `yarn typecheck` passes
 - [ ] `yarn lint` passes  
-- [ ] `yarn widget:dev` builds without errors
+- [ ] `yarn dev` starts without errors
 - [ ] New API routes have a corresponding service function
 - [ ] New Prisma schema changes have a migration
 - [ ] Sensitive data (credentials, personal info) not committed

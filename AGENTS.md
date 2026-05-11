@@ -291,65 +291,49 @@ npx prisma studio
 
 ---
 
-## Dual Database Setup (Production + Development)
+## Database Setup
 
-This project maintains **two separate databases** to ensure production safety:
+This project uses a **single PostgreSQL database** via `DATABASE_URL`:
 
-### Environment Variables
-
-| Variable | Purpose | Operations |
-|----------|---------|------------|
-| `DATABASE_URL` | **Production** — Live application data | Read/Write by app only |
-| `DATABASE_URL_DEVELOPMENT` | **Development** — Experiments, benchmarks, testing | Safe for destructive ops |
+- **Local development:** Point `DATABASE_URL` to your local PostgreSQL instance
+- **Production:** `DATABASE_URL` is already set to the production database
 
 ### Safety Rules
 
-1. **Benchmark scripts MUST check for `DATABASE_URL_DEVELOPMENT`**
-   - If not set, scripts exit with error
-   - If set but matches `DATABASE_URL`, scripts block execution unless `FORCE_*` env var is set
-   - This prevents accidental benchmark runs on production
+1. **Be careful with destructive operations**
+   - `db:reset` destroys all data — it requires typed confirmation
+   - Benchmark seeding inserts large amounts of test data
 
-2. **Seeding is FORBIDDEN on production**
-   - `seed-benchmark-data.ts` has hardcoded safety checks
-   - Requires explicit `DATABASE_URL_DEVELOPMENT` to run
-
-3. **Migration sync workflow**
+2. **Migration workflow**
    ```bash
-   # Check status of both databases
+   # Check status
    yarn db:status
    
-   # Sync both (prod first, then dev)
-   yarn db:sync
+   # Apply migrations
+   yarn db:migrate
    
-   # Reset only development (requires confirmation)
-   yarn db:reset-dev
+   # Reset (destructive — requires confirmation)
+   yarn db:reset
    ```
-
-4. **Application usage**
-   - The Next.js app uses `DATABASE_URL` for all operations
-   - Development scripts (benchmarks, seeds) use `DATABASE_URL_DEVELOPMENT`
-   - Never swap these in application code
 
 ### Database Manager Script
 
-A helper script handles dual-DB operations safely:
+A helper script for common operations:
 
 ```bash
 npx tsx scripts/db-manager.ts [command]
 
 Commands:
-  status     - Check migration status on both databases
-  sync       - Apply migrations to both (prod first via deploy, then dev)
-  reset-dev  - Reset development database (requires typed confirmation)
+  status     - Check migration status
+  reset      - Reset database (requires typed confirmation)
   validate   - Validate Prisma schema
 ```
 
 ### NPM Scripts
 
 ```bash
-yarn db:status      # Check both DBs
-yarn db:sync        # Sync both DBs with migrations
-yarn db:reset-dev   # Reset development DB only
-yarn db:benchmark:run    # Run benchmarks on dev DB
-yarn db:benchmark:seed   # Seed test data on dev DB
+yarn db:status           # Check migration status
+yarn db:reset            # Reset database (destructive)
+yarn db:benchmark:run    # Run index benchmarks
+yarn db:benchmark:seed   # Seed test data for benchmarking
 ```
