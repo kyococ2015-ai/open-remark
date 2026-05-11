@@ -213,7 +213,7 @@ class ZeonWidget {
           parent.replies = [...(parent.replies ?? []), comment];
         }
       } else {
-        this.comments = [...this.comments, comment];
+        this.comments = [comment, ...this.comments];
       }
       this.replyTo = null;
       this.replyingToId = null;
