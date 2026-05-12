@@ -92,7 +92,8 @@ model Site {
   ownerId String
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-  pages Page[]
+  pages            Page[]
+  bannedCommenters BannedCommenter[]
 
   @@index([ownerId])
 }
@@ -121,7 +122,8 @@ model Commenter {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  comments Comment[]
+  comments      Comment[]
+  bannedOnSites BannedCommenter[]
 }
 
 model Comment {
@@ -175,4 +177,19 @@ model ModerationLog {
 
   @@index([commentId, createdAt])
   @@index([adminEmail, createdAt])
+}
+
+model BannedCommenter {
+  id          String   @id @default(cuid())
+  siteId      String
+  commenterId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  site      Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  commenter Commenter @relation(fields: [commenterId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, commenterId])
+  @@index([siteId])
+  @@index([commenterId])
 }
