@@ -14,6 +14,7 @@ import {
   renderError,
   renderLoading,
   renderLoadingAuthBar,
+  renderBannedBanner,
 } from "./render";
 
 declare const __APP_URL__: string;
@@ -98,6 +99,7 @@ class ZeonWidget {
   private isEditingId: string | null = null;
   private deletingId: string | null = null;
   private isSubmitting = false;
+  private isBanned = false;
 
   constructor(config: WidgetConfig) {
     this.config = config;
@@ -146,6 +148,7 @@ class ZeonWidget {
       );
       this.themeStyle.textContent = buildThemeStyle(themeConfig);
       saveCachedTheme(this.config.siteKey, themeConfig);
+      this.isBanned = themeConfig.currentUser?.isBanned ?? false;
       this.comments = comments;
       this.render();
     } catch {
@@ -219,6 +222,11 @@ class ZeonWidget {
       this.replyingToId = null;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to post";
+      if (message.toLowerCase().includes("suspended")) {
+        this.isBanned = true;
+        this.render();
+        return;
+      }
       this.renderErrorBanner(message);
     } finally {
       this.isSubmitting = false;
@@ -240,7 +248,13 @@ class ZeonWidget {
       comment.hasLiked = result.liked;
       comment.likeCount = result.count;
       this.render();
-    } catch {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to update like";
+      if (message.toLowerCase().includes("suspended")) {
+        this.isBanned = true;
+        this.render();
+        return;
+      }
       this.renderErrorBanner("Failed to update like");
     }
   }
@@ -316,6 +330,11 @@ class ZeonWidget {
       this.deletingId = null;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to delete";
+      if (message.toLowerCase().includes("suspended")) {
+        this.isBanned = true;
+        this.render();
+        return;
+      }
       this.renderErrorBanner(message);
     } finally {
       this.isSubmitting = false;
@@ -342,6 +361,11 @@ class ZeonWidget {
       this.isEditingId = null;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to update";
+      if (message.toLowerCase().includes("suspended")) {
+        this.isBanned = true;
+        this.render();
+        return;
+      }
       this.renderErrorBanner(message);
     } finally {
       this.isSubmitting = false;
@@ -391,6 +415,10 @@ class ZeonWidget {
     this.root.innerHTML = "";
     this.root.appendChild(this.buildHeader());
 
+    if (this.isBanned) {
+      this.root.appendChild(renderBannedBanner());
+    }
+
     if (this.auth.status === "error") {
       this.root.appendChild(renderError(this.auth.message));
     }
@@ -403,7 +431,7 @@ class ZeonWidget {
       ),
     );
 
-    if (this.auth.status === "authenticated") {
+    if (this.auth.status === "authenticated" && !this.isBanned) {
       this.root.appendChild(
         renderCommentForm(
           (body, parentId) => this.handleSubmit(body, parentId),
