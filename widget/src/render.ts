@@ -147,6 +147,48 @@ function renderCommentItem(
     return li;
   }
 
+  if (comment.status === "SPAM") {
+    const spamWrap = document.createElement("div");
+    spamWrap.className = "z-comment-deleted";
+    spamWrap.appendChild(deletedAvatarEl(avatarSize));
+    const spamBody = document.createElement("span");
+    spamBody.className = "z-comment-deleted-body";
+    spamBody.textContent = "Flagged as spam";
+    spamWrap.appendChild(spamBody);
+    li.appendChild(spamWrap);
+
+    if (comment.replies?.length > 0) {
+      const repliesList = document.createElement("ul");
+      repliesList.className = "z-replies";
+      repliesList.setAttribute("aria-label", "Replies");
+      for (const reply of comment.replies) {
+        repliesList.appendChild(
+          renderCommentItem(
+            reply,
+            depth + 1,
+            onReply,
+            onLike,
+            replyingToId,
+            currentUser,
+            onSubmitReply,
+            onCancelReply,
+            isSubmitting,
+            editingId,
+            onEdit,
+            onCancelEdit,
+            onSubmitEdit,
+            deletingId,
+            onDelete,
+            onCancelDelete,
+            onConfirmDelete,
+          ),
+        );
+      }
+      li.appendChild(repliesList);
+    }
+    return li;
+  }
+
   const content = document.createElement("div");
   content.className = "z-comment-content";
 
