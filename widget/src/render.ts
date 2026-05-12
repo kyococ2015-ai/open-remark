@@ -106,14 +106,48 @@ function renderCommentItem(
   const avatarSize = isTopLevel ? false : true;
 
   if (comment.status === "DELETED") {
-    const deletedWrap = document.createElement("div");
-    deletedWrap.className = "z-comment-deleted";
-    deletedWrap.appendChild(deletedAvatarEl(avatarSize));
-    const deletedBody = document.createElement("span");
-    deletedBody.className = "z-comment-deleted-body";
-    deletedBody.textContent = comment.banned ? "Account is suspended" : "Comment Removed";
-    deletedWrap.appendChild(deletedBody);
-    li.appendChild(deletedWrap);
+    if (comment.banned) {
+      const deletedWrap = document.createElement("div");
+      deletedWrap.className = "z-comment-deleted";
+      deletedWrap.appendChild(deletedAvatarEl(avatarSize));
+      const deletedBody = document.createElement("span");
+      deletedBody.className = "z-comment-deleted-body";
+      deletedBody.textContent = "Account is suspended";
+      deletedWrap.appendChild(deletedBody);
+      li.appendChild(deletedWrap);
+    } else {
+      const content = document.createElement("div");
+      content.className = "z-comment-content";
+      content.appendChild(
+        avatarEl(comment.commenter.name, comment.commenter.image, avatarSize),
+      );
+
+      const right = document.createElement("div");
+      right.className = "z-comment-right";
+
+      const meta = document.createElement("div");
+      meta.className = "z-comment-meta";
+
+      const nameEl = document.createElement("span");
+      nameEl.className = "z-comment-author";
+      nameEl.textContent = comment.commenter.name;
+      meta.appendChild(nameEl);
+
+      const userEl = document.createElement("span");
+      userEl.className = "z-comment-username";
+      userEl.textContent = `@${comment.commenter.username}`;
+      meta.appendChild(userEl);
+
+      right.appendChild(meta);
+
+      const deletedBody = document.createElement("span");
+      deletedBody.className = "z-comment-deleted-body";
+      deletedBody.textContent = "Comment Removed";
+      right.appendChild(deletedBody);
+
+      content.appendChild(right);
+      li.appendChild(content);
+    }
 
     if (comment.replies?.length > 0) {
       const repliesList = document.createElement("ul");
@@ -148,14 +182,37 @@ function renderCommentItem(
   }
 
   if (comment.status === "SPAM") {
-    const spamWrap = document.createElement("div");
-    spamWrap.className = "z-comment-deleted";
-    spamWrap.appendChild(deletedAvatarEl(avatarSize));
+    const content = document.createElement("div");
+    content.className = "z-comment-content";
+    content.appendChild(
+      avatarEl(comment.commenter.name, comment.commenter.image, avatarSize),
+    );
+
+    const right = document.createElement("div");
+    right.className = "z-comment-right";
+
+    const meta = document.createElement("div");
+    meta.className = "z-comment-meta";
+
+    const nameEl = document.createElement("span");
+    nameEl.className = "z-comment-author";
+    nameEl.textContent = comment.commenter.name;
+    meta.appendChild(nameEl);
+
+    const userEl = document.createElement("span");
+    userEl.className = "z-comment-username";
+    userEl.textContent = `@${comment.commenter.username}`;
+    meta.appendChild(userEl);
+
+    right.appendChild(meta);
+
     const spamBody = document.createElement("span");
     spamBody.className = "z-comment-deleted-body";
     spamBody.textContent = "Flagged as spam";
-    spamWrap.appendChild(spamBody);
-    li.appendChild(spamWrap);
+    right.appendChild(spamBody);
+
+    content.appendChild(right);
+    li.appendChild(content);
 
     if (comment.replies?.length > 0) {
       const repliesList = document.createElement("ul");
