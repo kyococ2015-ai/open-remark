@@ -755,6 +755,14 @@ export function renderError(message: string): HTMLElement {
   return el;
 }
 
+export function renderBannedBanner(): HTMLElement {
+  const banner = document.createElement("div");
+  banner.className = "z-banned-banner";
+  banner.setAttribute("role", "alert");
+  banner.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>You're Banned`;
+  return banner;
+}
+
 export function renderLoadingAuthBar(): HTMLElement {
   const bar = document.createElement("div");
   bar.className = "z-skeleton-authbar";
