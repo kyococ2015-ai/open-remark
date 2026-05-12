@@ -1,7 +1,7 @@
 'use client';
 
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { useState, useTransition, useEffect, useRef, useCallback } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { useState, useCallback, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search, X } from 'lucide-react';
 
@@ -10,44 +10,32 @@ const DEBOUNCE_MS = 300;
 export function UserSearchInput() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
 
-  const [value, setValue] = useState(searchParams.get('search') ?? '');
+  const [value, setValue] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const doSearch = useCallback(
     (query: string) => {
-      const params = new URLSearchParams(searchParams);
+      const params = new URLSearchParams();
       if (query.trim()) {
         params.set('search', query.trim());
-        params.delete('page');
-      } else {
-        params.delete('search');
-        params.delete('page');
       }
-      startTransition(() => {
-        router.push(`${pathname}?${params.toString()}`);
-      });
+      router.push(`${pathname}?${params.toString()}`);
     },
-    [pathname, router, searchParams],
+    [pathname, router],
   );
 
-  // Debounced search on type
-  useEffect(() => {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const next = e.target.value;
+    setValue(next);
+
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
     debounceRef.current = setTimeout(() => {
-      doSearch(value);
+      doSearch(next);
     }, DEBOUNCE_MS);
-
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, [value, doSearch]);
+  }
 
   function handleClear() {
     if (debounceRef.current) {
@@ -65,8 +53,7 @@ export function UserSearchInput() {
         placeholder="Search by name, email..."
         className="pl-9 pr-9 w-64"
         value={value}
-        onChange={(e) => setValue(e.target.value)}
-        disabled={isPending}
+        onChange={handleChange}
       />
       {value && (
         <button

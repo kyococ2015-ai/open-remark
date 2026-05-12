@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useState, useCallback, useRef } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Search, X } from 'lucide-react';
 
@@ -10,42 +10,32 @@ const DEBOUNCE_MS = 300;
 export function CommentSearchInput() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const initialSearch = searchParams.get('search') ?? '';
 
-  const [value, setValue] = useState(initialSearch);
+  const [value, setValue] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const updateSearch = useCallback(
     (search: string) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams();
       if (search.trim()) {
         params.set('search', search.trim());
-      } else {
-        params.delete('search');
       }
-      params.delete('page');
       router.push(`${pathname}?${params.toString()}`);
     },
-    [pathname, router, searchParams],
+    [pathname, router],
   );
 
-  useEffect(() => {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const next = e.target.value;
+    setValue(next);
+
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
     debounceRef.current = setTimeout(() => {
-      if (value !== initialSearch) {
-        updateSearch(value);
-      }
+      updateSearch(next);
     }, DEBOUNCE_MS);
-
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, [value, initialSearch, updateSearch]);
+  }
 
   function handleClear() {
     if (debounceRef.current) {
@@ -62,7 +52,7 @@ export function CommentSearchInput() {
         type="text"
         placeholder="Search comments..."
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={handleChange}
         className="pl-9 pr-9 h-8 w-52 text-sm"
       />
       {value && (
