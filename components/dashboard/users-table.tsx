@@ -93,7 +93,6 @@ export function UsersTable({ commenters, siteId }: Props) {
 
     updateItem((c) => c.id === commenterId, {
       isBanned: true,
-      deletedCount: original.totalCount - original.spamCount,
     });
     setBusy(commenterId, true);
     closeConfirm();
@@ -278,7 +277,7 @@ export function UsersTable({ commenters, siteId }: Props) {
           <DialogHeader>
             <DialogTitle>Ban {confirmTarget?.name}?</DialogTitle>
             <DialogDescription>
-              This will ban {confirmTarget?.name} from this site and soft-delete all their {confirmTarget?.totalCount} comments.
+              This will ban {confirmTarget?.name} from this site. They will no longer be able to post, like, edit, or delete comments.
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-2 justify-end mt-2">

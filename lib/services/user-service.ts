@@ -139,7 +139,6 @@ export async function deleteAllCommentsByCommenterOnSite(
 export async function banCommenterOnSite(
   siteId: string,
   commenterId: string,
-  adminEmail: string,
 ) {
   const existing = await db.bannedCommenter.findUnique({
     where: { siteId_commenterId: { siteId, commenterId } },
@@ -153,13 +152,7 @@ export async function banCommenterOnSite(
     data: { siteId, commenterId },
   });
 
-  const { deletedCount } = await deleteAllCommentsByCommenterOnSite(
-    siteId,
-    commenterId,
-    adminEmail,
-  );
-
-  return { banned: true, deletedCount };
+  return { banned: true };
 }
 
 export async function unbanCommenterOnSite(siteId: string, commenterId: string) {

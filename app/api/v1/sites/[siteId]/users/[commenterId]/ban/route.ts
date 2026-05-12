@@ -30,11 +30,7 @@ export async function POST(
 
   try {
     if (action === 'ban') {
-      const result = await banCommenterOnSite(
-        siteId,
-        commenterId,
-        session.user.email,
-      );
+      const result = await banCommenterOnSite(siteId, commenterId);
       return ok(result);
     }
 
