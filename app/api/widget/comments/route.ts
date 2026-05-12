@@ -85,6 +85,11 @@ export async function POST(req: NextRequest) {
 
     const site = await getSiteBySiteKey(parsed.data.siteKey);
 
+    const isBanned = await isCommenterBannedOnSite(site.id, payload.commenterId);
+    if (isBanned) {
+      throw new ApiError("Your account has been suspended on this site", 403);
+    }
+
     const effectiveOrigin = getEffectiveOrigin(req);
     if (!isOriginAllowed(effectiveOrigin, site.allowedOrigins)) {
       throw new ApiError("Origin not allowed", 403);
