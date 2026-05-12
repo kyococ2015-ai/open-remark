@@ -169,3 +169,13 @@ export async function unbanCommenterOnSite(siteId: string, commenterId: string) 
 
   return { unbanned: true };
 }
+
+export async function isCommenterBannedOnSite(
+  siteId: string,
+  commenterId: string,
+): Promise<boolean> {
+  const record = await db.bannedCommenter.findUnique({
+    where: { siteId_commenterId: { siteId, commenterId } },
+  });
+  return !!record;
+}
