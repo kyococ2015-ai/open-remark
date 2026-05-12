@@ -111,7 +111,7 @@ function renderCommentItem(
     deletedWrap.appendChild(deletedAvatarEl(avatarSize));
     const deletedBody = document.createElement("span");
     deletedBody.className = "z-comment-deleted-body";
-    deletedBody.textContent = "Comment Removed";
+    deletedBody.textContent = comment.banned ? "Account is suspended" : "Comment Removed";
     deletedWrap.appendChild(deletedBody);
     li.appendChild(deletedWrap);
 

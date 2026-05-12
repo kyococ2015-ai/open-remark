@@ -22,6 +22,7 @@ export type CommentData = {
   hasLiked: boolean;
   parentId: string | null;
   commenter: Commenter;
+  banned?: boolean;
   replies: CommentData[];
 };
 
