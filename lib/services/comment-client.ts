@@ -17,3 +17,23 @@ export async function patchCommentBody(id: string, body: string) {
   });
   if (!res.ok) throw new Error('Failed to update comment body');
 }
+
+export async function banCommenter(siteId: string, commenterId: string) {
+  const res = await fetch(`/api/v1/sites/${siteId}/users/${commenterId}/ban`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'ban' }),
+  });
+  if (!res.ok) throw new Error('Failed to ban user');
+  return res.json();
+}
+
+export async function deleteAllCommentsByCommenter(siteId: string, commenterId: string) {
+  const res = await fetch(`/api/v1/sites/${siteId}/users/${commenterId}/ban`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'deleteAll' }),
+  });
+  if (!res.ok) throw new Error('Failed to delete all comments');
+  return res.json();
+}

@@ -1,0 +1,177 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { formatDistanceToNow } from 'date-fns';
+import { CommentStatus } from '@/generated/prisma/client';
+import { patchCommentStatus } from '@/lib/services/comment-client';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Check, ShieldAlert, Trash2 } from 'lucide-react';
+
+type Commenter = {
+  id: string;
+  name: string;
+  email: string;
+  image: string | null;
+  username: string;
+};
+
+type CommentItem = {
+  id: string;
+  body: string;
+  status: CommentStatus;
+  createdAt: string;
+  editedAt?: string | null;
+  page: { slug: string; url: string | null };
+  commenter: Commenter;
+};
+
+type Props = {
+  open: boolean;
+  onClose: () => void;
+  commenter: Commenter | null;
+  siteId: string;
+};
+
+const STATUS_BADGE: Record<CommentStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+  APPROVED: { label: 'Approved', variant: 'default' },
+  PENDING: { label: 'Pending', variant: 'secondary' },
+  SPAM: { label: 'Spam', variant: 'destructive' },
+  DELETED: { label: 'Deleted', variant: 'outline' },
+};
+
+export function UserProfileDialog({ open, onClose, commenter, siteId }: Props) {
+  const [comments, setComments] = useState<CommentItem[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open && commenter) {
+      setLoading(true);
+      fetch(`/api/v1/sites/${siteId}/users/${commenter.id}/comments`)
+        .then(async (res) => {
+          if (!res.ok) throw new Error('Failed to load');
+          return res.json();
+        })
+        .then((data) => {
+          setComments(data);
+        })
+        .catch(() => {
+          toast.error('Failed to load comments');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [open, commenter, siteId]);
+
+  async function handleStatusChange(commentId: string, status: CommentStatus) {
+    try {
+      await patchCommentStatus(commentId, status);
+      setComments((prev) =>
+        prev.map((c) => (c.id === commentId ? { ...c, status } : c)),
+      );
+      toast.success(`Comment ${status.toLowerCase()}`);
+    } catch {
+      toast.error('Action failed');
+    }
+  }
+
+  if (!commenter) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <Avatar className="size-10">
+              <AvatarImage src={commenter.image ?? ''} />
+              <AvatarFallback>{commenter.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <div>
+              <DialogTitle>{commenter.name}</DialogTitle>
+              <DialogDescription>{commenter.email}</DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="flex-1 overflow-auto space-y-3">
+          {loading ? (
+            <p className="text-sm text-muted-foreground">Loading comments...</p>
+          ) : comments.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No comments</p>
+          ) : (
+            comments.map((comment) => {
+              const badge = STATUS_BADGE[comment.status];
+              return (
+                <div key={comment.id} className="rounded-md border p-3 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge variant={badge.variant}>{badge.label}</Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(comment.createdAt), {
+                        addSuffix: true,
+                      })}
+                    </span>
+                  </div>
+                  <p
+                    className={
+                      comment.status === CommentStatus.DELETED
+                        ? 'text-sm italic text-muted-foreground'
+                        : 'text-sm'
+                    }
+                  >
+                    {comment.status === CommentStatus.DELETED ? 'Comment Removed' : comment.body}
+                  </p>
+                  <p className="text-xs font-mono text-muted-foreground">{comment.page.slug}</p>
+                  <div className="flex gap-2 pt-1">
+                    {comment.status !== CommentStatus.APPROVED && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7"
+                        onClick={() => handleStatusChange(comment.id, CommentStatus.APPROVED)}
+                      >
+                        <Check className="mr-1 size-3" />
+                        Approve
+                      </Button>
+                    )}
+                    {comment.status !== CommentStatus.SPAM && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7"
+                        onClick={() => handleStatusChange(comment.id, CommentStatus.SPAM)}
+                      >
+                        <ShieldAlert className="mr-1 size-3" />
+                        Spam
+                      </Button>
+                    )}
+                    {comment.status !== CommentStatus.DELETED && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-destructive"
+                        onClick={() => handleStatusChange(comment.id, CommentStatus.DELETED)}
+                      >
+                        <Trash2 className="mr-1 size-3" />
+                        Delete
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
