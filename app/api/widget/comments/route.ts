@@ -5,6 +5,7 @@ import {
   createComment,
 } from "@/lib/services/comment-service";
 import { getSiteBySiteKey } from "@/lib/services/site-service";
+import { isCommenterBannedOnSite } from "@/lib/services/user-service";
 import { verifyWidgetToken } from "@/lib/auth-widget";
 import { isOriginAllowed, getEffectiveOrigin, corsHeaders } from "@/lib/cors";
 import { rateLimit } from "@/lib/rate-limit";
@@ -32,13 +33,17 @@ export async function GET(req: NextRequest) {
 
     const site = await getSiteBySiteKey(siteKey);
 
-    // Extract user email from optional auth header for personalized like state
+    // Extract user from optional auth header for personalized state
     let userEmail: string | undefined;
+    let isBanned = false;
     const authHeader = req.headers.get("authorization");
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.slice(7);
       const payload = await verifyWidgetToken(token);
-      if (payload) userEmail = payload.sub;
+      if (payload) {
+        userEmail = payload.sub;
+        isBanned = await isCommenterBannedOnSite(site.id, payload.commenterId);
+      }
     }
 
     const comments = await getApprovedCommentsForPage(site.id, slug, userEmail);
@@ -48,6 +53,7 @@ export async function GET(req: NextRequest) {
         theme: site.theme,
         primaryColor: site.primaryColor,
         radius: site.radius,
+        currentUser: userEmail ? { isBanned } : undefined,
       },
     });
   } catch (err) {
