@@ -792,6 +792,25 @@
   }
 }
 
+/* ─── Banned banner ──────────────────────────────────────────────────────── */
+.z-banned-banner {
+  padding: 10px 16px;
+  background: color-mix(in srgb, #ef4444 10%, var(--z-bg));
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 600;
+  border-bottom: 1px solid color-mix(in srgb, #ef4444 20%, transparent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host .z-banned-banner {
+    color: #fca5a5;
+  }
+}
+
 /* ─── Accessibility ──────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .z-btn,
