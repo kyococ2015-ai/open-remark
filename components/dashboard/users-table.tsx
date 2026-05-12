@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { banCommenter, deleteAllCommentsByCommenter } from '@/lib/services/comment-client';
+import { banCommenter, unbanCommenter, deleteAllCommentsByCommenter } from '@/lib/services/comment-client';
 import { useOptimisticState } from '@/hooks/use-optimistic-state';
 import {
   Table,
@@ -77,6 +77,26 @@ export function UsersTable({ commenters, siteId }: Props) {
     } catch (err) {
       revertItem((c) => c.id === commenterId, original);
       toast.error('Failed to ban user');
+    } finally {
+      setBusy(commenterId, false);
+    }
+  }
+
+  async function handleUnban(commenterId: string) {
+    const original = optimisticCommenters.find((c) => c.id === commenterId);
+    if (!original) return;
+
+    updateItem((c) => c.id === commenterId, {
+      isBanned: false,
+    });
+    setBusy(commenterId, true);
+
+    try {
+      await unbanCommenter(siteId, commenterId);
+      toast.success('Ban removed');
+    } catch (err) {
+      revertItem((c) => c.id === commenterId, original);
+      toast.error('Failed to remove ban');
     } finally {
       setBusy(commenterId, false);
     }
@@ -163,7 +183,7 @@ export function UsersTable({ commenters, siteId }: Props) {
                         <Trash2 className="mr-2 size-4" />
                         Delete all comments
                       </DropdownMenuItem>
-                      {!commenter.isBanned && (
+                      {!commenter.isBanned ? (
                         <DropdownMenuItem
                           className="text-destructive"
                           onClick={(e) => {
@@ -173,6 +193,16 @@ export function UsersTable({ commenters, siteId }: Props) {
                         >
                           <ShieldAlert className="mr-2 size-4" />
                           Ban user
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUnban(commenter.id);
+                          }}
+                        >
+                          <ShieldAlert className="mr-2 size-4 text-muted-foreground" />
+                          Remove Ban
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>
