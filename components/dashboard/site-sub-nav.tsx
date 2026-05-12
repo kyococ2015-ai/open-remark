@@ -8,6 +8,7 @@ import {
   RiArrowRightSLine,
   RiDashboardLine,
   RiMessage2Line,
+  RiUserLine,
   RiCodeSSlashLine,
   RiSettingsLine,
 } from "@remixicon/react";
@@ -21,6 +22,7 @@ type Props = {
 const TABS = [
   { label: "Overview",  href: "",          icon: RiDashboardLine  },
   { label: "Comments",  href: "/comments", icon: RiMessage2Line   },
+  { label: "Users",     href: "/users",    icon: RiUserLine       },
   { label: "Install",   href: "/install",  icon: RiCodeSSlashLine },
   { label: "Settings",  href: "/settings", icon: RiSettingsLine   },
 ];
