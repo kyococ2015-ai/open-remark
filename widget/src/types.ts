@@ -43,4 +43,5 @@ export type WidgetThemeConfig = {
   theme: "AUTO" | "LIGHT" | "DARK";
   primaryColor: string;
   radius: number;
+  currentUser?: { isBanned: boolean };
 };
