@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { UpdateCommentSchema } from "@/lib/validators/comment";
 import { updateCommentBody, deleteComment } from "@/lib/services/comment-service";
+import { isCommenterBannedOnSite } from "@/lib/services/user-service";
 import { verifyWidgetToken } from "@/lib/auth-widget";
 import { corsHeaders } from "@/lib/cors";
 import { db } from "@/lib/db";
@@ -43,11 +44,19 @@ export async function PATCH(
     // Verify ownership
     const comment = await db.comment.findUnique({
       where: { id },
-      select: { commenterId: true },
+      select: { commenterId: true, page: { select: { siteId: true } } },
     });
     if (!comment) throw new ApiError("Comment not found", 404);
     if (comment.commenterId !== payload.commenterId) {
       throw new ApiError("Forbidden", 403);
+    }
+
+    const isBanned = await isCommenterBannedOnSite(
+      comment.page.siteId,
+      payload.commenterId,
+    );
+    if (isBanned) {
+      throw new ApiError("Your account has been suspended on this site", 403);
     }
 
     if (parsed.data.body !== undefined) {
