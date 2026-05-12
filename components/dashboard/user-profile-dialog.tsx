@@ -16,14 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Check, ShieldAlert, Trash2 } from 'lucide-react';
-
-type Commenter = {
-  id: string;
-  name: string;
-  email: string;
-  image: string | null;
-  username: string;
-};
+import type { CommenterProfile } from '@/lib/types/commenter';
 
 type CommentItem = {
   id: string;
@@ -32,13 +25,13 @@ type CommentItem = {
   createdAt: string;
   editedAt?: string | null;
   page: { slug: string; url: string | null };
-  commenter: Commenter;
+  commenter: CommenterProfile;
 };
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  commenter: Commenter | null;
+  commenter: CommenterProfile | null;
   siteId: string;
 };
 

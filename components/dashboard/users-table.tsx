@@ -23,26 +23,15 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MoreHorizontal, ShieldAlert, Trash2, Eye } from 'lucide-react';
 import { UserProfileDialog } from './user-profile-dialog';
-
-type Commenter = {
-  id: string;
-  name: string;
-  email: string;
-  image: string | null;
-  username: string;
-  totalCount: number;
-  deletedCount: number;
-  spamCount: number;
-  isBanned: boolean;
-};
+import type { CommenterWithStats, CommenterProfile } from '@/lib/types/commenter';
 
 type Props = {
-  commenters: Commenter[];
+  commenters: CommenterWithStats[];
   siteId: string;
 };
 
 export function UsersTable({ commenters, siteId }: Props) {
-  const [profileUser, setProfileUser] = useState<Commenter | null>(null);
+  const [profileUser, setProfileUser] = useState<CommenterProfile | null>(null);
 
   const {
     data: optimisticCommenters,
@@ -50,7 +39,7 @@ export function UsersTable({ commenters, siteId }: Props) {
     revertItem,
     setBusy,
     isBusy,
-  } = useOptimisticState<Commenter>(commenters);
+  } = useOptimisticState<CommenterWithStats>(commenters);
 
   async function handleDeleteAll(commenterId: string) {
     const original = optimisticCommenters.find((c) => c.id === commenterId);
