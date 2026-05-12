@@ -1,7 +1,8 @@
+import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getSiteByIdForOwner } from '@/lib/services/site-service';
 import { getCommentsByCommenterOnSite } from '@/lib/services/user-service';
-import { jsonResponse, errorResponse } from '@/lib/api/response';
+import { ok } from '@/lib/api/response';
 
 export async function GET(
   _request: Request,
@@ -9,7 +10,7 @@ export async function GET(
 ) {
   const session = await auth();
   if (!session?.user?.email) {
-    return errorResponse('Unauthorized', 401);
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { siteId, commenterId } = await params;
@@ -17,9 +18,9 @@ export async function GET(
   try {
     await getSiteByIdForOwner(siteId, session.user.id as string);
   } catch {
-    return errorResponse('Site not found', 404);
+    return NextResponse.json({ error: 'Site not found' }, { status: 404 });
   }
 
   const comments = await getCommentsByCommenterOnSite(siteId, commenterId);
-  return jsonResponse(comments);
+  return ok(comments);
 }

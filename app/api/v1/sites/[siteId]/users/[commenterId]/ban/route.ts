@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getSiteByIdForOwner } from '@/lib/services/site-service';
 import {
@@ -6,7 +6,7 @@ import {
   unbanCommenterOnSite,
   deleteAllCommentsByCommenterOnSite,
 } from '@/lib/services/user-service';
-import { jsonResponse, errorResponse } from '@/lib/api/response';
+import { ok } from '@/lib/api/response';
 
 export async function POST(
   request: NextRequest,
@@ -14,7 +14,7 @@ export async function POST(
 ) {
   const session = await auth();
   if (!session?.user?.email) {
-    return errorResponse('Unauthorized', 401);
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { siteId, commenterId } = await params;
@@ -22,7 +22,7 @@ export async function POST(
   try {
     await getSiteByIdForOwner(siteId, session.user.id as string);
   } catch {
-    return errorResponse('Site not found', 404);
+    return NextResponse.json({ error: 'Site not found' }, { status: 404 });
   }
 
   const body = await request.json();
@@ -35,12 +35,12 @@ export async function POST(
         commenterId,
         session.user.email,
       );
-      return jsonResponse(result);
+      return ok(result);
     }
 
     if (action === 'unban') {
       const result = await unbanCommenterOnSite(siteId, commenterId);
-      return jsonResponse(result);
+      return ok(result);
     }
 
     if (action === 'deleteAll') {
@@ -49,14 +49,14 @@ export async function POST(
         commenterId,
         session.user.email,
       );
-      return jsonResponse(result);
+      return ok(result);
     }
 
-    return errorResponse('Invalid action', 400);
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (err) {
     if (err instanceof Error && err.message.includes('already banned')) {
-      return errorResponse(err.message, 409);
+      return NextResponse.json({ error: err.message }, { status: 409 });
     }
-    return errorResponse('Action failed', 500);
+    return NextResponse.json({ error: 'Action failed' }, { status: 500 });
   }
 }
