@@ -12,22 +12,43 @@ Create `src/components/ZeonComments.astro`:
 
 ```astro
 ---
-interface Props {
-  slug: string;
-}
+// Pass the slug dynamically from Astro.params:
 const { slug } = Astro.props;
 ---
 
 <div
   data-zeon-comments
-  data-site-key="YOUR_SITE_KEY"
+  data-site-key="..."
   data-slug={slug}
-></div>
+>
+</div>
 
-<script async src="https://your-domain.com/embed.js"></script>
+<script is:inline>
+  function loadZeonComments() {
+    // prevent duplicate scripts
+    const oldScript = document.querySelector(
+      "script[data-zeon-comments-script]",
+    );
+
+    if (oldScript) oldScript.remove();
+
+    const script = document.createElement("script");
+    script.src = "https://zeon-comments.vercel.app/embed.js";
+    script.async = true;
+    script.setAttribute("data-zeon-comments-script", "true");
+
+    document.body.appendChild(script);
+  }
+
+  // first load
+  loadZeonComments();
+
+  // astro page transitions
+  document.addEventListener("astro:page-load", loadZeonComments);
+</script>
 ```
 
-Replace `YOUR_SITE_KEY` with your key from the dashboard.
+Replace `...` with your site key from the dashboard.
 
 ## 2. Add to blog post layout
 

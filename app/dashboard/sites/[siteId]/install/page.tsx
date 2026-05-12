@@ -55,7 +55,7 @@ export default async function InstallPage({ params }: Props) {
 <script async src="${appUrl}/embed.js"></script>`
 
   const astroSnippet = `---
-// Pass the slug dynamically:
+// Pass the slug dynamically from Astro.params:
 const { slug } = Astro.props;
 ---
 
@@ -63,8 +63,32 @@ const { slug } = Astro.props;
   data-zeon-comments
   data-site-key="${site.siteKey}"
   data-slug={slug}
-></div>
-<script async src="${appUrl}/embed.js"></script>`
+>
+</div>
+
+<script is:inline>
+  function loadZeonComments() {
+    // prevent duplicate scripts
+    const oldScript = document.querySelector(
+      "script[data-zeon-comments-script]",
+    );
+
+    if (oldScript) oldScript.remove();
+
+    const script = document.createElement("script");
+    script.src = "${appUrl}/embed.js";
+    script.async = true;
+    script.setAttribute("data-zeon-comments-script", "true");
+
+    document.body.appendChild(script);
+  }
+
+  // first load
+  loadZeonComments();
+
+  // astro page transitions
+  document.addEventListener("astro:page-load", loadZeonComments);
+</script>`
 
   const hugoSnippet = `{{/* layouts/partials/comments.html */}}
 <div
