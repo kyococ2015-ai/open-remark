@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react"
 
 /**
  * Manages local state with optimistic updates for list data.
@@ -10,45 +10,37 @@ import { useState, useEffect, useCallback } from 'react';
  * changes and the optimistic update would be silently discarded.
  */
 export function useOptimisticState<T>(initialData: T[]) {
-  const [data, setData] = useState<T[]>(initialData);
-  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+  const [data, setData] = useState<T[]>(initialData)
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set())
 
   // Reset to server data on navigation, filter change, or page refresh
   useEffect(() => {
-    setData(initialData);
-  }, [initialData]);
+    setData(initialData)
+  }, [initialData])
 
   const updateItem = useCallback(
     (match: (item: T) => boolean, changes: Partial<T>) => {
       setData((prev) =>
         prev.map((item) => (match(item) ? { ...item, ...changes } : item))
-      );
+      )
     },
     []
-  );
+  )
 
-  const revertItem = useCallback(
-    (match: (item: T) => boolean, original: T) => {
-      setData((prev) =>
-        prev.map((item) => (match(item) ? original : item))
-      );
-    },
-    []
-  );
+  const revertItem = useCallback((match: (item: T) => boolean, original: T) => {
+    setData((prev) => prev.map((item) => (match(item) ? original : item)))
+  }, [])
 
   const setBusy = useCallback((id: string, busy: boolean) => {
     setPendingIds((prev) => {
-      const next = new Set(prev);
-      if (busy) next.add(id);
-      else next.delete(id);
-      return next;
-    });
-  }, []);
+      const next = new Set(prev)
+      if (busy) next.add(id)
+      else next.delete(id)
+      return next
+    })
+  }, [])
 
-  const isBusy = useCallback(
-    (id: string) => pendingIds.has(id),
-    [pendingIds]
-  );
+  const isBusy = useCallback((id: string) => pendingIds.has(id), [pendingIds])
 
   return {
     data,
@@ -56,5 +48,5 @@ export function useOptimisticState<T>(initialData: T[]) {
     revertItem,
     setBusy,
     isBusy,
-  };
+  }
 }
