@@ -18,10 +18,13 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get("page") ?? "1", 10);
     const limit = Math.min(parseInt(searchParams.get("limit") ?? "50", 10), 200);
 
+    const search = searchParams.get("search");
+
     const result = await getCommentsBySite(siteId, {
       status: status ?? undefined,
       page,
       limit,
+      search: search ?? undefined,
     });
 
     return ok(result);

@@ -15,9 +15,10 @@ type Props = {
   pages: Page[];
   activeSlug?: string;
   activeStatus?: string;
+  search?: string;
 };
 
-export function PagesFilterPanel({ siteId, pages, activeSlug, activeStatus }: Props) {
+export function PagesFilterPanel({ siteId, pages, activeSlug, activeStatus, search }: Props) {
   const [collapsed, setCollapsed] = useState(false);
 
   function pageHref(slug: string | null) {
@@ -25,6 +26,7 @@ export function PagesFilterPanel({ siteId, pages, activeSlug, activeStatus }: Pr
     const params = new URLSearchParams();
     if (activeStatus && activeStatus !== "ALL") params.set("status", activeStatus);
     if (slug) params.set("slug", slug);
+    if (search) params.set("search", search);
     const qs = params.toString();
     return qs ? `${base}?${qs}` : base;
   }

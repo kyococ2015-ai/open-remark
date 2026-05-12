@@ -45,16 +45,27 @@ function buildCommentSelect(userEmail?: string) {
 
 export async function getCommentsBySite(
   siteId: string,
-  filters: { status?: CommentStatus; slug?: string; page?: number; limit?: number } = {},
+  filters: { status?: CommentStatus; slug?: string; page?: number; limit?: number; search?: string } = {},
 ) {
-  const { status, slug, page = 1, limit = 50 } = filters;
+  const { status, slug, page = 1, limit = 50, search } = filters;
   const skip = (page - 1) * limit;
+
+  const searchFilter = search
+    ? {
+        OR: [
+          { body: { contains: search, mode: 'insensitive' as const } },
+          { commenter: { name: { contains: search, mode: 'insensitive' as const } } },
+          { commenter: { email: { contains: search, mode: 'insensitive' as const } } },
+        ],
+      }
+    : undefined;
 
   const [comments, total] = await Promise.all([
     db.comment.findMany({
       where: {
         page: { siteId, ...(slug && { slug }) },
         ...(status && { status }),
+        ...(searchFilter && searchFilter),
       },
       include: {
         page: { select: { slug: true, url: true } },
@@ -70,7 +81,7 @@ export async function getCommentsBySite(
       take: limit,
     }),
     db.comment.count({
-      where: { page: { siteId, ...(slug && { slug }) }, ...(status && { status }) },
+      where: { page: { siteId, ...(slug && { slug }) }, ...(status && { status }), ...(searchFilter && searchFilter) },
     }),
   ]);
 
