@@ -1,16 +1,10 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { formatDistanceToNow } from "date-fns";
-// Replicate enum locally — avoids pulling Prisma (Node-only) into a client bundle
-const CommentStatus = {
-  APPROVED: "APPROVED",
-  PENDING: "PENDING",
-  SPAM: "SPAM",
-  DELETED: "DELETED",
-} as const;
-type CommentStatus = (typeof CommentStatus)[keyof typeof CommentStatus];
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { formatDistanceToNow } from 'date-fns';
+import { patchCommentStatus, patchCommentBody } from '@/lib/services/comment-client';
+import { useOptimisticState } from '@/hooks/use-optimistic-state';
 import {
   Table,
   TableBody,
@@ -18,25 +12,34 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Check, MoreHorizontal, ShieldAlert, Trash2, Eye, Pencil } from "lucide-react";
+} from '@/components/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Check, MoreHorizontal, ShieldAlert, Trash2, Eye, Pencil } from 'lucide-react';
+
+const COMMENT_STATUS = {
+  APPROVED: 'APPROVED',
+  PENDING: 'PENDING',
+  SPAM: 'SPAM',
+  DELETED: 'DELETED',
+} as const;
+
+type CommentStatus = (typeof COMMENT_STATUS)[keyof typeof COMMENT_STATUS];
 
 type Comment = {
   id: string;
@@ -57,52 +60,67 @@ type Props = {
   onStatusChange?: () => void;
 };
 
-const statusBadge: Record<CommentStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  APPROVED: { label: "Approved", variant: "default" },
-  PENDING: { label: "Pending", variant: "secondary" },
-  SPAM: { label: "Spam", variant: "destructive" },
-  DELETED: { label: "Deleted", variant: "outline" },
+const STATUS_BADGE: Record<CommentStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+  APPROVED: { label: 'Approved', variant: 'default' },
+  PENDING: { label: 'Pending', variant: 'secondary' },
+  SPAM: { label: 'Spam', variant: 'destructive' },
+  DELETED: { label: 'Deleted', variant: 'outline' },
 };
 
-async function patchComment(id: string, status: CommentStatus) {
-  const res = await fetch(`/api/v1/comments/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status }),
-  });
-  if (!res.ok) throw new Error("Failed");
-}
-
-async function patchCommentBody(id: string, body: string) {
-  const res = await fetch(`/api/v1/comments/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ body }),
-  });
-  if (!res.ok) throw new Error("Failed");
-}
-
 export function CommentsTable({ comments, onStatusChange }: Props) {
-  const [busy, setBusy] = useState<string | null>(null);
   const [preview, setPreview] = useState<Comment | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Comment | null>(null);
   const [editTarget, setEditTarget] = useState<Comment | null>(null);
-  const [editBody, setEditBody] = useState("");
+  const [editBody, setEditBody] = useState('');
 
-  async function act(id: string, status: CommentStatus) {
-    setBusy(id);
+  const {
+    data: optimisticComments,
+    updateItem,
+    revertItem,
+    setBusy,
+    isBusy,
+  } = useOptimisticState<Comment>(comments);
+
+  async function handleStatusChange(id: string, status: CommentStatus) {
+    const original = optimisticComments.find((c) => c.id === id);
+    if (!original) return;
+
+    updateItem((c) => c.id === id, { status });
+    setBusy(id, true);
+
     try {
-      await patchComment(id, status);
+      await patchCommentStatus(id, status);
       toast.success(`Comment ${status.toLowerCase()}`);
       onStatusChange?.();
     } catch {
-      toast.error("Action failed");
+      revertItem((c) => c.id === id, original);
+      toast.error('Action failed. Changes reverted.');
     } finally {
-      setBusy(null);
+      setBusy(id, false);
     }
   }
 
-  if (comments.length === 0) {
+  async function handleBodyUpdate(id: string, body: string) {
+    const original = optimisticComments.find((c) => c.id === id);
+    if (!original) return;
+
+    updateItem((c) => c.id === id, { body, editedAt: new Date() });
+    setEditTarget(null);
+    setBusy(id, true);
+
+    try {
+      await patchCommentBody(id, body);
+      toast.success('Comment updated');
+      onStatusChange?.();
+    } catch {
+      revertItem((c) => c.id === id, original);
+      toast.error('Update failed. Changes reverted.');
+    } finally {
+      setBusy(id, false);
+    }
+  }
+
+  if (optimisticComments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
         <p className="text-muted-foreground text-sm">No comments found</p>
@@ -125,80 +143,80 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {comments.map((c) => {
-              const badge = statusBadge[c.status];
+            {optimisticComments.map((comment) => {
+              const badge = STATUS_BADGE[comment.status];
               return (
-                <TableRow key={c.id}>
+                <TableRow key={comment.id}>
                   <TableCell>
                     <div className="flex items-center gap-2 min-w-0">
                       <Avatar className="size-7 shrink-0">
-                        <AvatarImage src={c.commenter.image ?? ""} />
+                        <AvatarImage src={comment.commenter.image ?? ''} />
                         <AvatarFallback className="text-xs">
-                          {c.commenter.name.slice(0, 2).toUpperCase()}
+                          {comment.commenter.name.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate">
-                          {c.commenter.name}
+                          {comment.commenter.name}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">
-                          {c.commenter.email}
+                          {comment.commenter.email}
                         </p>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="max-w-xs">
-                    <p className={c.status === CommentStatus.DELETED ? "text-sm italic text-muted-foreground" : "text-sm line-clamp-2"}>
-                      {c.status === CommentStatus.DELETED ? "Comment Removed" : c.body}
+                    <p className={comment.status === COMMENT_STATUS.DELETED ? 'text-sm italic text-muted-foreground' : 'text-sm line-clamp-2'}>
+                      {comment.status === COMMENT_STATUS.DELETED ? 'Comment Removed' : comment.body}
                     </p>
                   </TableCell>
                   <TableCell>
                     <p className="text-xs font-mono text-muted-foreground truncate max-w-36">
-                      {c.page.slug}
+                      {comment.page.slug}
                     </p>
                   </TableCell>
                   <TableCell>
                     <Badge variant={badge.variant}>{badge.label}</Badge>
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                    {formatDistanceToNow(new Date(c.createdAt), {
+                    {formatDistanceToNow(new Date(comment.createdAt), {
                       addSuffix: true,
                     })}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-7"
-                            disabled={busy === c.id}
-                          aria-label={`Actions for comment by ${c.commenter.name}`}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7"
+                          disabled={isBusy(comment.id)}
+                          aria-label={`Actions for comment by ${comment.commenter.name}`}
                         >
                           <MoreHorizontal className="size-4" aria-hidden="true" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setPreview(c)}>
+                        <DropdownMenuItem onClick={() => setPreview(comment)}>
                           <Eye className="mr-2 size-4" aria-hidden="true" />
                           View full
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { setEditTarget(c); setEditBody(c.body); }}>
+                        <DropdownMenuItem onClick={() => { setEditTarget(comment); setEditBody(comment.body); }}>
                           <Pencil className="mr-2 size-4" aria-hidden="true" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        {c.status !== CommentStatus.APPROVED && (
+                        {comment.status !== COMMENT_STATUS.APPROVED && (
                           <DropdownMenuItem
-                            onClick={() => act(c.id, CommentStatus.APPROVED)}
+                            onClick={() => handleStatusChange(comment.id, COMMENT_STATUS.APPROVED)}
                           >
                             <Check className="mr-2 size-4 text-success" aria-hidden="true" />
                             Approve
                           </DropdownMenuItem>
                         )}
-                        {c.status !== CommentStatus.SPAM && (
+                        {comment.status !== COMMENT_STATUS.SPAM && (
                           <DropdownMenuItem
-                            onClick={() => act(c.id, CommentStatus.SPAM)}
+                            onClick={() => handleStatusChange(comment.id, COMMENT_STATUS.SPAM)}
                           >
                             <ShieldAlert className="mr-2 size-4 text-warning" aria-hidden="true" />
                             Mark as spam
@@ -207,7 +225,7 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-destructive"
-                          onClick={() => setDeleteTarget(c)}
+                          onClick={() => setDeleteTarget(comment)}
                         >
                           <Trash2 className="mr-2 size-4" aria-hidden="true" />
                           Delete
@@ -256,10 +274,10 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
             </Button>
             <Button
               variant="destructive"
-              disabled={busy === deleteTarget?.id}
+              disabled={isBusy(deleteTarget?.id ?? '')}
               onClick={async () => {
                 if (!deleteTarget) return;
-                await act(deleteTarget.id, CommentStatus.DELETED);
+                await handleStatusChange(deleteTarget.id, COMMENT_STATUS.DELETED);
                 setDeleteTarget(null);
               }}
             >
@@ -279,27 +297,17 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
             className="w-full min-h-[100px] p-3 text-sm border rounded-md bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
             value={editBody}
             onChange={(e) => setEditBody(e.target.value)}
-            disabled={busy === editTarget?.id}
+            disabled={isBusy(editTarget?.id ?? '')}
           />
           <div className="flex gap-2 justify-end mt-2">
             <Button variant="outline" onClick={() => setEditTarget(null)}>
               Cancel
             </Button>
             <Button
-              disabled={busy === editTarget?.id || !editBody.trim()}
-              onClick={async () => {
+              disabled={isBusy(editTarget?.id ?? '') || !editBody.trim()}
+              onClick={() => {
                 if (!editTarget) return;
-                setBusy(editTarget.id);
-                try {
-                  await patchCommentBody(editTarget.id, editBody);
-                  toast.success("Comment updated");
-                  setEditTarget(null);
-                  onStatusChange?.();
-                } catch {
-                  toast.error("Update failed");
-                } finally {
-                  setBusy(null);
-                }
+                handleBodyUpdate(editTarget.id, editBody);
               }}
             >
               Save
