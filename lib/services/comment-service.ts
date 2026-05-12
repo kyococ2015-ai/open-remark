@@ -23,6 +23,7 @@ function buildCommentSelect(userEmail?: string) {
     createdAt: true,
     editedAt: true,
     parentId: true,
+    commenterId: true,
     commenter: { select: buildCommenterSelect() },
     _count: { select: { likes: true } },
     likes: likeWhere ? { ...likeWhere, select: { id: true } } : undefined,
@@ -34,6 +35,7 @@ function buildCommentSelect(userEmail?: string) {
         createdAt: true,
         editedAt: true,
         parentId: true,
+        commenterId: true,
         commenter: { select: buildCommenterSelect() },
         _count: { select: { likes: true } },
         likes: likeWhere ? { ...likeWhere, select: { id: true } } : undefined,
@@ -104,6 +106,27 @@ export async function getApprovedCommentsForPage(siteId: string, slug: string, u
     orderBy: { createdAt: "desc" },
   });
 
+  // Collect commenterIds of deleted comments to check ban status
+  const deletedCommenterIds = [
+    ...new Set(
+      raw
+        .filter((c) => c.status === CommentStatus.DELETED)
+        .map((c) => c.commenterId),
+    ),
+  ];
+
+  const bannedRecords =
+    deletedCommenterIds.length > 0
+      ? await db.bannedCommenter.findMany({
+          where: {
+            siteId,
+            commenterId: { in: deletedCommenterIds },
+          },
+          select: { commenterId: true },
+        })
+      : [];
+  const bannedSet = new Set(bannedRecords.map((b) => b.commenterId));
+
   return raw.map((c) => ({
     id: c.id,
     body: c.body,
@@ -114,6 +137,7 @@ export async function getApprovedCommentsForPage(siteId: string, slug: string, u
     hasLiked: userEmail ? c.likes.length > 0 : false,
     parentId: c.parentId,
     commenter: c.commenter,
+    banned: c.status === CommentStatus.DELETED ? bannedSet.has(c.commenterId) : undefined,
     replies: c.replies.map((r) => ({
       id: r.id,
       body: r.body,
@@ -124,6 +148,7 @@ export async function getApprovedCommentsForPage(siteId: string, slug: string, u
       hasLiked: userEmail ? r.likes.length > 0 : false,
       parentId: r.parentId,
       commenter: r.commenter,
+      banned: r.status === CommentStatus.DELETED ? bannedSet.has(r.commenterId) : undefined,
       replies: [],
     })),
   }));
