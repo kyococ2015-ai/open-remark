@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
-import { CommentStatus } from '@/generated/prisma/client';
-import { patchCommentStatus } from '@/lib/services/comment-client';
+import { patchCommentStatus, type ClientCommentStatus } from '@/lib/services/comment-client';
 import {
   Dialog,
   DialogContent,
@@ -21,7 +20,7 @@ import type { CommenterProfile } from '@/lib/types/commenter';
 type CommentItem = {
   id: string;
   body: string;
-  status: CommentStatus;
+  status: ClientCommentStatus;
   createdAt: string;
   editedAt?: string | null;
   page: { slug: string; url: string | null };
@@ -35,7 +34,7 @@ type Props = {
   siteId: string;
 };
 
-const STATUS_BADGE: Record<CommentStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+const STATUS_BADGE: Record<ClientCommentStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   APPROVED: { label: 'Approved', variant: 'default' },
   PENDING: { label: 'Pending', variant: 'secondary' },
   SPAM: { label: 'Spam', variant: 'destructive' },
@@ -66,7 +65,7 @@ export function UserProfileDialog({ open, onClose, commenter, siteId }: Props) {
     }
   }, [open, commenter, siteId]);
 
-  async function handleStatusChange(commentId: string, status: CommentStatus) {
+  async function handleStatusChange(commentId: string, status: ClientCommentStatus) {
     try {
       await patchCommentStatus(commentId, status);
       setComments((prev) =>
@@ -116,43 +115,43 @@ export function UserProfileDialog({ open, onClose, commenter, siteId }: Props) {
                   </div>
                   <p
                     className={
-                      comment.status === CommentStatus.DELETED
+                      comment.status === 'DELETED'
                         ? 'text-sm italic text-muted-foreground'
                         : 'text-sm'
                     }
                   >
-                    {comment.status === CommentStatus.DELETED ? 'Comment Removed' : comment.body}
+                    {comment.status === 'DELETED' ? 'Comment Removed' : comment.body}
                   </p>
                   <p className="text-xs font-mono text-muted-foreground">{comment.page.slug}</p>
                   <div className="flex gap-2 pt-1">
-                    {comment.status !== CommentStatus.APPROVED && (
+                    {comment.status !== 'APPROVED' && (
                       <Button
                         size="sm"
                         variant="outline"
                         className="h-7"
-                        onClick={() => handleStatusChange(comment.id, CommentStatus.APPROVED)}
+                        onClick={() => handleStatusChange(comment.id, 'APPROVED')}
                       >
                         <Check className="mr-1 size-3" />
                         Approve
                       </Button>
                     )}
-                    {comment.status !== CommentStatus.SPAM && (
+                    {comment.status !== 'SPAM' && (
                       <Button
                         size="sm"
                         variant="outline"
                         className="h-7"
-                        onClick={() => handleStatusChange(comment.id, CommentStatus.SPAM)}
+                        onClick={() => handleStatusChange(comment.id, 'SPAM')}
                       >
                         <ShieldAlert className="mr-1 size-3" />
                         Spam
                       </Button>
                     )}
-                    {comment.status !== CommentStatus.DELETED && (
+                    {comment.status !== 'DELETED' && (
                       <Button
                         size="sm"
                         variant="outline"
                         className="h-7 text-destructive"
-                        onClick={() => handleStatusChange(comment.id, CommentStatus.DELETED)}
+                        onClick={() => handleStatusChange(comment.id, 'DELETED')}
                       >
                         <Trash2 className="mr-1 size-3" />
                         Delete
