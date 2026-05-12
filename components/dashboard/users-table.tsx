@@ -20,6 +20,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MoreHorizontal, ShieldAlert, Trash2, Eye } from 'lucide-react';
 import { UserProfileDialog } from './user-profile-dialog';
@@ -30,8 +37,12 @@ type Props = {
   siteId: string;
 };
 
+type ConfirmAction = 'deleteAll' | 'ban' | null;
+
 export function UsersTable({ commenters, siteId }: Props) {
   const [profileUser, setProfileUser] = useState<CommenterProfile | null>(null);
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+  const [confirmTarget, setConfirmTarget] = useState<CommenterWithStats | null>(null);
 
   const {
     data: optimisticCommenters,
@@ -41,7 +52,19 @@ export function UsersTable({ commenters, siteId }: Props) {
     isBusy,
   } = useOptimisticState<CommenterWithStats>(commenters);
 
-  async function handleDeleteAll(commenterId: string) {
+  function openConfirm(action: ConfirmAction, commenter: CommenterWithStats) {
+    setConfirmAction(action);
+    setConfirmTarget(commenter);
+  }
+
+  function closeConfirm() {
+    setConfirmAction(null);
+    setConfirmTarget(null);
+  }
+
+  async function handleDeleteAll() {
+    if (!confirmTarget) return;
+    const commenterId = confirmTarget.id;
     const original = optimisticCommenters.find((c) => c.id === commenterId);
     if (!original) return;
 
@@ -49,6 +72,7 @@ export function UsersTable({ commenters, siteId }: Props) {
       deletedCount: original.totalCount - original.spamCount,
     });
     setBusy(commenterId, true);
+    closeConfirm();
 
     try {
       await deleteAllCommentsByCommenter(siteId, commenterId);
@@ -61,7 +85,9 @@ export function UsersTable({ commenters, siteId }: Props) {
     }
   }
 
-  async function handleBan(commenterId: string) {
+  async function handleBan() {
+    if (!confirmTarget) return;
+    const commenterId = confirmTarget.id;
     const original = optimisticCommenters.find((c) => c.id === commenterId);
     if (!original) return;
 
@@ -70,6 +96,7 @@ export function UsersTable({ commenters, siteId }: Props) {
       deletedCount: original.totalCount - original.spamCount,
     });
     setBusy(commenterId, true);
+    closeConfirm();
 
     try {
       await banCommenter(siteId, commenterId);
@@ -177,7 +204,7 @@ export function UsersTable({ commenters, siteId }: Props) {
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeleteAll(commenter.id);
+                          openConfirm('deleteAll', commenter);
                         }}
                       >
                         <Trash2 className="mr-2 size-4" />
@@ -188,7 +215,7 @@ export function UsersTable({ commenters, siteId }: Props) {
                           className="text-destructive"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleBan(commenter.id);
+                            openConfirm('ban', commenter);
                           }}
                         >
                           <ShieldAlert className="mr-2 size-4" />
@@ -220,6 +247,54 @@ export function UsersTable({ commenters, siteId }: Props) {
         commenter={profileUser}
         siteId={siteId}
       />
+
+      {/* Delete All Comments Confirmation */}
+      <Dialog open={confirmAction === 'deleteAll'} onOpenChange={(v) => !v && closeConfirm()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete all comments?</DialogTitle>
+            <DialogDescription>
+              This will permanently soft-delete all {confirmTarget?.totalCount} comments by {confirmTarget?.name} on this site.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 justify-end mt-2">
+            <Button variant="outline" onClick={closeConfirm}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isBusy(confirmTarget?.id ?? '')}
+              onClick={handleDeleteAll}
+            >
+              Delete all
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ban User Confirmation */}
+      <Dialog open={confirmAction === 'ban'} onOpenChange={(v) => !v && closeConfirm()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ban {confirmTarget?.name}?</DialogTitle>
+            <DialogDescription>
+              This will ban {confirmTarget?.name} from this site and soft-delete all their {confirmTarget?.totalCount} comments.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 justify-end mt-2">
+            <Button variant="outline" onClick={closeConfirm}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={isBusy(confirmTarget?.id ?? '')}
+              onClick={handleBan}
+            >
+              Ban user
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
