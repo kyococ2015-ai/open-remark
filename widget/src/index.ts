@@ -36,13 +36,6 @@ function resolveEffectiveTheme(cfg: WidgetThemeConfig): "LIGHT" | "DARK" {
   if (cfg.theme === "LIGHT") return "LIGHT";
   if (cfg.theme === "DARK") return "DARK";
   if (document.documentElement.classList.contains("dark")) return "DARK";
-  if (
-    typeof window !== "undefined" &&
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  ) {
-    return "DARK";
-  }
   return "LIGHT";
 }
 
@@ -118,8 +111,6 @@ class ZeonWidget {
   private activeConfig: WidgetThemeConfig | null = null;
   private lastEffectiveTheme: "LIGHT" | "DARK" | null = null;
   private htmlObserver: MutationObserver | null = null;
-  private mediaQueryListener: (() => void) | null = null;
-  private mediaQuery: MediaQueryList | null = null;
 
   constructor(config: WidgetConfig) {
     this.config = config;
@@ -525,19 +516,6 @@ class ZeonWidget {
       }
     });
     this.htmlObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-
-    if (typeof window.matchMedia === "function") {
-      this.mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      this.mediaQueryListener = debouncedReapply;
-      if (this.mediaQuery.addEventListener) {
-        this.mediaQuery.addEventListener("change", this.mediaQueryListener);
-      } else {
-        // Safari < 14 fallback
-        (this.mediaQuery as unknown as { addListener: (cb: () => void) => void }).addListener(
-          this.mediaQueryListener,
-        );
-      }
-    }
   }
 }
 
