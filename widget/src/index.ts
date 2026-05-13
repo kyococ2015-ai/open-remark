@@ -35,7 +35,16 @@ function readableOn(hex: string): string {
 function resolveEffectiveTheme(cfg: WidgetThemeConfig): "LIGHT" | "DARK" {
   if (cfg.theme === "LIGHT") return "LIGHT";
   if (cfg.theme === "DARK") return "DARK";
-  if (document.documentElement.classList.contains("dark")) return "DARK";
+
+  const html = document.documentElement;
+
+  // Explicit host-page signals take priority over OS preference
+  if (html.classList.contains("dark")) return "DARK";
+  if (html.classList.contains("light")) return "LIGHT";
+  if (html.dataset.theme === "dark") return "DARK";
+  if (html.dataset.theme === "light") return "LIGHT";
+
+  // No explicit host signal — fall back to OS preference
   if (
     typeof window !== "undefined" &&
     window.matchMedia &&
