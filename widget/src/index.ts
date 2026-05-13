@@ -131,9 +131,9 @@ class ZeonWidget {
 
     this.themeStyle = document.createElement("style");
     const cached = loadCachedTheme(config.siteKey);
-    if (cached) {
-      this.applyTheme(cached);
-    }
+    this.applyTheme(
+      cached ?? { theme: "AUTO", primaryColor: "#0f172a", radius: 8 },
+    );
     this.shadow.appendChild(this.themeStyle);
     this.setupThemeObservers();
 
@@ -520,15 +520,17 @@ class ZeonWidget {
     });
     this.htmlObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
-    this.mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    this.mediaQueryListener = debouncedReapply;
-    if (this.mediaQuery.addEventListener) {
-      this.mediaQuery.addEventListener("change", this.mediaQueryListener);
-    } else {
-      // Safari < 14 fallback
-      (this.mediaQuery as unknown as { addListener: (cb: () => void) => void }).addListener(
-        this.mediaQueryListener,
-      );
+    if (typeof window.matchMedia === "function") {
+      this.mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      this.mediaQueryListener = debouncedReapply;
+      if (this.mediaQuery.addEventListener) {
+        this.mediaQuery.addEventListener("change", this.mediaQueryListener);
+      } else {
+        // Safari < 14 fallback
+        (this.mediaQuery as unknown as { addListener: (cb: () => void) => void }).addListener(
+          this.mediaQueryListener,
+        );
+      }
     }
   }
 }
