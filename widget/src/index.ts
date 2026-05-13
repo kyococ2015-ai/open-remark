@@ -55,6 +55,15 @@ function resolveEffectiveTheme(cfg: WidgetThemeConfig): "LIGHT" | "DARK" {
   return "LIGHT";
 }
 
+function getHostThemeSignal(): string {
+  const html = document.documentElement;
+  const classes = Array.from(html.classList).join(", ");
+  const dataTheme = html.dataset.theme ?? "(none)";
+  const hasDark = html.classList.contains("dark");
+  const hasLight = html.classList.contains("light");
+  return `classes=[${classes}] data-theme=${dataTheme} hasDark=${hasDark} hasLight=${hasLight}`;
+}
+
 function buildThemeStyle(cfg: WidgetThemeConfig): string {
   const lines: string[] = [];
   const effective = resolveEffectiveTheme(cfg);
@@ -502,6 +511,13 @@ class ZeonWidget {
   private applyTheme(cfg: WidgetThemeConfig) {
     this.activeConfig = cfg;
     const effective = resolveEffectiveTheme(cfg);
+    console.log(
+      "[Zeon Theme] resolving:",
+      "backendTheme=", cfg.theme,
+      "host=", getHostThemeSignal(),
+      "effective=", effective,
+      "previous=", this.lastEffectiveTheme,
+    );
     if (effective !== this.lastEffectiveTheme) {
       this.lastEffectiveTheme = effective;
       this.config.onThemeChange?.(effective === "DARK" ? "dark" : "light");
