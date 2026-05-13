@@ -35,16 +35,7 @@ function readableOn(hex: string): string {
 function resolveEffectiveTheme(cfg: WidgetThemeConfig): "LIGHT" | "DARK" {
   if (cfg.theme === "LIGHT") return "LIGHT";
   if (cfg.theme === "DARK") return "DARK";
-
-  const html = document.documentElement;
-
-  // Explicit host-page signals take priority over OS preference
-  if (html.classList.contains("dark")) return "DARK";
-  if (html.classList.contains("light")) return "LIGHT";
-  if (html.dataset.theme === "dark") return "DARK";
-  if (html.dataset.theme === "light") return "LIGHT";
-
-  // No explicit host signal — fall back to OS preference
+  if (document.documentElement.classList.contains("dark")) return "DARK";
   if (
     typeof window !== "undefined" &&
     window.matchMedia &&
@@ -53,15 +44,6 @@ function resolveEffectiveTheme(cfg: WidgetThemeConfig): "LIGHT" | "DARK" {
     return "DARK";
   }
   return "LIGHT";
-}
-
-function getHostThemeSignal(): string {
-  const html = document.documentElement;
-  const classes = Array.from(html.classList).join(", ");
-  const dataTheme = html.dataset.theme ?? "(none)";
-  const hasDark = html.classList.contains("dark");
-  const hasLight = html.classList.contains("light");
-  return `classes=[${classes}] data-theme=${dataTheme} hasDark=${hasDark} hasLight=${hasLight}`;
 }
 
 function buildThemeStyle(cfg: WidgetThemeConfig): string {
@@ -511,13 +493,6 @@ class ZeonWidget {
   private applyTheme(cfg: WidgetThemeConfig) {
     this.activeConfig = cfg;
     const effective = resolveEffectiveTheme(cfg);
-    console.log(
-      "[Zeon Theme] resolving:",
-      "backendTheme=", cfg.theme,
-      "host=", getHostThemeSignal(),
-      "effective=", effective,
-      "previous=", this.lastEffectiveTheme,
-    );
     if (effective !== this.lastEffectiveTheme) {
       this.lastEffectiveTheme = effective;
       this.config.onThemeChange?.(effective === "DARK" ? "dark" : "light");
