@@ -32,12 +32,6 @@ function readableOn(hex: string): string {
   return lum > 0.6 ? "#0f172a" : "#ffffff";
 }
 
-const DEFAULT_THEME: WidgetThemeConfig = {
-  theme: "AUTO",
-  primaryColor: "#0f172a",
-  radius: 8,
-};
-
 function resolveEffectiveTheme(cfg: WidgetThemeConfig): "LIGHT" | "DARK" {
   if (cfg.theme === "LIGHT") return "LIGHT";
   if (cfg.theme === "DARK") return "DARK";
@@ -121,6 +115,10 @@ class ZeonWidget {
   private deletingId: string | null = null;
   private isSubmitting = false;
   private isBanned = false;
+  private activeConfig: WidgetThemeConfig | null = null;
+  private htmlObserver: MutationObserver | null = null;
+  private mediaQueryListener: (() => void) | null = null;
+  private mediaQuery: MediaQueryList | null = null;
 
   constructor(config: WidgetConfig) {
     this.config = config;
@@ -133,8 +131,11 @@ class ZeonWidget {
 
     this.themeStyle = document.createElement("style");
     const cached = loadCachedTheme(config.siteKey);
-    if (cached) this.themeStyle.textContent = buildThemeStyle(cached);
+    if (cached) {
+      this.applyTheme(cached);
+    }
     this.shadow.appendChild(this.themeStyle);
+    this.setupThemeObservers();
 
     this.root = document.createElement("div");
     this.root.className = "z-root";
@@ -167,7 +168,7 @@ class ZeonWidget {
         this.config.slug,
         this.token,
       );
-      this.themeStyle.textContent = buildThemeStyle(themeConfig);
+      this.applyTheme(themeConfig);
       saveCachedTheme(this.config.siteKey, themeConfig);
       this.isBanned = themeConfig.currentUser?.isBanned ?? false;
       this.comments = comments;
@@ -486,6 +487,49 @@ class ZeonWidget {
         (id) => this.handleConfirmDelete(id),
       ),
     );
+  }
+
+  private applyTheme(cfg: WidgetThemeConfig) {
+    this.activeConfig = cfg;
+    this.themeStyle.textContent = buildThemeStyle(cfg);
+  }
+
+  private setupThemeObservers() {
+    const reapply = () => {
+      if (this.activeConfig && this.activeConfig.theme === "AUTO") {
+        this.applyTheme(this.activeConfig);
+      }
+    };
+
+    let rafId: number | null = null;
+    const debouncedReapply = () => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        reapply();
+      });
+    };
+
+    this.htmlObserver = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type === "attributes" && m.attributeName === "class") {
+          debouncedReapply();
+          return;
+        }
+      }
+    });
+    this.htmlObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+
+    this.mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    this.mediaQueryListener = debouncedReapply;
+    if (this.mediaQuery.addEventListener) {
+      this.mediaQuery.addEventListener("change", this.mediaQueryListener);
+    } else {
+      // Safari < 14 fallback
+      (this.mediaQuery as unknown as { addListener: (cb: () => void) => void }).addListener(
+        this.mediaQueryListener,
+      );
+    }
   }
 }
 
