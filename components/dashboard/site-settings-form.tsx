@@ -207,7 +207,9 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
               ))}
             </div>
             <p className="text-xs text-muted-foreground">
-              Auto follows the visitor&apos;s OS preference.
+              Auto detects your page&apos;s dark mode. If the{" "}
+              <code>&lt;html&gt;</code> element has a <code>dark</code> class, the
+              widget renders in dark mode; otherwise it uses light mode.
             </p>
           </div>
 
