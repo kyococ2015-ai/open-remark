@@ -128,6 +128,10 @@
       html.dark .theme-toggle:hover {
         background: #334155;
       }
+
+      html.dark #widget-theme-status {
+        color: #94a3b8;
+      }
     </style>
   </head>
   <body>
@@ -164,8 +168,12 @@
       <section class="comments-section" aria-label="Comments">
         <h2>Comments</h2>
 
-        <!-- Zeon Comments -->
-        <div data-zeon-comments data-site-key="" data-slug="demo.html"></div>
+        <p id="widget-theme-status" style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
+        Widget theme: <strong>—</strong>
+      </p>
+
+      <!-- Zeon Comments -->
+        <div data-zeon-comments data-site-key="" data-slug="demo.html" data-on-theme-change="onWidgetThemeChange"></div>
         <script>
           // update site-key based on your environment (production vs development).
           const commentsContainer = document.querySelector(
@@ -213,6 +221,13 @@
     </button>
 
     <script>
+      function onWidgetThemeChange(theme) {
+        const status = document.getElementById("widget-theme-status");
+        if (status) {
+          status.innerHTML = 'Widget theme: <strong>' + theme + '</strong>';
+        }
+      }
+
       const MOON_ICON =
         '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
       const SUN_ICON =

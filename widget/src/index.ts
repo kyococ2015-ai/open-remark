@@ -116,6 +116,7 @@ class ZeonWidget {
   private isSubmitting = false;
   private isBanned = false;
   private activeConfig: WidgetThemeConfig | null = null;
+  private lastEffectiveTheme: "LIGHT" | "DARK" | null = null;
   private htmlObserver: MutationObserver | null = null;
   private mediaQueryListener: (() => void) | null = null;
   private mediaQuery: MediaQueryList | null = null;
@@ -491,6 +492,11 @@ class ZeonWidget {
 
   private applyTheme(cfg: WidgetThemeConfig) {
     this.activeConfig = cfg;
+    const effective = resolveEffectiveTheme(cfg);
+    if (effective !== this.lastEffectiveTheme) {
+      this.lastEffectiveTheme = effective;
+      this.config.onThemeChange?.(effective === "DARK" ? "dark" : "light");
+    }
     this.themeStyle.textContent = buildThemeStyle(cfg);
   }
 
@@ -555,7 +561,17 @@ function mount() {
       console.warn("[Zeon Comments] Missing data-site-key or data-slug", el);
       continue;
     }
-    new ZeonWidget({ siteKey, slug, container: el, appUrl });
+
+    let onThemeChange: ((theme: "light" | "dark") => void) | undefined;
+    const cbName = el.dataset.onThemeChange;
+    if (cbName) {
+      const cb = (window as unknown as Record<string, unknown>)[cbName];
+      if (typeof cb === "function") {
+        onThemeChange = cb as (theme: "light" | "dark") => void;
+      }
+    }
+
+    new ZeonWidget({ siteKey, slug, container: el, appUrl, onThemeChange });
   }
 }
 

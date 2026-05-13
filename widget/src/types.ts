@@ -3,6 +3,7 @@ export type WidgetConfig = {
   slug: string;
   container: HTMLElement;
   appUrl: string;
+  onThemeChange?: (theme: "light" | "dark") => void;
 };
 
 export type Commenter = {
