@@ -32,10 +32,31 @@ function readableOn(hex: string): string {
   return lum > 0.6 ? "#0f172a" : "#ffffff";
 }
 
+const DEFAULT_THEME: WidgetThemeConfig = {
+  theme: "AUTO",
+  primaryColor: "#0f172a",
+  radius: 8,
+};
+
+function resolveEffectiveTheme(cfg: WidgetThemeConfig): "LIGHT" | "DARK" {
+  if (cfg.theme === "LIGHT") return "LIGHT";
+  if (cfg.theme === "DARK") return "DARK";
+  if (document.documentElement.classList.contains("dark")) return "DARK";
+  if (
+    typeof window !== "undefined" &&
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  ) {
+    return "DARK";
+  }
+  return "LIGHT";
+}
+
 function buildThemeStyle(cfg: WidgetThemeConfig): string {
   const lines: string[] = [];
+  const effective = resolveEffectiveTheme(cfg);
 
-  if (cfg.theme === "DARK") {
+  if (effective === "DARK") {
     lines.push(`:host {
   --z-bg: #0f172a;
   --z-text: #f8fafc;
@@ -46,7 +67,7 @@ function buildThemeStyle(cfg: WidgetThemeConfig): string {
   --z-skel-base: #1e293b;
   --z-skel-glow: #334155;
 }`);
-  } else if (cfg.theme === "LIGHT") {
+  } else {
     lines.push(`:host {
   --z-bg: #ffffff;
   --z-text: #0f172a;
