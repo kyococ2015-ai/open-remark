@@ -57,7 +57,7 @@ See [docs/contributing.md](docs/contributing.md).
 | Layer | Tech |
 |-------|------|
 | Framework | Next.js 16 App Router |
-| Database | SQLite (Prisma 7 + libsql) |
+| Database | PostgreSQL (Prisma) |
 | ORM | Prisma |
 | Admin auth | Auth.js v5 (Google OAuth) |
 | Widget auth | Widget JWT (jose) |
@@ -69,7 +69,7 @@ See [docs/contributing.md](docs/contributing.md).
 
 | Variable | Description |
 |----------|-------------|
-| `DATABASE_URL` | SQLite file path (e.g. `file:./prisma/dev.db`) |
+| `DATABASE_URL` | PostgreSQL connection string (e.g. `postgresql://user:pass@localhost:5432/zeon`) |
 | `AUTH_SECRET` | Auth.js secret (run `openssl rand -base64 32`) |
 | `AUTH_URL` | App URL (e.g. `http://localhost:3000`) |
 | `AUTH_GOOGLE_ID` | Google OAuth client ID |
