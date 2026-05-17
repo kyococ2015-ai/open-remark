@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "prisma generate && pnpm widget:build && next dev --turbopack",
     "build": "prisma generate && pnpm widget:build && next build",
-    "prepare": "husky install",
+    "prepare": "husky",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
