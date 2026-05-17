@@ -70,7 +70,7 @@ export function UserProfileDialog({ open, onClose, commenter, siteId }: Props) {
   }, [open, commenter, siteId])
 
   async function handleStatusChange(
-    commentId: string,
+                    commentId: number,
     status: ClientCommentStatus
   ) {
     try {
