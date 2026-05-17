@@ -73,7 +73,7 @@ export function AppSidebar({ user }: Props) {
                   <RiMessage2Fill className="size-4" aria-hidden="true" />
                 </div>
                 <div className="flex flex-col leading-tight">
-                  <span className="font-bold text-sm tracking-tight">Zeon Comments</span>
+                  <span className="font-bold text-sm tracking-tight">Open Remark</span>
                   <span className="text-xs text-muted-foreground font-normal">
                     Comment platform
                   </span>

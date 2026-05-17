@@ -50,11 +50,11 @@ const features = [
 ]
 
 const embedSnippet = `<div
-  data-zeon-comments
+  data-open-remark
   data-site-key="YOUR_SITE_KEY"
   data-slug="/posts/hello-world"
 ></div>
-<script async src="https://zeon-comments.vercel.app/embed.js"></script>`
+<script async src="https://open-remark.vercel.app/embed.js"></script>`
 
 export default function HomePage() {
   return (
@@ -72,7 +72,7 @@ export default function HomePage() {
             <div className="flex size-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
               Z
             </div>
-            Zeon Comments
+            Open Remark
           </Link>
           <div className="flex items-center gap-3">
             <Button asChild variant="ghost" size="sm">
@@ -247,7 +247,7 @@ export default function HomePage() {
             >
               Z
             </div>
-            <span>Zeon Comments</span>
+            <span>Open Remark</span>
           </div>
           <p>Built with Next.js, Prisma &amp; shadcn/ui</p>
         </div>

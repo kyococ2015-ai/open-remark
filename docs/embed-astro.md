@@ -1,9 +1,9 @@
-# Embedding Zeon Comments in Astro
+# Embedding Open Remark in Astro
 
 ## Prerequisites
 
 - An Astro site (v3+)
-- A Zeon Comments account with a registered site
+- A Open Remark account with a registered site
 - Your **site key** from the dashboard
 
 ## 1. Create a Comments component
@@ -17,7 +17,7 @@ const { slug } = Astro.props;
 ---
 
 <div
-  data-zeon-comments
+  data-open-remark
   data-site-key="..."
   data-slug={slug}
 >
@@ -27,15 +27,15 @@ const { slug } = Astro.props;
   function loadZeonComments() {
     // prevent duplicate scripts
     const oldScript = document.querySelector(
-      "script[data-zeon-comments-script]",
+      "script[data-open-remark-script]",
     );
 
     if (oldScript) oldScript.remove();
 
     const script = document.createElement("script");
-    script.src = "https://zeon-comments.vercel.app/embed.js";
+    script.src = "https://open-remark.vercel.app/embed.js";
     script.async = true;
-    script.setAttribute("data-zeon-comments-script", "true");
+    script.setAttribute("data-open-remark-script", "true");
 
     document.body.appendChild(script);
   }
@@ -99,10 +99,10 @@ const { Content } = await post.render();
 ## Allowed origins
 
 Add `https://yourblog.com` (and `https://www.yourblog.com` if applicable) to
-the **Allowed origins** list in your site's Settings page. Zeon Comments will
+the **Allowed origins** list in your site's Settings page. Open Remark will
 reject widget posts from unlisted origins.
 
 ## Self-hosting note
 
-If you self-host Zeon Comments, replace `https://your-domain.com` with your
+If you self-host Open Remark, replace `https://your-domain.com` with your
 deployment URL in the `<script>` tag and in your site's allowed origins.

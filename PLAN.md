@@ -1,4 +1,4 @@
-# Zeon Comments — Architecture Plan
+# Open Remark — Architecture Plan
 
 ## Overview
 
@@ -104,7 +104,7 @@ enum CommentStatus  { PENDING APPROVED SPAM DELETED }
 ## Folder Structure
 
 ```
-zeon-comments/
+open-remark/
 ├── prisma/
 │   ├── schema.prisma
 │   ├── seed.ts
@@ -257,7 +257,7 @@ SQLite / Postgres
 
 ```html
 <div
-  data-zeon-comments
+  data-open-remark
   data-site-key="zk_abc123"
   data-slug="/posts/hello-world"
 ></div>

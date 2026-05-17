@@ -530,13 +530,13 @@ function detectAppUrl(): string {
 
 function mount() {
   const appUrl = detectAppUrl();
-  const elements = document.querySelectorAll<HTMLElement>("[data-zeon-comments]");
+  const elements = document.querySelectorAll<HTMLElement>("[data-open-remark]");
 
   for (const el of elements) {
     const siteKey = el.dataset.siteKey;
     const slug = el.dataset.slug;
     if (!siteKey || !slug) {
-      console.warn("[Zeon Comments] Missing data-site-key or data-slug", el);
+      console.warn("[Open Remark] Missing data-site-key or data-slug", el);
       continue;
     }
 

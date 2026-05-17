@@ -6,7 +6,7 @@
 ┌─────────────────────────────────────────────────────────┐
 │  Static Site (Astro / Hugo / Next.js)                   │
 │                                                         │
-│  <div data-zeon-comments                                │
+│  <div data-open-remark                                │
 │       data-site-key="zk_abc"                            │
 │       data-slug="/posts/hello">                         │
 │  <script src="https://app.com/embed.js">                │
@@ -15,7 +15,7 @@
                              │ HTTP (CORS)
                              ▼
 ┌─────────────────────────────────────────────────────────┐
-│  Zeon Comments Server (Next.js)                         │
+│  Open Remark Server (Next.js)                         │
 │                                                         │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
 │  │ /api/widget/ │  │  /api/v1/    │  │  /dashboard  │  │
@@ -44,7 +44,7 @@
 ## Request flow — visitor posts a comment
 
 ```
-1. embed.js mounts on [data-zeon-comments]
+1. embed.js mounts on [data-open-remark]
 2. GET /api/widget/comments?siteKey=…&slug=…
    → Returns approved comments (no auth required)
 3. Visitor clicks "Continue with Google"
@@ -70,10 +70,10 @@
 
 ## Authentication — two separate systems
 
-| System | Who | Mechanism | Storage |
-|--------|-----|-----------|---------|
-| Admin auth | Site owners | Auth.js v5 + Google OAuth → session cookie | Server session |
-| Widget auth | Visitors (commenters) | Google id_token → Widget JWT | `sessionStorage` |
+| System      | Who                   | Mechanism                                  | Storage          |
+| ----------- | --------------------- | ------------------------------------------ | ---------------- |
+| Admin auth  | Site owners           | Auth.js v5 + Google OAuth → session cookie | Server session   |
+| Widget auth | Visitors (commenters) | Google id_token → Widget JWT               | `sessionStorage` |
 
 Admin routes gated by `middleware.ts` checking Auth.js session.
 Widget routes use `Authorization: Bearer <jwt>` header — no cookies (cross-origin).
@@ -105,16 +105,16 @@ The embed widget is a self-contained vanilla TypeScript bundle:
 
 ## Security model
 
-| Threat | Mitigation |
-|--------|-----------|
-| Cross-site comment spam | CORS allowlist per site (`Site.allowedOrigins`) |
-| Anonymous spam | Google OAuth required to post |
-| Widget JWT theft | Short-lived (7d), stored in sessionStorage (not localStorage), not httpOnly (cross-origin limitation) |
-| SQL injection | Prisma parameterized queries |
-| XSS in comments | Body sanitized server-side (HTML stripped), rendered as `textContent` in widget |
-| CSRF | Widget uses Bearer token (not cookies) — CSRF not applicable |
-| Rate abuse | 10 posts/min per IP via in-memory LRU rate limiter |
-| Admin route access | `middleware.ts` checks Auth.js session for all `/dashboard` paths |
+| Threat                  | Mitigation                                                                                            |
+| ----------------------- | ----------------------------------------------------------------------------------------------------- |
+| Cross-site comment spam | CORS allowlist per site (`Site.allowedOrigins`)                                                       |
+| Anonymous spam          | Google OAuth required to post                                                                         |
+| Widget JWT theft        | Short-lived (7d), stored in sessionStorage (not localStorage), not httpOnly (cross-origin limitation) |
+| SQL injection           | Prisma parameterized queries                                                                          |
+| XSS in comments         | Body sanitized server-side (HTML stripped), rendered as `textContent` in widget                       |
+| CSRF                    | Widget uses Bearer token (not cookies) — CSRF not applicable                                          |
+| Rate abuse              | 10 posts/min per IP via in-memory LRU rate limiter                                                    |
+| Admin route access      | `middleware.ts` checks Auth.js session for all `/dashboard` paths                                     |
 
 ## Data model summary
 
@@ -131,10 +131,10 @@ User ──< Site ──< Page ──< Comment ──< Comment (replies)
 
 ## Scaling path
 
-| Component | Current | Scale-up path |
-|-----------|---------|---------------|
-| Database | SQLite (libsql) | Change 1 line in prisma.config.ts + schema → Postgres |
-| Rate limiting | In-memory LRU | Replace `lib/rate-limit.ts` with Redis/Upstash |
-| Widget auth | Google tokeninfo API | Cache responses, add other OAuth providers |
-| Comments | Full fetch per load | Add cursor pagination + real-time via SSE |
-| Widget bundle | Single file | CDN-hosted with long-lived cache headers |
+| Component     | Current              | Scale-up path                                         |
+| ------------- | -------------------- | ----------------------------------------------------- |
+| Database      | SQLite (libsql)      | Change 1 line in prisma.config.ts + schema → Postgres |
+| Rate limiting | In-memory LRU        | Replace `lib/rate-limit.ts` with Redis/Upstash        |
+| Widget auth   | Google tokeninfo API | Cache responses, add other OAuth providers            |
+| Comments      | Full fetch per load  | Add cursor pagination + real-time via SSE             |
+| Widget bundle | Single file          | CDN-hosted with long-lived cache headers              |

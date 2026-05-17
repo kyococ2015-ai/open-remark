@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 
 export const metadata: Metadata = {
-  title: "Zeon Comments",
+  title: "Open Remark",
   description: "Comment system for static websites",
 }
 

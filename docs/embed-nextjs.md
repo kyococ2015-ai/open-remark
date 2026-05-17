@@ -1,9 +1,9 @@
-# Embedding Zeon Comments in Next.js
+# Embedding Open Remark in Next.js
 
 ## Prerequisites
 
 - A Next.js site (v13+ App Router)
-- A Zeon Comments account with a registered site
+- A Open Remark account with a registered site
 - Your **site key** from the dashboard
 
 ## 1. Create a Comments component
@@ -23,7 +23,7 @@ export function ZeonComments({ slug }: Props) {
   return (
     <>
       <div
-        data-zeon-comments
+        data-open-remark
         data-site-key={process.env.NEXT_PUBLIC_ZEON_SITE_KEY}
         data-slug={slug}
       />
@@ -86,7 +86,7 @@ This way, if you rename the post URL, existing comments follow the stable ID.
 ## Allowed origins
 
 Add `https://yourblog.com` to the **Allowed origins** list in your site's
-Settings page on the Zeon Comments dashboard. For local dev, add
+Settings page on the Open Remark dashboard. For local dev, add
 `http://localhost:3000` too (remove it before going to production).
 
 ## Content Security Policy

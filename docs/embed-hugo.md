@@ -1,18 +1,18 @@
-# Embedding Zeon Comments in Hugo
+# Embedding Open Remark in Hugo
 
 ## Prerequisites
 
 - A Hugo site (v0.110+)
-- A Zeon Comments account with a registered site
+- A Open Remark account with a registered site
 - Your **site key** from the dashboard
 
 ## 1. Create a comments partial
 
-Create `layouts/partials/zeon-comments.html`:
+Create `layouts/partials/open-remark.html`:
 
 ```html
 <div
-  data-zeon-comments
+  data-open-remark
   data-site-key="{{ .Site.Params.zeonSiteKey }}"
   data-slug="{{ .RelPermalink }}"
 ></div>
@@ -49,7 +49,7 @@ In `layouts/posts/single.html` (or `layouts/_default/single.html`):
 </article>
 
 <section aria-label="Comments">
-  {{ partial "zeon-comments.html" . }}
+  {{ partial "open-remark.html" . }}
 </section>
 {{ end }}
 ```
@@ -76,4 +76,4 @@ data-slug="{{ with .Params.commentSlug }}{{ . }}{{ else }}{{ .RelPermalink }}{{ 
 ## Allowed origins
 
 Add `https://yourblog.com` to the **Allowed origins** list in your site's
-Settings page on the Zeon Comments dashboard.
+Settings page on the Open Remark dashboard.

@@ -46,9 +46,9 @@ export default async function InstallPage({ params }: Props) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://your-domain.com"
 
-  const htmlSnippet = `<!-- Zeon Comments -->
+  const htmlSnippet = `<!-- Open Remark -->
 <div
-  data-zeon-comments
+  data-open-remark
   data-site-key="${site.siteKey}"
   data-slug="/your-post-slug"
 ></div>
@@ -60,7 +60,7 @@ const { slug } = Astro.props;
 ---
 
 <div
-  data-zeon-comments
+  data-open-remark
   data-site-key="${site.siteKey}"
   data-slug={slug}
 >
@@ -70,7 +70,7 @@ const { slug } = Astro.props;
   function loadZeonComments() {
     // prevent duplicate scripts
     const oldScript = document.querySelector(
-      "script[data-zeon-comments-script]",
+      "script[data-open-remark-script]",
     );
 
     if (oldScript) oldScript.remove();
@@ -78,7 +78,7 @@ const { slug } = Astro.props;
     const script = document.createElement("script");
     script.src = "${appUrl}/embed.js";
     script.async = true;
-    script.setAttribute("data-zeon-comments-script", "true");
+    script.setAttribute("data-open-remark-script", "true");
 
     document.body.appendChild(script);
   }
@@ -92,7 +92,7 @@ const { slug } = Astro.props;
 
   const hugoSnippet = `{{/* layouts/partials/comments.html */}}
 <div
-  data-zeon-comments
+  data-open-remark
   data-site-key="${site.siteKey}"
   data-slug="{{ .RelPermalink }}"
 ></div>
@@ -106,7 +106,7 @@ export function Comments({ slug }: { slug: string }) {
   return (
     <>
       <div
-        data-zeon-comments
+        data-open-remark
         data-site-key="${site.siteKey}"
         data-slug={slug}
       />
@@ -172,7 +172,7 @@ export function Comments({ slug }: { slug: string }) {
           <StepHeader
             number={3}
             title="Verify the integration"
-            description="Open a page on your site where you added the snippet. You should see the Zeon Comments widget. Post a test comment to confirm everything works."
+            description="Open a page on your site where you added the snippet. You should see the Open Remark widget. Post a test comment to confirm everything works."
           />
           <div className="ml-12 flex items-center gap-2 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
             <CheckCircle2 className="text-success size-4 shrink-0" />

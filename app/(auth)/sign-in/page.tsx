@@ -20,7 +20,7 @@ export default async function SignInPage() {
             <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground text-lg font-bold">
             Z
           </div>
-          <CardTitle className="text-2xl">Zeon Comments</CardTitle>
+          <CardTitle className="text-2xl">Open Remark</CardTitle>
           <CardDescription>
             Sign in to manage comments on your sites
           </CardDescription>

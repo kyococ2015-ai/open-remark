@@ -1,4 +1,4 @@
-# Zeon Comments
+# Open Remark
 
 A self-hostable comment system for static websites — Astro, Hugo, Next.js, and any site that accepts HTML.
 
@@ -29,7 +29,7 @@ Open `http://localhost:3000` — sign in with Google to access the dashboard.
 ```html
 <!-- Paste anywhere in your post template -->
 <div
-  data-zeon-comments
+  data-open-remark
   data-site-key="YOUR_SITE_KEY"
   data-slug="/posts/your-post-slug"
 ></div>

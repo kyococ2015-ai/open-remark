@@ -1,6 +1,6 @@
-# Contributing to Zeon Comments
+# Contributing to Open Remark
 
-Thank you for helping improve Zeon Comments.
+Thank you for helping improve Open Remark.
 
 ## Project structure
 
@@ -122,7 +122,7 @@ The `__APP_URL__`, `__GOOGLE_CLIENT_ID__`, and `__STYLES__` constants are inject
 ## Pull request checklist
 
 - [ ] `yarn typecheck` passes
-- [ ] `yarn lint` passes  
+- [ ] `yarn lint` passes
 - [ ] `yarn dev` starts without errors
 - [ ] New API routes have a corresponding service function
 - [ ] New Prisma schema changes have a migration
