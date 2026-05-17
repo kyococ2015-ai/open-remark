@@ -16,17 +16,17 @@ Multi-tenant comment SaaS. Site owner registers → gets embed snippet → paste
 
 ## Tech Stack
 
-| Layer         | Choice                          | Reason                                      |
-|---------------|---------------------------------|---------------------------------------------|
-| Framework     | Next.js 16 App Router           | Already scaffolded                          |
-| Database      | SQLite (dev) → Postgres (prod)  | Simple start; Prisma swaps provider in 1 line |
-| ORM           | Prisma                          | Type-safe, migrations, easy swap            |
-| Admin Auth    | Auth.js v5 (next-auth@beta)     | Google OAuth, Prisma adapter                |
-| Widget Auth   | Short-lived JWT (Bearer)        | Cross-origin embeds can't use cookies       |
-| UI            | shadcn/ui + Tailwind v4         | Already wired                               |
-| Validation    | Zod                             | Shared client+server schemas                |
-| Widget Bundle | Vanilla TS → esbuild            | Zero deps, works in any static site         |
-| Rate Limit    | In-memory LRU (v1)              | Pluggable; swap to Redis later              |
+| Layer         | Choice                         | Reason                                        |
+| ------------- | ------------------------------ | --------------------------------------------- |
+| Framework     | Next.js 16 App Router          | Already scaffolded                            |
+| Database      | SQLite (dev) → Postgres (prod) | Simple start; Prisma swaps provider in 1 line |
+| ORM           | Prisma                         | Type-safe, migrations, easy swap              |
+| Admin Auth    | Auth.js v5 (next-auth@beta)    | Google OAuth, Prisma adapter                  |
+| Widget Auth   | Short-lived JWT (Bearer)       | Cross-origin embeds can't use cookies         |
+| UI            | shadcn/ui + Tailwind v4        | Already wired                                 |
+| Validation    | Zod                            | Shared client+server schemas                  |
+| Widget Bundle | Vanilla TS → esbuild           | Zero deps, works in any static site           |
+| Rate Limit    | In-memory LRU (v1)             | Pluggable; swap to Redis later                |
 
 ---
 
@@ -248,23 +248,31 @@ SQLite / Postgres
 ## Key Flows
 
 ### 1. Owner Onboarding
+
 1. Visit `/sign-in` → Google OAuth → session created
 2. `/dashboard/sites/new` → POST `/api/v1/sites` → `siteKey` generated
 3. `/dashboard/sites/[id]/install` → copyable `<script>` snippet
 
 ### 2. Embed Snippet (what users paste)
+
 ```html
-<div data-zeon-comments data-site-key="zk_abc123" data-slug="/posts/hello-world"></div>
+<div
+  data-zeon-comments
+  data-site-key="zk_abc123"
+  data-slug="/posts/hello-world"
+></div>
 <script async src="https://your-domain.com/embed.js"></script>
 ```
 
 ### 3. Visitor Commenting
+
 1. `embed.js` mounts → `GET /api/widget/comments?siteKey=...&slug=...` → render thread
 2. "Sign in with Google" → popup → `POST /api/widget/auth` → widget JWT (localStorage)
 3. Write comment → `POST /api/widget/comments` with `Authorization: Bearer <jwt>`
 4. Status = `PENDING` (if moderation on) or `APPROVED`
 
 ### 4. Moderation
+
 1. Dashboard → comments table → filter `PENDING`
 2. Approve / Spam / Delete → `PATCH /api/v1/comments/[id]`
 3. ModerationLog entry created
@@ -286,14 +294,14 @@ SQLite / Postgres
 
 ## Build Phases
 
-| Phase | Scope                                 | Est.   |
-|-------|---------------------------------------|--------|
-| 0     | Deps, Prisma, NextAuth, middleware    | 1-2d   |
-| 1     | Dashboard shell + Sites CRUD          | 2-3d   |
-| 2     | Services + all API routes             | 2d     |
-| 3     | Moderation UI (table, filters)        | 2d     |
-| 4     | Widget (embed.js, esbuild, demo)      | 3d     |
-| 5     | Docs, seed, polish                    | 1-2d   |
+| Phase | Scope                              | Est. |
+| ----- | ---------------------------------- | ---- |
+| 0     | Deps, Prisma, NextAuth, middleware | 1-2d |
+| 1     | Dashboard shell + Sites CRUD       | 2-3d |
+| 2     | Services + all API routes          | 2d   |
+| 3     | Moderation UI (table, filters)     | 2d   |
+| 4     | Widget (embed.js, esbuild, demo)   | 3d   |
+| 5     | Docs, seed, polish                 | 1-2d |
 
 ---
 
@@ -314,10 +322,10 @@ APP_URL="http://localhost:3000"
 
 ## Open Decisions
 
-| Question                           | Default         |
-|------------------------------------|-----------------|
-| Moderation default                 | Pre-moderate on |
-| Free tier limits                   | TBD             |
-| Self-hosted option                 | No (v1)         |
-| Custom widget theme per site       | CSS vars (v1)   |
-| Postgres migration                 | Phase 6         |
+| Question                     | Default         |
+| ---------------------------- | --------------- |
+| Moderation default           | Pre-moderate on |
+| Free tier limits             | TBD             |
+| Self-hosted option           | No (v1)         |
+| Custom widget theme per site | CSS vars (v1)   |
+| Postgres migration           | Phase 6         |
