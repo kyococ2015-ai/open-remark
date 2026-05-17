@@ -5,7 +5,7 @@ Thank you for helping improve Zeon Comments.
 ## Project structure
 
 ```
-zeon-comments/
+open-remark/
 ├── app/                  Next.js App Router pages + API routes
 │   ├── (auth)/           Sign-in page
 │   ├── (dashboard)/      Admin dashboard (protected)
