@@ -44,7 +44,7 @@ yarn install
 
 # 2. Copy env file and fill in values
 cp .env.example .env
-# Add AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET from Google Cloud Console
+# Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET from Google Cloud Console
 
 # 3. Run database migrations
 yarn db:migrate

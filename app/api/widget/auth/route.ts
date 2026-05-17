@@ -49,8 +49,8 @@ export async function POST(req: NextRequest) {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         code,
-        client_id: process.env.AUTH_GOOGLE_ID!,
-        client_secret: process.env.AUTH_GOOGLE_SECRET!,
+        client_id: process.env.GOOGLE_CLIENT_ID!,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET!,
         redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/widget/oauth-callback`,
         grant_type: "authorization_code",
         code_verifier: codeVerifier,
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       aud: string
     }
 
-    if (googlePayload.aud !== process.env.AUTH_GOOGLE_ID) {
+    if (googlePayload.aud !== process.env.GOOGLE_CLIENT_ID) {
       throw new ApiError("Token audience mismatch", 401)
     }
 

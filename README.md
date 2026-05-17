@@ -12,7 +12,7 @@ yarn install
 
 # 2. Configure
 cp .env.example .env
-# Fill in AUTH_GOOGLE_ID, AUTH_GOOGLE_SECRET, AUTH_SECRET, WIDGET_JWT_SECRET
+# Fill in GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, AUTH_SECRET, WIDGET_JWT_SECRET
 
 # 3. Database
 yarn db:migrate
@@ -67,14 +67,14 @@ See [docs/contributing.md](docs/contributing.md).
 
 ## Environment variables
 
-| Variable              | Description                                                                      |
-| --------------------- | -------------------------------------------------------------------------------- |
-| `DATABASE_URL`        | PostgreSQL connection string (e.g. `postgresql://user:pass@localhost:5432/zeon`) |
-| `AUTH_SECRET`         | Auth.js secret (run `openssl rand -base64 32`)                                   |
-| `AUTH_GOOGLE_ID`      | Google OAuth client ID                                                           |
-| `AUTH_GOOGLE_SECRET`  | Google OAuth client secret                                                       |
-| `WIDGET_JWT_SECRET`   | JWT secret for widget visitor tokens                                             |
-| `NEXT_PUBLIC_APP_URL` | Public app URL (used in embed snippets)                                          |
+| Variable               | Description                                                                      |
+| ---------------------- | -------------------------------------------------------------------------------- |
+| `DATABASE_URL`         | PostgreSQL connection string (e.g. `postgresql://user:pass@localhost:5432/zeon`) |
+| `AUTH_SECRET`          | Auth.js secret (run `openssl rand -base64 32`)                                   |
+| `GOOGLE_CLIENT_ID`     | Google OAuth client ID                                                           |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret                                                       |
+| `WIDGET_JWT_SECRET`    | JWT secret for widget visitor tokens                                             |
+| `NEXT_PUBLIC_APP_URL`  | Public app URL (used in embed snippets)                                          |
 
 ## License
 

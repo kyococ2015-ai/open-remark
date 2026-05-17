@@ -33,7 +33,7 @@ loadEnvFile(envPath)
 loadEnvFile(envLocalPath)
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-const googleClientId = process.env.AUTH_GOOGLE_ID ?? ""
+const googleClientId = process.env.GOOGLE_CLIENT_ID ?? ""
 
 const cssPath = resolve(import.meta.dirname, "src/styles.css")
 const rawCss = readFileSync(cssPath, "utf8")
