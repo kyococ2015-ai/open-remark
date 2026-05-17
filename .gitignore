@@ -48,3 +48,6 @@ prisma/dev.db-journal
 
 # env
 .env
+
+# Agents
+.claude/worktrees
