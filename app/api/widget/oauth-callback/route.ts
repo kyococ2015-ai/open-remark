@@ -1,11 +1,11 @@
-import { NextRequest } from "next/server";
+import { NextRequest } from "next/server"
 
 // Google OAuth popup lands here with the authorization code as a query param (?code=...).
 // We serve an HTML page that reads the code and sends it to the opener via postMessage,
 // then closes itself.
 export function GET(req: NextRequest) {
-  const code = req.nextUrl.searchParams.get("code");
-  const state = req.nextUrl.searchParams.get("state");
+  const code = req.nextUrl.searchParams.get("code")
+  const state = req.nextUrl.searchParams.get("state")
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><title>Signing in…</title></head>
@@ -35,10 +35,10 @@ export function GET(req: NextRequest) {
   Signing in… this window will close automatically.
 </p>
 </body>
-</html>`;
+</html>`
 
   return new Response(html, {
     status: 200,
     headers: { "Content-Type": "text/html; charset=utf-8" },
-  });
+  })
 }

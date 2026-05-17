@@ -1,5 +1,5 @@
-import { z } from "zod";
-import { CommentStatus } from "@/generated/prisma/client";
+import { z } from "zod"
+import { CommentStatus } from "@/generated/prisma/client"
 
 export const CreateCommentSchema = z.object({
   body: z.string().min(1).max(5000),
@@ -7,19 +7,21 @@ export const CreateCommentSchema = z.object({
   slug: z.string().min(1),
   url: z.string().url().optional(),
   parentId: z.string().cuid().optional(),
-});
+})
 
 export const UpdateCommentStatusSchema = z.object({
   status: z.nativeEnum(CommentStatus),
-});
+})
 
-export const UpdateCommentSchema = z.object({
-  body: z.string().min(1).max(5000).optional(),
-  status: z.nativeEnum(CommentStatus).optional(),
-}).refine((data) => data.body !== undefined || data.status !== undefined, {
-  message: "Either body or status is required",
-});
+export const UpdateCommentSchema = z
+  .object({
+    body: z.string().min(1).max(5000).optional(),
+    status: z.nativeEnum(CommentStatus).optional(),
+  })
+  .refine((data) => data.body !== undefined || data.status !== undefined, {
+    message: "Either body or status is required",
+  })
 
-export type CreateCommentInput = z.infer<typeof CreateCommentSchema>;
-export type UpdateCommentStatusInput = z.infer<typeof UpdateCommentStatusSchema>;
-export type UpdateCommentInput = z.infer<typeof UpdateCommentSchema>;
+export type CreateCommentInput = z.infer<typeof CreateCommentSchema>
+export type UpdateCommentStatusInput = z.infer<typeof UpdateCommentStatusSchema>
+export type UpdateCommentInput = z.infer<typeof UpdateCommentSchema>

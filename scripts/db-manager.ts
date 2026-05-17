@@ -57,7 +57,7 @@ async function status() {
 
   try {
     run("npx prisma migrate status")
-  } catch (e) {
+  } catch {
     console.log("   Could not connect or no migrations\n")
   }
 }
@@ -105,7 +105,7 @@ async function validate() {
   try {
     run("npx prisma validate")
     console.log("✅ Schema is valid")
-  } catch (e) {
+  } catch {
     console.error("❌ Schema validation failed")
     process.exit(1)
   }

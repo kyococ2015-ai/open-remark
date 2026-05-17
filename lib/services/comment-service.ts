@@ -1,8 +1,8 @@
-import { db } from "@/lib/db";
-import { ApiError } from "@/lib/api/error";
-import { sanitizeBody } from "@/lib/sanitize";
-import { CommentStatus } from "@/generated/prisma/client";
-import type { CreateCommentInput } from "@/lib/validators/comment";
+import { db } from "@/lib/db"
+import { ApiError } from "@/lib/api/error"
+import { sanitizeBody } from "@/lib/sanitize"
+import { CommentStatus } from "@/generated/prisma/client"
+import type { CreateCommentInput } from "@/lib/validators/comment"
 
 function buildCommenterSelect() {
   return {
@@ -11,11 +11,11 @@ function buildCommenterSelect() {
     email: true,
     username: true,
     image: true,
-  };
+  }
 }
 
 function buildCommentSelect(userEmail?: string) {
-  const likeWhere = userEmail ? { where: { userEmail } } : undefined;
+  const likeWhere = userEmail ? { where: { userEmail } } : undefined
   return {
     id: true,
     body: true,
@@ -42,25 +42,39 @@ function buildCommentSelect(userEmail?: string) {
       },
       orderBy: { createdAt: "asc" as const },
     },
-  };
+  }
 }
 
 export async function getCommentsBySite(
   siteId: string,
-  filters: { status?: CommentStatus; slug?: string; page?: number; limit?: number; search?: string } = {},
+  filters: {
+    status?: CommentStatus
+    slug?: string
+    page?: number
+    limit?: number
+    search?: string
+  } = {}
 ) {
-  const { status, slug, page = 1, limit = 50, search } = filters;
-  const skip = (page - 1) * limit;
+  const { status, slug, page = 1, limit = 50, search } = filters
+  const skip = (page - 1) * limit
 
   const searchFilter = search
     ? {
         OR: [
-          { body: { contains: search, mode: 'insensitive' as const } },
-          { commenter: { name: { contains: search, mode: 'insensitive' as const } } },
-          { commenter: { email: { contains: search, mode: 'insensitive' as const } } },
+          { body: { contains: search, mode: "insensitive" as const } },
+          {
+            commenter: {
+              name: { contains: search, mode: "insensitive" as const },
+            },
+          },
+          {
+            commenter: {
+              email: { contains: search, mode: "insensitive" as const },
+            },
+          },
         ],
       }
-    : undefined;
+    : undefined
 
   const [comments, total] = await Promise.all([
     db.comment.findMany({
@@ -72,29 +86,39 @@ export async function getCommentsBySite(
       include: {
         page: { select: { slug: true, url: true } },
         commenter: { select: buildCommenterSelect() },
-    replies: {
-      where: { status: { in: [CommentStatus.APPROVED, CommentStatus.DELETED] } },
-      orderBy: { createdAt: "asc" as const },
-      include: { commenter: { select: buildCommenterSelect() } },
-    },
+        replies: {
+          where: {
+            status: { in: [CommentStatus.APPROVED, CommentStatus.DELETED] },
+          },
+          orderBy: { createdAt: "asc" as const },
+          include: { commenter: { select: buildCommenterSelect() } },
+        },
       },
       orderBy: { createdAt: "desc" },
       skip,
       take: limit,
     }),
     db.comment.count({
-      where: { page: { siteId, ...(slug && { slug }) }, ...(status && { status }), ...(searchFilter && searchFilter) },
+      where: {
+        page: { siteId, ...(slug && { slug }) },
+        ...(status && { status }),
+        ...(searchFilter && searchFilter),
+      },
     }),
-  ]);
+  ])
 
-  return { comments, total, page, limit };
+  return { comments, total, page, limit }
 }
 
-export async function getApprovedCommentsForPage(siteId: string, slug: string, userEmail?: string) {
+export async function getApprovedCommentsForPage(
+  siteId: string,
+  slug: string,
+  userEmail?: string
+) {
   const page = await db.page.findUnique({
     where: { siteId_slug: { siteId, slug } },
-  });
-  if (!page) return [];
+  })
+  if (!page) return []
 
   const raw = await db.comment.findMany({
     where: {
@@ -104,16 +128,16 @@ export async function getApprovedCommentsForPage(siteId: string, slug: string, u
     },
     select: buildCommentSelect(userEmail),
     orderBy: { createdAt: "desc" },
-  });
+  })
 
   // Collect commenterIds of deleted comments to check ban status
   const deletedCommenterIds = [
     ...new Set(
       raw
         .filter((c) => c.status === CommentStatus.DELETED)
-        .map((c) => c.commenterId),
+        .map((c) => c.commenterId)
     ),
-  ];
+  ]
 
   const bannedRecords =
     deletedCommenterIds.length > 0
@@ -124,8 +148,8 @@ export async function getApprovedCommentsForPage(siteId: string, slug: string, u
           },
           select: { commenterId: true },
         })
-      : [];
-  const bannedSet = new Set(bannedRecords.map((b) => b.commenterId));
+      : []
+  const bannedSet = new Set(bannedRecords.map((b) => b.commenterId))
 
   return raw.map((c) => ({
     id: c.id,
@@ -137,7 +161,10 @@ export async function getApprovedCommentsForPage(siteId: string, slug: string, u
     hasLiked: userEmail ? c.likes.length > 0 : false,
     parentId: c.parentId,
     commenter: c.commenter,
-    banned: c.status === CommentStatus.DELETED ? bannedSet.has(c.commenterId) : undefined,
+    banned:
+      c.status === CommentStatus.DELETED
+        ? bannedSet.has(c.commenterId)
+        : undefined,
     replies: c.replies.map((r) => ({
       id: r.id,
       body: r.body,
@@ -148,30 +175,33 @@ export async function getApprovedCommentsForPage(siteId: string, slug: string, u
       hasLiked: userEmail ? r.likes.length > 0 : false,
       parentId: r.parentId,
       commenter: r.commenter,
-      banned: r.status === CommentStatus.DELETED ? bannedSet.has(r.commenterId) : undefined,
+      banned:
+        r.status === CommentStatus.DELETED
+          ? bannedSet.has(r.commenterId)
+          : undefined,
       replies: [],
     })),
-  }));
+  }))
 }
 
 export async function createComment(
   data: CreateCommentInput,
   commenterId: string,
-  autoApprove: boolean,
+  autoApprove: boolean
 ) {
-  const sanitized = sanitizeBody(data.body);
-  if (!sanitized) throw new ApiError("Comment body is empty", 400);
+  const sanitized = sanitizeBody(data.body)
+  if (!sanitized) throw new ApiError("Comment body is empty", 400)
 
   const site = await db.site.findUniqueOrThrow({
     where: { siteKey: data.siteKey },
     select: { id: true },
-  });
+  })
 
   const page = await db.page.upsert({
     where: { siteId_slug: { siteId: site.id, slug: data.slug } },
     update: {},
     create: { siteId: site.id, slug: data.slug, url: data.url },
-  });
+  })
 
   const raw = await db.comment.create({
     data: {
@@ -182,7 +212,7 @@ export async function createComment(
       status: autoApprove ? "APPROVED" : "PENDING",
     },
     select: buildCommentSelect(),
-  });
+  })
 
   return {
     id: raw.id,
@@ -195,18 +225,18 @@ export async function createComment(
     parentId: raw.parentId,
     commenter: raw.commenter,
     replies: [],
-  };
+  }
 }
 
 export async function updateCommentBody(commentId: string, body: string) {
-  const sanitized = sanitizeBody(body);
-  if (!sanitized) throw new ApiError("Comment body is empty", 400);
+  const sanitized = sanitizeBody(body)
+  if (!sanitized) throw new ApiError("Comment body is empty", 400)
 
   const raw = await db.comment.update({
     where: { id: commentId },
     data: { body: sanitized, editedAt: new Date() },
     select: buildCommentSelect(),
-  });
+  })
 
   return {
     id: raw.id,
@@ -219,7 +249,7 @@ export async function updateCommentBody(commentId: string, body: string) {
     parentId: raw.parentId,
     commenter: raw.commenter,
     replies: [],
-  };
+  }
 }
 
 export async function deleteComment(commentId: string) {
@@ -227,7 +257,7 @@ export async function deleteComment(commentId: string) {
     where: { id: commentId },
     data: { status: "DELETED" },
     select: buildCommentSelect(),
-  });
+  })
 
   return {
     id: raw.id,
@@ -240,25 +270,25 @@ export async function deleteComment(commentId: string) {
     parentId: raw.parentId,
     commenter: raw.commenter,
     replies: [],
-  };
+  }
 }
 
 export async function toggleCommentLike(commentId: string, userEmail: string) {
   const existing = await db.commentLike.findUnique({
     where: { commentId_userEmail: { commentId, userEmail } },
-  });
+  })
 
   if (existing) {
     await db.commentLike.delete({
       where: { id: existing.id },
-    });
-    const count = await db.commentLike.count({ where: { commentId } });
-    return { liked: false, count };
+    })
+    const count = await db.commentLike.count({ where: { commentId } })
+    return { liked: false, count }
   }
 
   await db.commentLike.create({
     data: { commentId, userEmail },
-  });
-  const count = await db.commentLike.count({ where: { commentId } });
-  return { liked: true, count };
+  })
+  const count = await db.commentLike.count({ where: { commentId } })
+  return { liked: true, count }
 }

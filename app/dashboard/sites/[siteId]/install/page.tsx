@@ -176,7 +176,7 @@ export function Comments({ slug }: { slug: string }) {
           />
           <div className="ml-12 flex items-center gap-2 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
             <CheckCircle2 className="text-success size-4 shrink-0" />
-            Once comments appear on your page, you're all set.
+            Once comments appear on your page, you&apos;re all set.
           </div>
         </div>
 

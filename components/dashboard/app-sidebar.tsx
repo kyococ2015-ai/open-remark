@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { signOut } from "next-auth/react"
 import {
   RiDashboardLine,
   RiGlobalLine,
@@ -11,7 +11,7 @@ import {
   RiExpandUpDownLine,
   RiAddLine,
   RiMessage2Fill,
-} from "@remixicon/react";
+} from "@remixicon/react"
 import {
   Sidebar,
   SidebarContent,
@@ -24,7 +24,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/sidebar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,33 +32,33 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 type NavItem = {
-  label: string;
-  href: string;
-  icon: React.ElementType;
-};
+  label: string
+  href: string
+  icon: React.ElementType
+}
 
 const navItems: NavItem[] = [
-  { label: "Overview",  href: "/dashboard",         icon: RiDashboardLine },
-  { label: "Sites",     href: "/dashboard/sites",   icon: RiGlobalLine    },
-  { label: "Account",   href: "/dashboard/account", icon: RiSettingsLine  },
-];
+  { label: "Overview", href: "/dashboard", icon: RiDashboardLine },
+  { label: "Sites", href: "/dashboard/sites", icon: RiGlobalLine },
+  { label: "Account", href: "/dashboard/account", icon: RiSettingsLine },
+]
 
 type Props = {
-  user: { name?: string | null; email?: string | null; image?: string | null };
-};
+  user: { name?: string | null; email?: string | null; image?: string | null }
+}
 
 export function AppSidebar({ user }: Props) {
-  const pathname = usePathname();
+  const pathname = usePathname()
   const initials = (user.name ?? user.email ?? "U")
     .split(" ")
     .map((w) => w[0])
     .slice(0, 2)
     .join("")
-    .toUpperCase();
+    .toUpperCase()
 
   return (
     <Sidebar collapsible="icon">
@@ -66,15 +66,21 @@ export function AppSidebar({ user }: Props) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="hover:bg-transparent active:bg-transparent">
+            <SidebarMenuButton
+              size="lg"
+              asChild
+              className="hover:bg-transparent active:bg-transparent"
+            >
               <Link href="/dashboard/sites">
                 {/* Logo mark */}
                 <div className="flex size-8 shrink-0 items-center justify-center bg-primary text-primary-foreground shadow-sm">
                   <RiMessage2Fill className="size-4" aria-hidden="true" />
                 </div>
                 <div className="flex flex-col leading-tight">
-                  <span className="font-bold text-sm tracking-tight">Open Remark</span>
-                  <span className="text-xs text-muted-foreground font-normal">
+                  <span className="text-sm font-bold tracking-tight">
+                    Open Remark
+                  </span>
+                  <span className="text-xs font-normal text-muted-foreground">
                     Comment platform
                   </span>
                 </div>
@@ -85,10 +91,10 @@ export function AppSidebar({ user }: Props) {
       </SidebarHeader>
 
       {/* ── New site shortcut ────────────────────────────── */}
-      <div className="px-3 pb-1 group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+      <div className="px-3 pb-1 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2">
         <Link
           href="/dashboard/sites/new"
-          className="flex w-full items-center gap-2 px-3 py-2 text-sm text-sidebar-foreground/60 transition-colors hover:text-sidebar-foreground rounded-md group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+          className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-sidebar-foreground/60 transition-colors group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 hover:text-sidebar-foreground"
           title="New site"
         >
           <RiAddLine className="size-4 shrink-0" aria-hidden="true" />
@@ -107,14 +113,14 @@ export function AppSidebar({ user }: Props) {
                 const active =
                   item.href === "/dashboard"
                     ? pathname === "/dashboard"
-                    : pathname.startsWith(item.href);
+                    : pathname.startsWith(item.href)
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton
                       asChild
                       isActive={active}
                       tooltip={item.label}
-                      className="relative rounded-lg text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:font-medium data-[active=true]:[&_svg]:text-sidebar-primary transition-colors"
+                      className="relative rounded-lg text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[active=true]:[&_svg]:text-sidebar-primary"
                     >
                       <Link href={item.href}>
                         <item.icon aria-hidden="true" />
@@ -122,7 +128,7 @@ export function AppSidebar({ user }: Props) {
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                );
+                )
               })}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -142,13 +148,15 @@ export function AppSidebar({ user }: Props) {
                 >
                   <Avatar className="size-7 shrink-0">
                     <AvatarImage src={user.image ?? ""} alt={user.name ?? ""} />
-                    <AvatarFallback className="text-xs font-semibold bg-primary/10 text-primary">
+                    <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden overflow-hidden">
-                    <p className="text-sm font-semibold truncate">{user.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
+                  <div className="flex-1 overflow-hidden text-left leading-tight group-data-[collapsible=icon]:hidden">
+                    <p className="truncate text-sm font-semibold">
+                      {user.name}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
                       {user.email}
                     </p>
                   </div>
@@ -159,10 +167,17 @@ export function AppSidebar({ user }: Props) {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent side="top" align="start" sideOffset={4} className="w-56">
-                <DropdownMenuLabel className="font-normal py-2">
-                  <p className="font-semibold text-sm truncate">{user.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              <DropdownMenuContent
+                side="top"
+                align="start"
+                sideOffset={4}
+                className="w-56"
+              >
+                <DropdownMenuLabel className="py-2 font-normal">
+                  <p className="truncate text-sm font-semibold">{user.name}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {user.email}
+                  </p>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
@@ -187,5 +202,5 @@ export function AppSidebar({ user }: Props) {
 
       <SidebarRail />
     </Sidebar>
-  );
+  )
 }

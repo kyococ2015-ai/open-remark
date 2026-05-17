@@ -1,62 +1,67 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { PageHeader } from "@/components/dashboard/page-header";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { PageHeader } from "@/components/dashboard/page-header"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card"
 
 export default function NewSitePage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    setLoading(true)
 
-    const form = new FormData(e.currentTarget);
+    const form = new FormData(e.currentTarget)
     const body = {
       name: form.get("name") as string,
       domain: form.get("domain") as string,
       autoApprove: form.get("autoApprove") === "on",
-      allowedOrigins: [(form.get("domain") as string)
-        ? (form.get("domain") as string).match(/^https?:\/\//)
-          ? (form.get("domain") as string)
-          : `https://${form.get("domain")}`
-        : ""],
-    };
+      allowedOrigins: [
+        (form.get("domain") as string)
+          ? (form.get("domain") as string).match(/^https?:\/\//)
+            ? (form.get("domain") as string)
+            : `https://${form.get("domain")}`
+          : "",
+      ],
+    }
 
     const res = await fetch("/api/v1/sites", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-    });
+    })
 
     if (res.ok) {
-      const site = await res.json();
-      toast.success("Site created!");
-      router.push(`/dashboard/sites/${site.id}/install`);
+      const site = await res.json()
+      toast.success("Site created!")
+      router.push(`/dashboard/sites/${site.id}/install`)
     } else {
-      const err = await res.json();
-      toast.error(err.error ?? "Failed to create site");
+      const err = await res.json()
+      toast.error(err.error ?? "Failed to create site")
     }
 
-    setLoading(false);
+    setLoading(false)
   }
 
   return (
     <div>
-      <PageHeader title="Add Site" description="Register a new site to embed comments" />
-      <div className="p-6 max-w-lg">
+      <PageHeader
+        title="Add Site"
+        description="Register a new site to embed comments"
+      />
+      <div className="max-w-lg p-6">
         <Card>
           <CardHeader>
             <CardTitle>Site details</CardTitle>
@@ -124,5 +129,5 @@ export default function NewSitePage() {
         </Card>
       </div>
     </div>
-  );
+  )
 }

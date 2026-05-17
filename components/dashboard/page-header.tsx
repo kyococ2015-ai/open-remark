@@ -1,11 +1,11 @@
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
 
 type Props = {
-  title: string;
-  description?: string;
-  action?: React.ReactNode;
-};
+  title: string
+  description?: string
+  action?: React.ReactNode
+}
 
 export function PageHeader({ title, description, action }: Props) {
   return (
@@ -22,5 +22,5 @@ export function PageHeader({ title, description, action }: Props) {
         {action && <div>{action}</div>}
       </div>
     </header>
-  );
+  )
 }

@@ -1,7 +1,7 @@
-import NextAuth from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { db } from "@/lib/db";
-import { authConfig } from "@/lib/auth.config";
+import NextAuth from "next-auth"
+import { PrismaAdapter } from "@auth/prisma-adapter"
+import { db } from "@/lib/db"
+import { authConfig } from "@/lib/auth.config"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -13,12 +13,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // The jwt callback runs first, then session.
     jwt({ token, user }) {
       // On initial sign-in `user` is populated; persist id into token.
-      if (user?.id) token.sub = user.id;
-      return token;
+      if (user?.id) token.sub = user.id
+      return token
     },
     session({ session, token }) {
-      if (token.sub) session.user.id = token.sub;
-      return session;
+      if (token.sub) session.user.id = token.sub
+      return session
     },
   },
-});
+})

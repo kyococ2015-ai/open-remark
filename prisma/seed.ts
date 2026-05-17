@@ -1,11 +1,11 @@
-import { PrismaClient, CommentStatus } from "../generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { config } from "dotenv";
+import { PrismaClient, CommentStatus } from "../generated/prisma/client"
+import { PrismaPg } from "@prisma/adapter-pg"
+import { config } from "dotenv"
 
-config();
+config()
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const db = new PrismaClient({ adapter });
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+const db = new PrismaClient({ adapter })
 
 async function main() {
   // Seed a demo user
@@ -17,7 +17,7 @@ async function main() {
       name: "Demo Owner",
       image: "https://avatars.githubusercontent.com/u/1?v=4",
     },
-  });
+  })
 
   // Seed a demo site
   const site = await db.site.upsert({
@@ -31,7 +31,7 @@ async function main() {
       autoApprove: false,
       ownerId: user.id,
     },
-  });
+  })
 
   // Seed a demo page
   const page = await db.page.upsert({
@@ -42,7 +42,7 @@ async function main() {
       url: "https://myblog.com/posts/hello-world",
       siteId: site.id,
     },
-  });
+  })
 
   // Seed demo commenters
   const commenters = await Promise.all(
@@ -55,9 +55,9 @@ async function main() {
         where: { email: c.email },
         update: {},
         create: c,
-      }),
-    ),
-  );
+      })
+    )
+  )
 
   // Seed demo comments
   const comments = [
@@ -76,17 +76,17 @@ async function main() {
       commenterId: commenters[2].id,
       status: CommentStatus.SPAM,
     },
-  ];
+  ]
 
   for (const c of comments) {
     await db.comment.create({
       data: { ...c, pageId: page.id },
-    });
+    })
   }
 
-  console.log("Seed complete");
+  console.log("Seed complete")
 }
 
 main()
   .catch(console.error)
-  .finally(() => db.$disconnect());
+  .finally(() => db.$disconnect())

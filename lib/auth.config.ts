@@ -1,5 +1,5 @@
-import type { NextAuthConfig } from "next-auth";
-import Google from "next-auth/providers/google";
+import type { NextAuthConfig } from "next-auth"
+import Google from "next-auth/providers/google"
 
 /**
  * Edge-compatible auth config — no Prisma adapter, no Node-only imports.
@@ -20,10 +20,10 @@ export const authConfig = {
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
-      const isDashboard = nextUrl.pathname.startsWith("/dashboard");
-      if (isDashboard && !isLoggedIn) return false;
-      return true;
+      const isLoggedIn = !!auth?.user
+      const isDashboard = nextUrl.pathname.startsWith("/dashboard")
+      if (isDashboard && !isLoggedIn) return false
+      return true
     },
   },
-} satisfies NextAuthConfig;
+} satisfies NextAuthConfig

@@ -1,14 +1,14 @@
-import { db } from "@/lib/db";
-import { ApiError } from "@/lib/api/error";
-import { CommentStatus } from "@/generated/prisma/client";
+import { db } from "@/lib/db"
+import { ApiError } from "@/lib/api/error"
+import { CommentStatus } from "@/generated/prisma/client"
 
 export async function moderateComment(
   commentId: string,
   status: CommentStatus,
-  adminEmail: string,
+  adminEmail: string
 ) {
-  const comment = await db.comment.findUnique({ where: { id: commentId } });
-  if (!comment) throw new ApiError("Comment not found", 404);
+  const comment = await db.comment.findUnique({ where: { id: commentId } })
+  if (!comment) throw new ApiError("Comment not found", 404)
 
   const [updated] = await db.$transaction([
     db.comment.update({
@@ -18,15 +18,15 @@ export async function moderateComment(
     db.moderationLog.create({
       data: { commentId, action: status, adminEmail },
     }),
-  ]);
+  ])
 
-  return updated;
+  return updated
 }
 
 export async function bulkModerate(
   commentIds: string[],
   status: CommentStatus,
-  adminEmail: string,
+  adminEmail: string
 ) {
   await db.$transaction([
     db.comment.updateMany({
@@ -36,19 +36,25 @@ export async function bulkModerate(
     ...commentIds.map((commentId) =>
       db.moderationLog.create({
         data: { commentId, action: status, adminEmail },
-      }),
+      })
     ),
-  ]);
+  ])
 }
 
 export async function getSiteCommentStats(siteId: string) {
   const [total, pending, approved, spam] = await Promise.all([
     db.comment.count({ where: { page: { siteId } } }),
-    db.comment.count({ where: { page: { siteId }, status: CommentStatus.PENDING } }),
-    db.comment.count({ where: { page: { siteId }, status: CommentStatus.APPROVED } }),
-    db.comment.count({ where: { page: { siteId }, status: CommentStatus.SPAM } }),
-  ]);
-  return { total, pending, approved, spam };
+    db.comment.count({
+      where: { page: { siteId }, status: CommentStatus.PENDING },
+    }),
+    db.comment.count({
+      where: { page: { siteId }, status: CommentStatus.APPROVED },
+    }),
+    db.comment.count({
+      where: { page: { siteId }, status: CommentStatus.SPAM },
+    }),
+  ])
+  return { total, pending, approved, spam }
 }
 
 export async function getOwnerOverview(ownerId: string) {
@@ -64,32 +70,45 @@ export async function getOwnerOverview(ownerId: string) {
     },
     orderBy: { createdAt: "desc" },
     take: 5,
-  });
+  })
 
-  const siteIds = sites.map((s) => s.id);
+  const siteIds = sites.map((s) => s.id)
 
-  const [totalComments, pendingComments, approvedComments, spamComments, recentComments] =
-    await Promise.all([
-      db.comment.count({ where: { page: { siteId: { in: siteIds } } } }),
-      db.comment.count({
-        where: { page: { siteId: { in: siteIds } }, status: CommentStatus.PENDING },
-      }),
-      db.comment.count({
-        where: { page: { siteId: { in: siteIds } }, status: CommentStatus.APPROVED },
-      }),
-      db.comment.count({
-        where: { page: { siteId: { in: siteIds } }, status: CommentStatus.SPAM },
-      }),
-      db.comment.findMany({
-        where: { page: { siteId: { in: siteIds } } },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-        include: {
-          page: { select: { slug: true, site: { select: { name: true, id: true } } } },
-          commenter: { select: { name: true } },
+  const [
+    totalComments,
+    pendingComments,
+    approvedComments,
+    spamComments,
+    recentComments,
+  ] = await Promise.all([
+    db.comment.count({ where: { page: { siteId: { in: siteIds } } } }),
+    db.comment.count({
+      where: {
+        page: { siteId: { in: siteIds } },
+        status: CommentStatus.PENDING,
+      },
+    }),
+    db.comment.count({
+      where: {
+        page: { siteId: { in: siteIds } },
+        status: CommentStatus.APPROVED,
+      },
+    }),
+    db.comment.count({
+      where: { page: { siteId: { in: siteIds } }, status: CommentStatus.SPAM },
+    }),
+    db.comment.findMany({
+      where: { page: { siteId: { in: siteIds } } },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      include: {
+        page: {
+          select: { slug: true, site: { select: { name: true, id: true } } },
         },
-      }),
-    ]);
+        commenter: { select: { name: true } },
+      },
+    }),
+  ])
 
   return {
     totalSites: sites.length,
@@ -99,5 +118,5 @@ export async function getOwnerOverview(ownerId: string) {
     spamComments,
     sites,
     recentComments,
-  };
+  }
 }

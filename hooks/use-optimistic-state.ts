@@ -15,7 +15,7 @@ export function useOptimisticState<T>(initialData: T[]) {
 
   // Reset to server data on navigation, filter change, or page refresh
   useEffect(() => {
-    setData(initialData)
+    queueMicrotask(() => setData(initialData))
   }, [initialData])
 
   const updateItem = useCallback(

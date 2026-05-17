@@ -5,5 +5,5 @@ export function sanitizeBody(raw: string): string {
     .replace(/<[^>]*>/g, "") // strip HTML tags
     .replace(/javascript:/gi, "") // remove JS protocol
     .trim()
-    .slice(0, 5000); // hard cap
+    .slice(0, 5000) // hard cap
 }

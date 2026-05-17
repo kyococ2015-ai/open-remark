@@ -1,8 +1,8 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function DashboardLoading() {
   return (
-    <div className="p-6 flex flex-col gap-6">
+    <div className="flex flex-col gap-6 p-6">
       {/* Page header */}
       <div className="flex flex-col gap-2">
         <Skeleton className="h-7 w-32" />
@@ -35,5 +35,5 @@ export default function DashboardLoading() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,6 +1,6 @@
-# Contributing to Open Remark
+# Contributing to Zeon Comments
 
-Thank you for helping improve Open Remark.
+Thank you for helping improve Zeon Comments.
 
 ## Project structure
 

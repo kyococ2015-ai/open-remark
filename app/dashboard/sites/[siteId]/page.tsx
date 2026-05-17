@@ -1,35 +1,34 @@
-import Link from "next/link";
-import { auth } from "@/lib/auth";
-import { notFound } from "next/navigation";
-import { getSiteByIdForOwner } from "@/lib/services/site-service";
-import { getSiteCommentStats } from "@/lib/services/moderation-service";
-import { StatCard } from "@/components/dashboard/stat-card";
-import { Button } from "@/components/ui/button";
+import Link from "next/link"
+import { auth } from "@/lib/auth"
+import { notFound } from "next/navigation"
+import { getSiteByIdForOwner } from "@/lib/services/site-service"
+import { getSiteCommentStats } from "@/lib/services/moderation-service"
+import { StatCard } from "@/components/dashboard/stat-card"
+import { Button } from "@/components/ui/button"
 import {
   RiMessage2Line,
   RiCheckboxCircleLine,
   RiTimeLine,
   RiAlertLine,
-} from "@remixicon/react";
+} from "@remixicon/react"
 
-type Props = { params: Promise<{ siteId: string }> };
+type Props = { params: Promise<{ siteId: string }> }
 
 export default async function SiteOverviewPage({ params }: Props) {
-  const { siteId } = await params;
-  const session = await auth();
+  const { siteId } = await params
+  const session = await auth()
 
-  let site;
   try {
-    site = await getSiteByIdForOwner(siteId, session!.user!.id as string);
+    await getSiteByIdForOwner(siteId, session!.user!.id as string)
   } catch {
-    notFound();
+    notFound()
   }
 
-  const stats = await getSiteCommentStats(siteId);
+  const stats = await getSiteCommentStats(siteId)
 
   return (
     <div>
-      <div className="p-6 flex flex-col gap-6">
+      <div className="flex flex-col gap-6 p-6">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Comments"
@@ -58,12 +57,17 @@ export default async function SiteOverviewPage({ params }: Props) {
         </div>
 
         {stats.pending > 0 && (
-          <div className="rounded-lg border border-warning/20 bg-warning/10 p-4 flex items-center justify-between">
-            <p className="text-sm text-warning">
+          <div className="border-warning/20 bg-warning/10 flex items-center justify-between rounded-lg border p-4">
+            <p className="text-warning text-sm">
               <strong>{stats.pending}</strong> comment
               {stats.pending !== 1 ? "s" : ""} waiting for review
             </p>
-            <Button asChild size="sm" variant="outline" className="border-warning/30">
+            <Button
+              asChild
+              size="sm"
+              variant="outline"
+              className="border-warning/30"
+            >
               <Link href={`/dashboard/sites/${siteId}/comments?status=PENDING`}>
                 Review now
               </Link>
@@ -72,5 +76,5 @@ export default async function SiteOverviewPage({ params }: Props) {
         )}
       </div>
     </div>
-  );
+  )
 }

@@ -28,7 +28,11 @@ if (!dbUrl) {
 function isLocalDatabase(url: string): boolean {
   try {
     const hostname = new URL(url).hostname
-    return hostname === "localhost" || hostname === "127.0.0.1" || hostname.endsWith(".local")
+    return (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname.endsWith(".local")
+    )
   } catch {
     return false
   }

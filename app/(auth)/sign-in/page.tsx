@@ -1,23 +1,23 @@
-import { auth, signIn } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { auth, signIn } from "@/lib/auth"
+import { redirect } from "next/navigation"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card"
 
 export default async function SignInPage() {
-  const session = await auth();
-  if (session) redirect("/dashboard/sites");
+  const session = await auth()
+  if (session) redirect("/dashboard/sites")
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-            <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground text-lg font-bold">
+          <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-lg bg-primary text-lg font-bold text-primary-foreground">
             Z
           </div>
           <CardTitle className="text-2xl">Open Remark</CardTitle>
@@ -28,8 +28,8 @@ export default async function SignInPage() {
         <CardContent>
           <form
             action={async () => {
-              "use server";
-              await signIn("google", { redirectTo: "/dashboard/sites" });
+              "use server"
+              await signIn("google", { redirectTo: "/dashboard/sites" })
             }}
           >
             <Button type="submit" className="w-full" size="lg">
@@ -64,5 +64,5 @@ export default async function SignInPage() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

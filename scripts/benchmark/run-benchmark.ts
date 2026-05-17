@@ -37,9 +37,6 @@ function extractPlanMeta(planLines: string[]) {
   }
 }
 
-function scanIcon(type: string) {
-  return type.includes("Index") ? "✅ Index" : type.includes("Seq") ? "⚠️  Seq" : "❓ " + type
-}
 
 function pad(s: string | number, n: number) {
   return String(s).padEnd(n).slice(0, n)
@@ -51,7 +48,9 @@ async function benchmark() {
   console.log("\n🔍  Index Benchmark  —  50k comments\n")
 
   // 1. Data volume
-  const counts = await prisma.$queryRaw<[{ table_name: string; row_count: bigint }]>`
+  const counts = await prisma.$queryRaw<
+    [{ table_name: string; row_count: bigint }]
+  >`
     SELECT 'Sites' as table_name, COUNT(*) as row_count FROM "Site"
     UNION ALL SELECT 'Pages', COUNT(*) FROM "Page"
     UNION ALL SELECT 'Comments', COUNT(*) FROM "Comment"
@@ -77,7 +76,11 @@ async function benchmark() {
       ORDER BY "createdAt" DESC LIMIT 50
     `
     const meta = extractPlanMeta(plan.map((p) => p["QUERY PLAN"]))
-    results.push({ name: "Comment Feed", indexExpected: "pageId+status", ...meta })
+    results.push({
+      name: "Comment Feed",
+      indexExpected: "pageId+status",
+      ...meta,
+    })
   }
 
   // ── B2: Replies ──
@@ -105,7 +108,11 @@ async function benchmark() {
       ORDER BY "createdAt" DESC LIMIT 100
     `
     const meta = extractPlanMeta(plan.map((p) => p["QUERY PLAN"]))
-    results.push({ name: "Moderation Queue", indexExpected: "status+createdAt", ...meta })
+    results.push({
+      name: "Moderation Queue",
+      indexExpected: "status+createdAt",
+      ...meta,
+    })
   }
 
   // ── B4: Admin Activity ──
@@ -120,7 +127,11 @@ async function benchmark() {
       ORDER BY "createdAt" DESC LIMIT 50
     `
     const meta = extractPlanMeta(plan.map((p) => p["QUERY PLAN"]))
-    results.push({ name: "Admin Activity", indexExpected: "adminEmail+createdAt", ...meta })
+    results.push({
+      name: "Admin Activity",
+      indexExpected: "adminEmail+createdAt",
+      ...meta,
+    })
   }
 
   // ── B5: Pages per Site ──
@@ -137,7 +148,8 @@ async function benchmark() {
   }
 
   // ── B6: User's Sites ──
-  const ownerId = (await prisma.site.findFirst({ select: { ownerId: true } }))?.ownerId
+  const ownerId = (await prisma.site.findFirst({ select: { ownerId: true } }))
+    ?.ownerId
   if (ownerId) {
     const plan = await prisma.$queryRaw<{ "QUERY PLAN": string }[]>`
       EXPLAIN (ANALYZE, FORMAT TEXT)
@@ -155,7 +167,11 @@ async function benchmark() {
   console.log("  ├─────────────────────┼──────────┼────────────┼───────┤")
   for (const r of results) {
     const time = r.execMs < 1 ? "<1ms" : `${r.execMs.toFixed(1)}ms`
-    const icon = r.scanType.includes("Index") ? "✅" : r.scanType.includes("Seq") ? "⚠️ " : "❓"
+    const icon = r.scanType.includes("Index")
+      ? "✅"
+      : r.scanType.includes("Seq")
+        ? "⚠️ "
+        : "❓"
     console.log(
       `  │ ${pad(r.name, 19)} ${pad(time, 8)} ${pad(icon + " " + r.scanType.split(" ")[0], 10)} ${pad(r.rows, 5)} │`
     )
@@ -167,15 +183,21 @@ async function benchmark() {
   const avgTime = results.reduce((a, r) => a + r.execMs, 0) / results.length
 
   if (allIndexed && avgTime < 5) {
-    console.log("  🎉  All indexes active. Avg query time: " + avgTime.toFixed(2) + "ms")
+    console.log(
+      "  🎉  All indexes active. Avg query time: " + avgTime.toFixed(2) + "ms"
+    )
   } else if (!allIndexed) {
-    console.log("  ⚠️   Some queries are doing full table scans. Check indexes above.")
+    console.log(
+      "  ⚠️   Some queries are doing full table scans. Check indexes above."
+    )
   } else {
     console.log("  ⚠️   Queries are slower than expected. Consider optimizing.")
   }
 
   // 5. Index checklist (concise)
-  const indexes = await prisma.$queryRaw<{ tablename: string; indexname: string }[]>`
+  const indexes = await prisma.$queryRaw<
+    { tablename: string; indexname: string }[]
+  >`
     SELECT tablename, indexname
     FROM pg_indexes
     WHERE tablename IN ('Site','Page','Comment','ModerationLog')

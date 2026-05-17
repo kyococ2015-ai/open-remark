@@ -1,9 +1,9 @@
-# Embedding Open Remark in Astro
+# Embedding Zeon Comments in Astro
 
 ## Prerequisites
 
 - An Astro site (v3+)
-- A Open Remark account with a registered site
+- A Zeon Comments account with a registered site
 - Your **site key** from the dashboard
 
 ## 1. Create a Comments component
@@ -99,10 +99,10 @@ const { Content } = await post.render();
 ## Allowed origins
 
 Add `https://yourblog.com` (and `https://www.yourblog.com` if applicable) to
-the **Allowed origins** list in your site's Settings page. Open Remark will
+the **Allowed origins** list in your site's Settings page. Zeon Comments will
 reject widget posts from unlisted origins.
 
 ## Self-hosting note
 
-If you self-host Open Remark, replace `https://your-domain.com` with your
+If you self-host Zeon Comments, replace `https://your-domain.com` with your
 deployment URL in the `<script>` tag and in your site's allowed origins.

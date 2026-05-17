@@ -1,10 +1,13 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { formatDistanceToNow } from 'date-fns';
-import { patchCommentStatus, patchCommentBody } from '@/lib/services/comment-client';
-import { useOptimisticState } from '@/hooks/use-optimistic-state';
+import { useState } from "react"
+import { toast } from "sonner"
+import { formatDistanceToNow } from "date-fns"
+import {
+  patchCommentStatus,
+  patchCommentBody,
+} from "@/lib/services/comment-client"
+import { useOptimisticState } from "@/hooks/use-optimistic-state"
 import {
   Table,
   TableBody,
@@ -12,66 +15,79 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Check, MoreHorizontal, ShieldAlert, Trash2, Eye, Pencil } from 'lucide-react';
+} from "@/components/ui/dialog"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  Check,
+  MoreHorizontal,
+  ShieldAlert,
+  Trash2,
+  Eye,
+  Pencil,
+} from "lucide-react"
 
 const COMMENT_STATUS = {
-  APPROVED: 'APPROVED',
-  PENDING: 'PENDING',
-  SPAM: 'SPAM',
-  DELETED: 'DELETED',
-} as const;
+  APPROVED: "APPROVED",
+  PENDING: "PENDING",
+  SPAM: "SPAM",
+  DELETED: "DELETED",
+} as const
 
-type CommentStatus = (typeof COMMENT_STATUS)[keyof typeof COMMENT_STATUS];
+type CommentStatus = (typeof COMMENT_STATUS)[keyof typeof COMMENT_STATUS]
 
 type Comment = {
-  id: string;
-  body: string;
+  id: string
+  body: string
   commenter: {
-    name: string;
-    email: string;
-    image: string | null;
-  };
-  status: CommentStatus;
-  createdAt: Date;
-  editedAt?: Date | null;
-  page: { slug: string; url: string | null };
-};
+    name: string
+    email: string
+    image: string | null
+  }
+  status: CommentStatus
+  createdAt: Date
+  editedAt?: Date | null
+  page: { slug: string; url: string | null }
+}
 
 type Props = {
-  comments: Comment[];
-  onStatusChange?: () => void;
-};
+  comments: Comment[]
+  onStatusChange?: () => void
+}
 
-const STATUS_BADGE: Record<CommentStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  APPROVED: { label: 'Approved', variant: 'default' },
-  PENDING: { label: 'Pending', variant: 'secondary' },
-  SPAM: { label: 'Spam', variant: 'destructive' },
-  DELETED: { label: 'Deleted', variant: 'outline' },
-};
+const STATUS_BADGE: Record<
+  CommentStatus,
+  {
+    label: string
+    variant: "default" | "secondary" | "destructive" | "outline"
+  }
+> = {
+  APPROVED: { label: "Approved", variant: "default" },
+  PENDING: { label: "Pending", variant: "secondary" },
+  SPAM: { label: "Spam", variant: "destructive" },
+  DELETED: { label: "Deleted", variant: "outline" },
+}
 
 export function CommentsTable({ comments, onStatusChange }: Props) {
-  const [preview, setPreview] = useState<Comment | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Comment | null>(null);
-  const [editTarget, setEditTarget] = useState<Comment | null>(null);
-  const [editBody, setEditBody] = useState('');
+  const [preview, setPreview] = useState<Comment | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Comment | null>(null)
+  const [editTarget, setEditTarget] = useState<Comment | null>(null)
+  const [editBody, setEditBody] = useState("")
 
   const {
     data: optimisticComments,
@@ -79,53 +95,53 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
     revertItem,
     setBusy,
     isBusy,
-  } = useOptimisticState<Comment>(comments);
+  } = useOptimisticState<Comment>(comments)
 
   async function handleStatusChange(id: string, status: CommentStatus) {
-    const original = optimisticComments.find((c) => c.id === id);
-    if (!original) return;
+    const original = optimisticComments.find((c) => c.id === id)
+    if (!original) return
 
-    updateItem((c) => c.id === id, { status });
-    setBusy(id, true);
+    updateItem((c) => c.id === id, { status })
+    setBusy(id, true)
 
     try {
-      await patchCommentStatus(id, status);
-      toast.success(`Comment ${status.toLowerCase()}`);
-      onStatusChange?.();
+      await patchCommentStatus(id, status)
+      toast.success(`Comment ${status.toLowerCase()}`)
+      onStatusChange?.()
     } catch {
-      revertItem((c) => c.id === id, original);
-      toast.error('Action failed. Changes reverted.');
+      revertItem((c) => c.id === id, original)
+      toast.error("Action failed. Changes reverted.")
     } finally {
-      setBusy(id, false);
+      setBusy(id, false)
     }
   }
 
   async function handleBodyUpdate(id: string, body: string) {
-    const original = optimisticComments.find((c) => c.id === id);
-    if (!original) return;
+    const original = optimisticComments.find((c) => c.id === id)
+    if (!original) return
 
-    updateItem((c) => c.id === id, { body, editedAt: new Date() });
-    setEditTarget(null);
-    setBusy(id, true);
+    updateItem((c) => c.id === id, { body, editedAt: new Date() })
+    setEditTarget(null)
+    setBusy(id, true)
 
     try {
-      await patchCommentBody(id, body);
-      toast.success('Comment updated');
-      onStatusChange?.();
+      await patchCommentBody(id, body)
+      toast.success("Comment updated")
+      onStatusChange?.()
     } catch {
-      revertItem((c) => c.id === id, original);
-      toast.error('Update failed. Changes reverted.');
+      revertItem((c) => c.id === id, original)
+      toast.error("Update failed. Changes reverted.")
     } finally {
-      setBusy(id, false);
+      setBusy(id, false)
     }
   }
 
   if (optimisticComments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16 text-center">
-        <p className="text-muted-foreground text-sm">No comments found</p>
+        <p className="text-sm text-muted-foreground">No comments found</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -144,41 +160,49 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
           </TableHeader>
           <TableBody>
             {optimisticComments.map((comment) => {
-              const badge = STATUS_BADGE[comment.status];
+              const badge = STATUS_BADGE[comment.status]
               return (
                 <TableRow key={comment.id}>
                   <TableCell>
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex min-w-0 items-center gap-2">
                       <Avatar className="size-7 shrink-0">
-                        <AvatarImage src={comment.commenter.image ?? ''} />
+                        <AvatarImage src={comment.commenter.image ?? ""} />
                         <AvatarFallback className="text-xs">
                           {comment.commenter.name.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">
+                        <p className="truncate text-sm font-medium">
                           {comment.commenter.name}
                         </p>
-                        <p className="text-xs text-muted-foreground truncate">
+                        <p className="truncate text-xs text-muted-foreground">
                           {comment.commenter.email}
                         </p>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="max-w-xs">
-                    <p className={comment.status === COMMENT_STATUS.DELETED ? 'text-sm italic text-muted-foreground' : 'text-sm line-clamp-2'}>
-                      {comment.status === COMMENT_STATUS.DELETED ? 'Comment Removed' : comment.body}
+                    <p
+                      className={
+                        comment.status === COMMENT_STATUS.DELETED
+                          ? "text-sm text-muted-foreground italic"
+                          : "line-clamp-2 text-sm"
+                      }
+                    >
+                      {comment.status === COMMENT_STATUS.DELETED
+                        ? "Comment Removed"
+                        : comment.body}
                     </p>
                   </TableCell>
                   <TableCell>
-                    <p className="text-xs font-mono text-muted-foreground truncate max-w-36">
+                    <p className="max-w-36 truncate font-mono text-xs text-muted-foreground">
                       {comment.page.slug}
                     </p>
                   </TableCell>
                   <TableCell>
                     <Badge variant={badge.variant}>{badge.label}</Badge>
                   </TableCell>
-                  <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                  <TableCell className="text-xs whitespace-nowrap text-muted-foreground">
                     {formatDistanceToNow(new Date(comment.createdAt), {
                       addSuffix: true,
                     })}
@@ -193,7 +217,10 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                           disabled={isBusy(comment.id)}
                           aria-label={`Actions for comment by ${comment.commenter.name}`}
                         >
-                          <MoreHorizontal className="size-4" aria-hidden="true" />
+                          <MoreHorizontal
+                            className="size-4"
+                            aria-hidden="true"
+                          />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -201,24 +228,45 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                           <Eye className="mr-2 size-4" aria-hidden="true" />
                           View full
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => { setEditTarget(comment); setEditBody(comment.body); }}>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setEditTarget(comment)
+                            setEditBody(comment.body)
+                          }}
+                        >
                           <Pencil className="mr-2 size-4" aria-hidden="true" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         {comment.status !== COMMENT_STATUS.APPROVED && (
                           <DropdownMenuItem
-                            onClick={() => handleStatusChange(comment.id, COMMENT_STATUS.APPROVED)}
+                            onClick={() =>
+                              handleStatusChange(
+                                comment.id,
+                                COMMENT_STATUS.APPROVED
+                              )
+                            }
                           >
-                            <Check className="mr-2 size-4 text-success" aria-hidden="true" />
+                            <Check
+                              className="text-success mr-2 size-4"
+                              aria-hidden="true"
+                            />
                             Approve
                           </DropdownMenuItem>
                         )}
                         {comment.status !== COMMENT_STATUS.SPAM && (
                           <DropdownMenuItem
-                            onClick={() => handleStatusChange(comment.id, COMMENT_STATUS.SPAM)}
+                            onClick={() =>
+                              handleStatusChange(
+                                comment.id,
+                                COMMENT_STATUS.SPAM
+                              )
+                            }
                           >
-                            <ShieldAlert className="mr-2 size-4 text-warning" aria-hidden="true" />
+                            <ShieldAlert
+                              className="text-warning mr-2 size-4"
+                              aria-hidden="true"
+                            />
                             Mark as spam
                           </DropdownMenuItem>
                         )}
@@ -234,7 +282,7 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              );
+              )
             })}
           </TableBody>
         </Table>
@@ -249,7 +297,7 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
           <div className="rounded-md bg-muted p-4 text-sm whitespace-pre-wrap">
             {preview?.body}
           </div>
-          <div className="flex items-center gap-2 mt-2">
+          <div className="mt-2 flex items-center gap-2">
             <p className="text-xs text-muted-foreground">
               On <span className="font-mono">{preview?.page.slug}</span>
             </p>
@@ -265,20 +313,24 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
           <DialogHeader>
             <DialogTitle>Delete comment?</DialogTitle>
             <DialogDescription>
-              This comment will be marked as deleted. Replies will remain visible.
+              This comment will be marked as deleted. Replies will remain
+              visible.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex gap-2 justify-end mt-2">
+          <div className="mt-2 flex justify-end gap-2">
             <Button variant="outline" onClick={() => setDeleteTarget(null)}>
               Cancel
             </Button>
             <Button
               variant="destructive"
-              disabled={isBusy(deleteTarget?.id ?? '')}
+              disabled={isBusy(deleteTarget?.id ?? "")}
               onClick={async () => {
-                if (!deleteTarget) return;
-                await handleStatusChange(deleteTarget.id, COMMENT_STATUS.DELETED);
-                setDeleteTarget(null);
+                if (!deleteTarget) return
+                await handleStatusChange(
+                  deleteTarget.id,
+                  COMMENT_STATUS.DELETED
+                )
+                setDeleteTarget(null)
               }}
             >
               Delete
@@ -291,23 +343,25 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit comment</DialogTitle>
-            <DialogDescription>By {editTarget?.commenter.name}</DialogDescription>
+            <DialogDescription>
+              By {editTarget?.commenter.name}
+            </DialogDescription>
           </DialogHeader>
           <textarea
-            className="w-full min-h-[100px] p-3 text-sm border rounded-md bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+            className="min-h-[100px] w-full resize-none rounded-md border bg-background p-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
             value={editBody}
             onChange={(e) => setEditBody(e.target.value)}
-            disabled={isBusy(editTarget?.id ?? '')}
+            disabled={isBusy(editTarget?.id ?? "")}
           />
-          <div className="flex gap-2 justify-end mt-2">
+          <div className="mt-2 flex justify-end gap-2">
             <Button variant="outline" onClick={() => setEditTarget(null)}>
               Cancel
             </Button>
             <Button
-              disabled={isBusy(editTarget?.id ?? '') || !editBody.trim()}
+              disabled={isBusy(editTarget?.id ?? "") || !editBody.trim()}
               onClick={() => {
-                if (!editTarget) return;
-                handleBodyUpdate(editTarget.id, editBody);
+                if (!editTarget) return
+                handleBodyUpdate(editTarget.id, editBody)
               }}
             >
               Save
@@ -316,5 +370,5 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
         </DialogContent>
       </Dialog>
     </>
-  );
+  )
 }

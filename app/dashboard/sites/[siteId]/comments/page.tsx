@@ -1,41 +1,45 @@
-import { auth } from "@/lib/auth";
-import { notFound } from "next/navigation";
-import { getSiteByIdForOwner } from "@/lib/services/site-service";
-import { getCommentsBySite } from "@/lib/services/comment-service";
-import { getPagesForSite } from "@/lib/services/page-service";
-import { CommentsTable } from "@/components/dashboard/comments-table";
-import { PagesFilterPanel } from "@/components/dashboard/pages-filter-panel";
-import { CommentSearchInput } from "@/components/dashboard/comment-search-input";
-import Link from "next/link";
-import { CommentStatus } from "@/generated/prisma/client";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { auth } from "@/lib/auth"
+import { notFound } from "next/navigation"
+import { getSiteByIdForOwner } from "@/lib/services/site-service"
+import { getCommentsBySite } from "@/lib/services/comment-service"
+import { getPagesForSite } from "@/lib/services/page-service"
+import { CommentsTable } from "@/components/dashboard/comments-table"
+import { PagesFilterPanel } from "@/components/dashboard/pages-filter-panel"
+import { CommentSearchInput } from "@/components/dashboard/comment-search-input"
+import Link from "next/link"
+import { CommentStatus } from "@/generated/prisma/client"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 type Props = {
-  params: Promise<{ siteId: string }>;
-  searchParams: Promise<{ status?: string; slug?: string; page?: string; search?: string }>;
-};
+  params: Promise<{ siteId: string }>
+  searchParams: Promise<{
+    status?: string
+    slug?: string
+    page?: string
+    search?: string
+  }>
+}
 
-const STATUSES = ["ALL", "PENDING", "APPROVED", "SPAM", "DELETED"] as const;
-const LIMIT = 20;
+const STATUSES = ["ALL", "PENDING", "APPROVED", "SPAM", "DELETED"] as const
+const LIMIT = 20
 
 export default async function CommentsPage({ params, searchParams }: Props) {
-  const { siteId } = await params;
-  const { status, slug, page: pageParam, search } = await searchParams;
+  const { siteId } = await params
+  const { status, slug, page: pageParam, search } = await searchParams
 
-  const session = await auth();
+  const session = await auth()
 
-  let site;
   try {
-    site = await getSiteByIdForOwner(siteId, session!.user!.id as string);
+    await getSiteByIdForOwner(siteId, session!.user!.id as string)
   } catch {
-    notFound();
+    notFound()
   }
 
   const activeStatus =
-    status && status !== "ALL" ? (status as CommentStatus) : undefined;
-  const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10));
+    status && status !== "ALL" ? (status as CommentStatus) : undefined
+  const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10))
 
   const [{ comments, total, limit }, pages] = await Promise.all([
     getCommentsBySite(siteId, {
@@ -46,45 +50,59 @@ export default async function CommentsPage({ params, searchParams }: Props) {
       search: search || undefined,
     }),
     getPagesForSite(siteId),
-  ]);
+  ])
 
-  const totalPages = Math.ceil(total / limit);
+  const totalPages = Math.ceil(total / limit)
 
-  function buildHref(overrides: { status?: string; slug?: string | null; page?: number; search?: string | null }) {
-    const base = `/dashboard/sites/${siteId}/comments`;
-    const params = new URLSearchParams();
+  function buildHref(overrides: {
+    status?: string
+    slug?: string | null
+    page?: number
+    search?: string | null
+  }) {
+    const base = `/dashboard/sites/${siteId}/comments`
+    const params = new URLSearchParams()
 
-    const s = overrides.status ?? (status && status !== "ALL" ? status : undefined);
-    if (s && s !== "ALL") params.set("status", s);
+    const s =
+      overrides.status ?? (status && status !== "ALL" ? status : undefined)
+    if (s && s !== "ALL") params.set("status", s)
 
-    const sl = overrides.slug !== undefined ? overrides.slug : (slug ?? undefined);
-    if (sl) params.set("slug", sl);
+    const sl =
+      overrides.slug !== undefined ? overrides.slug : (slug ?? undefined)
+    if (sl) params.set("slug", sl)
 
-    const sr = overrides.search !== undefined ? overrides.search : (search ?? undefined);
-    if (sr) params.set("search", sr);
+    const sr =
+      overrides.search !== undefined ? overrides.search : (search ?? undefined)
+    if (sr) params.set("search", sr)
 
-    const p = overrides.page ?? currentPage;
-    if (p > 1) params.set("page", String(p));
+    const p = overrides.page ?? currentPage
+    if (p > 1) params.set("page", String(p))
 
-    const qs = params.toString();
-    return qs ? `${base}?${qs}` : base;
+    const qs = params.toString()
+    return qs ? `${base}?${qs}` : base
   }
 
   function statusHref(s: string) {
-    return buildHref({ status: s, page: 1 });
+    return buildHref({ status: s, page: 1 })
   }
 
-  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1).filter(
-    (p) => p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1)
-  );
+  const pageNumbers = Array.from(
+    { length: totalPages },
+    (_, i) => i + 1
+  ).filter(
+    (p) =>
+      p === 1 ||
+      p === totalPages ||
+      (p >= currentPage - 1 && p <= currentPage + 1)
+  )
 
   const dedupedPageNumbers = pageNumbers.reduce<number[]>((acc, p, i) => {
     if (i > 0 && p - pageNumbers[i - 1] > 1) {
-      acc.push(-1); // ellipsis marker
+      acc.push(-1) // ellipsis marker
     }
-    acc.push(p);
-    return acc;
-  }, []);
+    acc.push(p)
+    return acc
+  }, [])
 
   return (
     <div className="flex h-full min-h-0">
@@ -92,7 +110,11 @@ export default async function CommentsPage({ params, searchParams }: Props) {
       {pages.length > 0 && (
         <PagesFilterPanel
           siteId={siteId}
-          pages={pages.map((p) => ({ id: p.id, slug: p.slug, count: p._count.comments }))}
+          pages={pages.map((p) => ({
+            id: p.id,
+            slug: p.slug,
+            count: p._count.comments,
+          }))}
           activeSlug={slug}
           activeStatus={status}
           search={search}
@@ -100,31 +122,38 @@ export default async function CommentsPage({ params, searchParams }: Props) {
       )}
 
       {/* Main content */}
-      <div className="flex-1 min-w-0 overflow-auto">
+      <div className="min-w-0 flex-1 overflow-auto">
         {/* Page toolbar */}
-        <div className="sticky top-0 z-10 bg-background border-b px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-2 min-w-0">
-            <h1 className="text-base font-semibold shrink-0">Comments</h1>
+        <div className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-4 border-b bg-background px-6 py-3">
+          <div className="flex min-w-0 items-center gap-2">
+            <h1 className="shrink-0 text-base font-semibold">Comments</h1>
             {slug && (
-              <Badge variant="secondary" className="max-w-52 truncate font-normal text-xs">
+              <Badge
+                variant="secondary"
+                className="max-w-52 truncate text-xs font-normal"
+              >
                 {slug}
               </Badge>
             )}
-            <span className="text-sm text-muted-foreground tabular-nums shrink-0">
+            <span className="shrink-0 text-sm text-muted-foreground tabular-nums">
               {total} {total === 1 ? "comment" : "comments"}
             </span>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex flex-wrap items-center gap-3">
             <CommentSearchInput />
 
             {/* Status filters */}
-            <div className="flex gap-1.5 flex-wrap">
+            <div className="flex flex-wrap gap-1.5">
               {STATUSES.map((s) => (
                 <Button
                   key={s}
                   asChild
-                  variant={(s === "ALL" && !status) || s === status ? "default" : "ghost"}
+                  variant={
+                    (s === "ALL" && !status) || s === status
+                      ? "default"
+                      : "ghost"
+                  }
                   size="sm"
                   className="h-7 px-2.5 text-xs"
                 >
@@ -139,12 +168,14 @@ export default async function CommentsPage({ params, searchParams }: Props) {
 
         <div className="p-6">
           <CommentsTable
-            comments={comments as Parameters<typeof CommentsTable>[0]["comments"]}
+            comments={
+              comments as Parameters<typeof CommentsTable>[0]["comments"]
+            }
           />
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6">
+            <div className="mt-6 flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
                 Page {currentPage} of {totalPages}
               </p>
@@ -163,7 +194,10 @@ export default async function CommentsPage({ params, searchParams }: Props) {
 
                 {dedupedPageNumbers.map((p, i) =>
                   p === -1 ? (
-                    <span key={`ellipsis-${i}`} className="px-2 text-sm text-muted-foreground">
+                    <span
+                      key={`ellipsis-${i}`}
+                      className="px-2 text-sm text-muted-foreground"
+                    >
                       ...
                     </span>
                   ) : (
@@ -196,5 +230,5 @@ export default async function CommentsPage({ params, searchParams }: Props) {
         </div>
       </div>
     </div>
-  );
+  )
 }

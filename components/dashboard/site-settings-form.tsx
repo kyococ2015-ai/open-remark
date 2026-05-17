@@ -1,33 +1,33 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+} from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 
-type Theme = "AUTO" | "LIGHT" | "DARK";
+type Theme = "AUTO" | "LIGHT" | "DARK"
 
 type Site = {
-  id: string;
-  name: string;
-  domain: string;
-  autoApprove: boolean;
-  allowedOrigins: string;
-  theme: Theme;
-  primaryColor: string;
-  radius: number;
-};
+  id: string
+  name: string
+  domain: string
+  autoApprove: boolean
+  allowedOrigins: string
+  theme: Theme
+  primaryColor: string
+  radius: number
+}
 
 const PRESET_COLORS = [
   "#0f172a", // slate
@@ -38,34 +38,34 @@ const PRESET_COLORS = [
   "#ea580c", // orange
   "#0891b2", // cyan
   "#db2777", // pink
-];
+]
 
 type Props = {
-  site: Site;
-};
+  site: Site
+}
 
 export function SiteSettingsForm({ site: initialSite }: Props) {
-  const router = useRouter();
-  const [site, setSite] = useState<Site>(initialSite);
-  const [loading, setLoading] = useState(false);
-  const [savingAppearance, setSavingAppearance] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const router = useRouter()
+  const [site, setSite] = useState<Site>(initialSite)
+  const [loading, setLoading] = useState(false)
+  const [savingAppearance, setSavingAppearance] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   // Local appearance state for live preview
-  const [theme, setTheme] = useState<Theme>(site.theme);
-  const [primaryColor, setPrimaryColor] = useState(site.primaryColor);
-  const [radius, setRadius] = useState(site.radius);
+  const [theme, setTheme] = useState<Theme>(site.theme)
+  const [primaryColor, setPrimaryColor] = useState(site.primaryColor)
+  const [radius, setRadius] = useState(site.radius)
 
-  const siteId = site.id;
+  const siteId = site.id
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    const form = new FormData(e.currentTarget);
+    e.preventDefault()
+    setLoading(true)
+    const form = new FormData(e.currentTarget)
     const originsRaw = (form.get("allowedOrigins") as string)
       .split("\n")
       .map((s) => s.trim())
-      .filter(Boolean);
+      .filter(Boolean)
 
     const res = await fetch(`/api/v1/sites/${siteId}`, {
       method: "PATCH",
@@ -76,59 +76,65 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
         autoApprove: form.get("autoApprove") === "on",
         allowedOrigins: originsRaw,
       }),
-    });
+    })
 
     if (res.ok) {
-      toast.success("Settings saved");
-      setSite(await res.json());
+      toast.success("Settings saved")
+      setSite(await res.json())
     } else {
-      toast.error("Failed to save");
+      toast.error("Failed to save")
     }
-    setLoading(false);
+    setLoading(false)
   }
 
   async function handleSaveAppearance() {
-    setSavingAppearance(true);
+    setSavingAppearance(true)
     const res = await fetch(`/api/v1/sites/${siteId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ theme, primaryColor, radius }),
-    });
+    })
 
     if (res.ok) {
-      toast.success("Appearance saved");
-      setSite(await res.json());
+      toast.success("Appearance saved")
+      setSite(await res.json())
     } else {
-      toast.error("Failed to save appearance");
+      toast.error("Failed to save appearance")
     }
-    setSavingAppearance(false);
+    setSavingAppearance(false)
   }
 
   async function handleDelete() {
-    if (!confirm("Delete this site and all its comments? This cannot be undone.")) return;
-    setDeleting(true);
-    const res = await fetch(`/api/v1/sites/${siteId}`, { method: "DELETE" });
+    if (
+      !confirm("Delete this site and all its comments? This cannot be undone.")
+    )
+      return
+    setDeleting(true)
+    const res = await fetch(`/api/v1/sites/${siteId}`, { method: "DELETE" })
     if (res.ok) {
-      toast.success("Site deleted");
-      router.push("/dashboard/sites");
+      toast.success("Site deleted")
+      router.push("/dashboard/sites")
     } else {
-      toast.error("Failed to delete");
-      setDeleting(false);
+      toast.error("Failed to delete")
+      setDeleting(false)
     }
   }
 
   const origins = (() => {
-    try { return (JSON.parse(site.allowedOrigins) as string[]).join("\n"); }
-    catch { return ""; }
-  })();
+    try {
+      return (JSON.parse(site.allowedOrigins) as string[]).join("\n")
+    } catch {
+      return ""
+    }
+  })()
 
   const appearanceDirty =
     theme !== site.theme ||
     primaryColor !== site.primaryColor ||
-    radius !== site.radius;
+    radius !== site.radius
 
   return (
-    <div className="p-6 max-w-2xl flex flex-col gap-6">
+    <div className="flex max-w-2xl flex-col gap-6 p-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-base">General</CardTitle>
@@ -141,7 +147,12 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="domain">Domain</Label>
-              <Input id="domain" name="domain" defaultValue={site.domain} required />
+              <Input
+                id="domain"
+                name="domain"
+                defaultValue={site.domain}
+                required
+              />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="allowedOrigins">
@@ -182,8 +193,8 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
         <CardHeader>
           <CardTitle className="text-base">Embed appearance</CardTitle>
           <CardDescription>
-            Controls how the comment widget looks on your site. Applied
-            globally — visitors don&apos;t configure anything.
+            Controls how the comment widget looks on your site. Applied globally
+            — visitors don&apos;t configure anything.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-5">
@@ -208,8 +219,8 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
             </div>
             <p className="text-xs text-muted-foreground">
               Auto detects your page&apos;s dark mode. If the{" "}
-              <code>&lt;html&gt;</code> element has a <code>dark</code> class, the
-              widget renders in dark mode; otherwise it uses light mode.
+              <code>&lt;html&gt;</code> element has a <code>dark</code> class,
+              the widget renders in dark mode; otherwise it uses light mode.
             </p>
           </div>
 
@@ -229,9 +240,9 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
                 value={primaryColor}
                 onChange={(e) => setPrimaryColor(e.target.value)}
                 pattern="^#[0-9a-fA-F]{6}$"
-                className="font-mono uppercase max-w-36"
+                className="max-w-36 font-mono uppercase"
               />
-              <div className="flex flex-wrap gap-1.5 ml-2">
+              <div className="ml-2 flex flex-wrap gap-1.5">
                 {PRESET_COLORS.map((c) => (
                   <button
                     key={c}
@@ -275,10 +286,7 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
               className="rounded-lg border p-4"
               style={{
                 borderRadius: `${radius * 1.5}px`,
-                background:
-                  theme === "DARK"
-                    ? "#0f172a"
-                    : "#ffffff",
+                background: theme === "DARK" ? "#0f172a" : "#ffffff",
                 color: theme === "DARK" ? "#f8fafc" : "#0f172a",
                 borderColor: theme === "DARK" ? "#1e293b" : "#e2e8f0",
               }}
@@ -314,9 +322,9 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
               <Button
                 variant="ghost"
                 onClick={() => {
-                  setTheme(site.theme);
-                  setPrimaryColor(site.primaryColor);
-                  setRadius(site.radius);
+                  setTheme(site.theme)
+                  setPrimaryColor(site.primaryColor)
+                  setRadius(site.radius)
                 }}
               >
                 Reset
@@ -348,5 +356,5 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

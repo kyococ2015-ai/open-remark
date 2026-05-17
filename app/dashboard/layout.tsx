@@ -1,16 +1,16 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { AppSidebar } from "@/components/dashboard/app-sidebar";
+import { auth } from "@/lib/auth"
+import { redirect } from "next/navigation"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { AppSidebar } from "@/components/dashboard/app-sidebar"
 
 export default async function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  const session = await auth();
-  if (!session?.user) redirect("/sign-in");
+  const session = await auth()
+  if (!session?.user) redirect("/sign-in")
 
   return (
     <TooltipProvider>
@@ -19,5 +19,5 @@ export default async function DashboardLayout({
         <SidebarInset>{children}</SidebarInset>
       </SidebarProvider>
     </TooltipProvider>
-  );
+  )
 }
