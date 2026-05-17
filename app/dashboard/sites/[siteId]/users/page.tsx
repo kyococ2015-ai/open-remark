@@ -29,11 +29,7 @@ export default async function UsersPage({ params, searchParams }: Props) {
 
   const currentPage = Math.max(1, parseInt(pageParam ?? "1", 10))
 
-  const {
-    commenters,
-    total,
-    limit,
-  } = await getCommentersBySite(siteId, {
+  const { commenters, total, limit } = await getCommentersBySite(siteId, {
     page: currentPage,
     limit: LIMIT,
     search: search || undefined,

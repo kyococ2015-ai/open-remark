@@ -70,11 +70,11 @@ export function UserProfileDialog({ open, onClose, commenter, siteId }: Props) {
   }, [open, commenter, siteId])
 
   async function handleStatusChange(
-                    commentId: number,
+    commentId: string,
     status: ClientCommentStatus
   ) {
     try {
-        await patchCommentStatus(commentId, status)
+      await patchCommentStatus(commentId, status)
       setComments((prev) =>
         (prev ?? []).map((c) => (c.id === commentId ? { ...c, status } : c))
       )

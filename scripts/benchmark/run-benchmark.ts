@@ -37,7 +37,6 @@ function extractPlanMeta(planLines: string[]) {
   }
 }
 
-
 function pad(s: string | number, n: number) {
   return String(s).padEnd(n).slice(0, n)
 }
