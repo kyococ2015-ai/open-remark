@@ -8,18 +8,18 @@ A self-hostable comment system for static websites — Astro, Hugo, Next.js, and
 
 ```bash
 # 1. Install
-yarn install
+pnpm install
 
 # 2. Configure
 cp .env.example .env
 # Fill in GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, AUTH_SECRET, WIDGET_JWT_SECRET
 
 # 3. Database
-yarn db:migrate
-yarn db:seed        # optional demo data
+pnpm db:migrate
+pnpm db:seed        # optional demo data
 
 # 4. Run (also builds widget + generates Prisma client)
-yarn dev
+pnpm dev
 ```
 
 Open `http://localhost:3000` — sign in with Google to access the dashboard.
