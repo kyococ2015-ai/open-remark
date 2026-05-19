@@ -1,0 +1,10 @@
+{
+  "content": "public",
+  "media": "public",
+  "public": "public",
+  "configs": [
+    "config"
+  ],
+  "custom-commit": false,
+  "arrangement": []
+}
