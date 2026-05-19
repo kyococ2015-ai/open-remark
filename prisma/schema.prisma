@@ -84,7 +84,7 @@ model Site {
   allowedOrigins String   @default("[]")
   autoApprove    Boolean  @default(false)
   theme          String   @default("AUTO")
-  primaryColor   String   @default("#0f172a")
+  primaryColor   String   @default("#0891b2")
   radius         Int      @default(8)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

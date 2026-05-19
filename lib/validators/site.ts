@@ -26,7 +26,7 @@ export const CreateSiteSchema = z.object({
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/, "Must be a 6-digit hex color")
     .optional()
-    .default("#0f172a"),
+    .default("#0891b2"),
   radius: z.number().int().min(0).max(24).optional().default(8),
 })
 
