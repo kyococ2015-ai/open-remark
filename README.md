@@ -1,8 +1,12 @@
 # Open Remark
 
+![Beta](https://img.shields.io/badge/status-beta-orange) ![Version](https://img.shields.io/badge/version-0.1.0--beta.1-blue) ![License](https://img.shields.io/badge/license-MIT-green)
+
 A self-hostable comment system for static websites — Astro, Hugo, Next.js, and any site that accepts HTML.
 
 **Features:** Google sign-in · threaded replies · spam/moderation dashboard · shadow DOM widget · origin allowlisting
+
+> **Beta notice:** This is an early release. APIs and database schema may change between versions without a migration path. Not recommended for production use without pinning to a specific commit.
 
 ## Quick start
 

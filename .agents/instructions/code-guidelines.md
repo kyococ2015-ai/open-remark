@@ -110,7 +110,7 @@ When dealing with API calls in dashboard, try to use new React features like:
 hooks/use-optimistic-state.ts;
 ```
 
----
+--- 
 
 ## 6. Comments and Readability
 

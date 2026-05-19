@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
-
+import { GoogleTagManager } from "@next/third-parties/google"
+import config from "@/config/config.json"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
@@ -31,6 +32,10 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
     >
+      {/* google tag manager */}
+      {config.google_tag_manager.enable && (
+        <GoogleTagManager gtmId={config.google_tag_manager.gtm_id} />
+      )}
       <body suppressHydrationWarning>
         <a
           href="#main-content"
