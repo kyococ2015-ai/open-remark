@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
 import {
   patchCommentStatus,
   patchCommentBody,
+  bulkPatchCommentStatus,
 } from "@/lib/services/comment-client"
 import { useOptimisticState } from "@/hooks/use-optimistic-state"
 import {
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -99,6 +101,9 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
   const [deleteTarget, setDeleteTarget] = useState<Comment | null>(null)
   const [editTarget, setEditTarget] = useState<Comment | null>(null)
   const [editBody, setEditBody] = useState("")
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkAction, setBulkAction] = useState<"DELETE" | "SPAM" | null>(null)
+  const [bulkBusy, setBulkBusy] = useState(false)
 
   const {
     data: optimisticComments,
@@ -107,6 +112,59 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
     setBusy,
     isBusy,
   } = useOptimisticState<Comment>(comments)
+
+  const selectableIds = useMemo(
+    () =>
+      optimisticComments
+        .filter((c) => c.status !== COMMENT_STATUS.DELETED)
+        .map((c) => c.id),
+    [optimisticComments]
+  )
+
+  const allSelected =
+    selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id))
+  const someSelected = selectedIds.size > 0 && !allSelected
+
+  function toggleAll(checked: boolean) {
+    setSelectedIds(checked ? new Set(selectableIds) : new Set())
+  }
+
+  function toggleOne(id: string, checked: boolean) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (checked) next.add(id)
+      else next.delete(id)
+      return next
+    })
+  }
+
+  async function runBulk(status: CommentStatus) {
+    const ids = Array.from(selectedIds)
+    if (ids.length === 0) return
+
+    const originals = optimisticComments.filter((c) => selectedIds.has(c.id))
+    originals.forEach((o) => {
+      updateItem((c) => c.id === o.id, { status })
+      setBusy(o.id, true)
+    })
+    setBulkBusy(true)
+
+    try {
+      await bulkPatchCommentStatus(ids, status)
+      toast.success(
+        `${ids.length} comment${ids.length === 1 ? "" : "s"} ${status.toLowerCase()}`
+      )
+      setSelectedIds(new Set())
+      onStatusChange?.()
+    } catch {
+      originals.forEach((o) => revertItem((c) => c.id === o.id, o))
+      toast.error("Bulk action failed. Changes reverted.")
+    } finally {
+      originals.forEach((o) => setBusy(o.id, false))
+      setBulkBusy(false)
+      setBulkAction(null)
+    }
+  }
 
   async function handleStatusChange(id: string, status: CommentStatus) {
     const original = optimisticComments.find((c) => c.id === id)
@@ -157,10 +215,60 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
 
   return (
     <>
+      {selectedIds.size > 0 && (
+        <div className="mb-3 flex items-center justify-between rounded-md border bg-muted/40 px-3 py-2">
+          <p className="text-sm">
+            <span className="font-medium">{selectedIds.size}</span> selected
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bulkBusy}
+              onClick={() => setBulkAction("SPAM")}
+            >
+              <ShieldAlert
+                className="text-warning mr-1.5 size-4"
+                aria-hidden="true"
+              />
+              Mark as spam
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-destructive hover:text-destructive"
+              disabled={bulkBusy}
+              onClick={() => setBulkAction("DELETE")}
+            >
+              <Trash2 className="mr-1.5 size-4" aria-hidden="true" />
+              Delete
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={bulkBusy}
+              onClick={() => setSelectedIds(new Set())}
+            >
+              Clear
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-10">
+                <Checkbox
+                  checked={
+                    allSelected ? true : someSelected ? "indeterminate" : false
+                  }
+                  disabled={selectableIds.length === 0 || bulkBusy}
+                  onCheckedChange={(v) => toggleAll(v === true)}
+                  aria-label="Select all comments"
+                />
+              </TableHead>
               <TableHead>Author</TableHead>
               <TableHead>Comment</TableHead>
               <TableHead>Page</TableHead>
@@ -172,8 +280,22 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
           <TableBody>
             {optimisticComments.map((comment) => {
               const badge = STATUS_BADGE[comment.status]
+              const isDeleted = comment.status === COMMENT_STATUS.DELETED
               return (
-                <TableRow key={comment.id}>
+                <TableRow
+                  key={comment.id}
+                  data-state={
+                    selectedIds.has(comment.id) ? "selected" : undefined
+                  }
+                >
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.has(comment.id)}
+                      disabled={isDeleted || bulkBusy}
+                      onCheckedChange={(v) => toggleOne(comment.id, v === true)}
+                      aria-label={`Select comment by ${comment.commenter.name}`}
+                    />
+                  </TableCell>
                   <TableCell>
                     <div className="flex min-w-0 items-center gap-2">
                       <Avatar className="size-7 shrink-0">
@@ -347,6 +469,48 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
               }}
             >
               Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!bulkAction}
+        onOpenChange={(open) => !open && !bulkBusy && setBulkAction(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {bulkAction === "DELETE"
+                ? `Delete ${selectedIds.size} comment${selectedIds.size === 1 ? "" : "s"}?`
+                : `Mark ${selectedIds.size} comment${selectedIds.size === 1 ? "" : "s"} as spam?`}
+            </DialogTitle>
+            <DialogDescription>
+              {bulkAction === "DELETE"
+                ? "Selected comments will be marked as deleted. Replies remain visible."
+                : "Selected comments will be hidden from readers."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-2 flex justify-end gap-2">
+            <Button
+              variant="outline"
+              disabled={bulkBusy}
+              onClick={() => setBulkAction(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant={bulkAction === "DELETE" ? "destructive" : "default"}
+              disabled={bulkBusy}
+              onClick={() =>
+                runBulk(
+                  bulkAction === "DELETE"
+                    ? COMMENT_STATUS.DELETED
+                    : COMMENT_STATUS.SPAM
+                )
+              }
+            >
+              {bulkAction === "DELETE" ? "Delete" : "Mark as spam"}
             </Button>
           </div>
         </DialogContent>

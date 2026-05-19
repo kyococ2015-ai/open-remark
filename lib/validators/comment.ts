@@ -13,6 +13,11 @@ export const UpdateCommentStatusSchema = z.object({
   status: z.nativeEnum(CommentStatus),
 })
 
+export const BulkUpdateCommentStatusSchema = z.object({
+  ids: z.array(z.string().cuid()).min(1).max(200),
+  status: z.nativeEnum(CommentStatus),
+})
+
 export const UpdateCommentSchema = z
   .object({
     body: z.string().min(1).max(5000).optional(),
@@ -25,3 +30,6 @@ export const UpdateCommentSchema = z
 export type CreateCommentInput = z.infer<typeof CreateCommentSchema>
 export type UpdateCommentStatusInput = z.infer<typeof UpdateCommentStatusSchema>
 export type UpdateCommentInput = z.infer<typeof UpdateCommentSchema>
+export type BulkUpdateCommentStatusInput = z.infer<
+  typeof BulkUpdateCommentStatusSchema
+>
