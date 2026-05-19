@@ -75,12 +75,23 @@ const STATUS_BADGE: Record<
   {
     label: string
     variant: "default" | "secondary" | "destructive" | "outline"
+    className?: string
   }
 > = {
   APPROVED: { label: "Approved", variant: "default" },
   PENDING: { label: "Pending", variant: "secondary" },
-  SPAM: { label: "Spam", variant: "destructive" },
-  DELETED: { label: "Deleted", variant: "outline" },
+  SPAM: {
+    label: "Spam",
+    variant: "outline",
+    className:
+      "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-400",
+  },
+  DELETED: {
+    label: "Deleted",
+    variant: "outline",
+    className:
+      "border-border bg-muted text-muted-foreground line-through decoration-muted-foreground/40",
+  },
 }
 
 export function CommentsTable({ comments, onStatusChange }: Props) {
@@ -200,7 +211,9 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                     </p>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={badge.variant}>{badge.label}</Badge>
+                    <Badge variant={badge.variant} className={badge.className}>
+                      {badge.label}
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-xs whitespace-nowrap text-muted-foreground">
                     {formatDistanceToNow(new Date(comment.createdAt), {

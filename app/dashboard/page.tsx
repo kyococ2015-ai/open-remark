@@ -164,11 +164,15 @@ export default async function OverviewPage() {
                               ? "default"
                               : comment.status === "PENDING"
                                 ? "secondary"
-                                : comment.status === "SPAM"
-                                  ? "destructive"
-                                  : "outline"
+                                : "outline"
                           }
-                          className="h-4 rounded-none px-1 text-xs"
+                          className={
+                            comment.status === "SPAM"
+                              ? "h-4 rounded-none border-amber-200 bg-amber-50 px-1 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-400"
+                              : comment.status === "DELETED"
+                                ? "h-4 rounded-none border-border bg-muted px-1 text-xs text-muted-foreground"
+                                : "h-4 rounded-none px-1 text-xs"
+                          }
                         >
                           {comment.status.toLowerCase()}
                         </Badge>
