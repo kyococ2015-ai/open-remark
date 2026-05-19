@@ -70,7 +70,7 @@ const { slug } = Astro.props;
 </section>
 ```
 
-## 3. Pass the slug from your blog collection
+## 3. Pass the slug from your blog collection 
 
 In `src/pages/blog/[slug].astro`:
 
