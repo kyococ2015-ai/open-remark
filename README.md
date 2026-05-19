@@ -52,10 +52,6 @@ Get your site key from **Dashboard → Sites → Install**.
 
 See [docs/architecture.md](docs/architecture.md) for system design, request flows, and scaling path.
 
-## Contributing
-
-See [docs/contributing.md](docs/contributing.md).
-
 ## Tech stack
 
 | Layer       | Tech                      |
