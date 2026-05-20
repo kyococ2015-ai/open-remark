@@ -1,6 +1,8 @@
 import { auth, signIn } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { SignInPanel } from "./sign-in-panel"
 
 export default async function SignInPage() {
   const session = await auth()
@@ -67,20 +69,21 @@ export default async function SignInPage() {
           Open source · MIT license
         </p>
       </div>
+      <SignInPanel />
 
       {/* Right — sign-in form */}
       <div className="flex flex-col items-center justify-center px-6 py-16">
         {/* Mobile logo */}
-        <div className="mb-10 flex items-center gap-2.5 lg:hidden">
+        <Link href="/" className="mb-10 flex items-center gap-2.5 lg:hidden">
           <span className="flex size-7 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
             R
           </span>
           <span className="text-sm font-semibold tracking-tight">
             OpenRemark
           </span>
-        </div>
+        </Link>
 
-        <div className="w-full max-w-[360px] space-y-8">
+        <div className="w-full max-w-90 space-y-8">
           <div className="space-y-1.5">
             <h1 className="text-2xl font-semibold tracking-tight text-pretty">
               Welcome back

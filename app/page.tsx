@@ -9,6 +9,7 @@ import {
   Code2,
   ArrowRight,
 } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const features = [
   {
@@ -281,6 +282,8 @@ export default function HomePage() {
           </Button>
         </section>
       </main>
+
+      <ThemeToggle />
 
       {/* Footer */}
       <footer className="mt-auto border-t">
