@@ -17,6 +17,8 @@ import {
   RiAddLine,
   RiGlobalLine,
   RiMessage2Line,
+  RiTimeLine,
+  RiFileList2Line,
   RiSettings3Line,
   RiCodeLine,
 } from "@remixicon/react"
@@ -104,15 +106,19 @@ export default async function SitesPage() {
                     <div className="flex items-center gap-3">
                       {/* Stats */}
                       <div className="flex flex-1 items-center divide-x">
-                        <div className="flex flex-col pr-4">
+                        <div className="flex flex-1 flex-col pr-4">
                           <span className="text-lg leading-tight font-semibold tabular-nums">
                             {site.totalComments}
                           </span>
-                          <span className="mt-0.5 text-xs text-muted-foreground">
+                          <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                            <RiMessage2Line
+                              className="size-3.5"
+                              aria-hidden="true"
+                            />
                             Comments
                           </span>
                         </div>
-                        <div className="flex flex-col px-4">
+                        <div className="flex flex-1 flex-col px-4">
                           <span
                             className={cn(
                               "text-lg leading-tight font-semibold tabular-nums",
@@ -121,15 +127,23 @@ export default async function SitesPage() {
                           >
                             {site.pendingComments}
                           </span>
-                          <span className="mt-0.5 text-xs text-muted-foreground">
+                          <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                            <RiTimeLine
+                              className="size-3.5"
+                              aria-hidden="true"
+                            />
                             Pending
                           </span>
                         </div>
-                        <div className="flex flex-col pl-4">
+                        <div className="flex flex-1 flex-col pl-4">
                           <span className="text-lg leading-tight font-semibold tabular-nums">
                             {site._count.pages}
                           </span>
-                          <span className="mt-0.5 text-xs text-muted-foreground">
+                          <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                            <RiFileList2Line
+                              className="size-3.5"
+                              aria-hidden="true"
+                            />
                             Pages
                           </span>
                         </div>
