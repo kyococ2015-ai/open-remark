@@ -1,12 +1,31 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { RiFileTextLine, RiLayoutLeftLine, RiCloseLine } from "@remixicon/react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  RiFileTextLine,
+  RiLayoutLeftLine,
+  RiCloseLine,
+  RiDeleteBinLine,
+  RiFileCopyLine,
+  RiCheckLine,
+} from "@remixicon/react"
+import { deletePage } from "@/lib/services/comment-client"
 
 type Page = { id: string; slug: string; count: number }
 
@@ -25,7 +44,59 @@ export function PagesFilterPanel({
   activeStatus,
   search,
 }: Props) {
+  const router = useRouter()
   const [collapsed, setCollapsed] = useState(false)
+  const [target, setTarget] = useState<Page | null>(null)
+  const [typed, setTyped] = useState("")
+  const [copied, setCopied] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  function openDelete(page: Page, e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    setTarget(page)
+    setTyped("")
+    setCopied(false)
+  }
+
+  function closeDialog() {
+    if (deleting) return
+    setTarget(null)
+    setTyped("")
+    setCopied(false)
+  }
+
+  async function copySlug() {
+    if (!target) return
+    try {
+      await navigator.clipboard.writeText(target.slug)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      toast.error("Copy failed")
+    }
+  }
+
+  async function confirmDelete() {
+    if (!target || typed !== target.slug) return
+    setDeleting(true)
+    try {
+      await deletePage(siteId, target.id)
+      toast.success(`Deleted "${target.slug}"`)
+      const wasActive = activeSlug === target.slug
+      setTarget(null)
+      setTyped("")
+      if (wasActive) {
+        router.push(`/dashboard/sites/${siteId}/comments`)
+      } else {
+        router.refresh()
+      }
+    } catch {
+      toast.error("Failed to delete page")
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   function pageHref(slug: string | null) {
     const base = `/dashboard/sites/${siteId}/comments`
@@ -53,6 +124,8 @@ export function PagesFilterPanel({
       </div>
     )
   }
+
+  const canConfirm = !!target && typed === target.slug && !deleting
 
   return (
     <div className="flex w-52 shrink-0 flex-col border-r bg-background">
@@ -89,32 +162,113 @@ export function PagesFilterPanel({
           <Separator className="my-1" />
 
           {pages.map((p) => (
-            <Link
+            <div
               key={p.id}
-              href={pageHref(p.slug)}
-              title={p.slug}
-              className={`group flex items-center gap-2 rounded-md px-2.5 py-1.5 transition-colors ${
+              className={`group relative flex items-center rounded-md transition-colors ${
                 activeSlug === p.slug
-                  ? "bg-accent font-medium text-foreground"
+                  ? "bg-accent text-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
               }`}
             >
-              <RiFileTextLine className="size-3.5 shrink-0 opacity-50" />
-              <span className="flex-1 truncate text-xs leading-snug">
-                {p.slug}
-              </span>
-              {p.count > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="h-4 min-w-4 shrink-0 px-1 text-xs leading-none"
-                >
-                  {p.count}
-                </Badge>
-              )}
-            </Link>
+              <Link
+                href={pageHref(p.slug)}
+                title={p.slug}
+                className={`flex min-w-0 flex-1 items-center gap-2 px-2.5 py-1.5 ${
+                  activeSlug === p.slug ? "font-medium" : ""
+                }`}
+              >
+                <RiFileTextLine className="size-3.5 shrink-0 opacity-50" />
+                <span className="flex-1 truncate text-xs leading-snug">
+                  {p.slug}
+                </span>
+                {p.count > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="h-4 min-w-4 shrink-0 px-1 text-xs leading-none group-hover:hidden"
+                  >
+                    {p.count}
+                  </Badge>
+                )}
+              </Link>
+              <button
+                type="button"
+                onClick={(e) => openDelete(p, e)}
+                aria-label={`Delete page ${p.slug}`}
+                className="mr-1 hidden size-6 shrink-0 items-center justify-center rounded text-muted-foreground group-hover:flex hover:bg-destructive/10 hover:text-destructive"
+              >
+                <RiDeleteBinLine className="size-3.5" />
+              </button>
+            </div>
           ))}
         </div>
       </ScrollArea>
+
+      <Dialog
+        open={!!target}
+        onOpenChange={(open) => {
+          if (!open) closeDialog()
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete page</DialogTitle>
+            <DialogDescription>
+              This permanently deletes the page and{" "}
+              <span className="font-medium text-foreground">
+                {target?.count ?? 0}{" "}
+                {target?.count === 1 ? "comment" : "comments"}
+              </span>
+              . This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground">
+              Type the page name to confirm:
+            </label>
+            <div className="flex items-center gap-2 rounded-md border bg-muted/40 px-2.5 py-1.5">
+              <code className="flex-1 truncate font-mono text-xs text-foreground">
+                {target?.slug}
+              </code>
+              <button
+                type="button"
+                onClick={copySlug}
+                aria-label="Copy page name"
+                className="flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                {copied ? (
+                  <RiCheckLine className="size-3.5 text-emerald-600" />
+                ) : (
+                  <RiFileCopyLine className="size-3.5" />
+                )}
+              </button>
+            </div>
+            <Input
+              autoFocus
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              placeholder="Paste or type the page name"
+              disabled={deleting}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && canConfirm) confirmDelete()
+              }}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={closeDialog} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={!canConfirm}
+            >
+              {deleting ? "Deleting…" : "Delete page"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

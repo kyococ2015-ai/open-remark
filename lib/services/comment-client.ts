@@ -56,6 +56,13 @@ export async function deleteAllCommentsByCommenter(
   return res.json()
 }
 
+export async function deletePage(siteId: string, pageId: string) {
+  const res = await fetch(`/api/v1/sites/${siteId}/pages/${pageId}`, {
+    method: "DELETE",
+  })
+  if (!res.ok) throw new Error("Failed to delete page")
+}
+
 export async function unbanCommenter(siteId: string, commenterId: string) {
   const res = await fetch(`/api/v1/sites/${siteId}/users/${commenterId}/ban`, {
     method: "POST",
