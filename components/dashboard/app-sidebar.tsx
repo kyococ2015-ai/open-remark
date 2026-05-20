@@ -115,7 +115,7 @@ export function AppSidebar({ user }: Props) {
         {/* Nav */}
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {navItems.map((item) => {
                 const active =
                   item.href === "/dashboard"
@@ -143,7 +143,7 @@ export function AppSidebar({ user }: Props) {
 
       {/* ── Footer / user ───────────────────────────────── */}
       <SidebarFooter>
-        <SidebarMenu>
+        <SidebarMenu className="gap-1">
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip={resolvedTheme === "dark" ? "Light mode" : "Dark mode"}

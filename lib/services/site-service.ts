@@ -1,13 +1,39 @@
 import { db } from "@/lib/db"
 import { ApiError } from "@/lib/api/error"
+import { CommentStatus } from "@/generated/prisma/client"
 import type { CreateSiteInput, UpdateSiteInput } from "@/lib/validators/site"
 
 export async function getSitesByOwner(ownerId: string) {
-  return db.site.findMany({
-    where: { ownerId },
-    include: { _count: { select: { pages: true } } },
-    orderBy: { createdAt: "desc" },
-  })
+  const [sites, pendingByPage] = await Promise.all([
+    db.site.findMany({
+      where: { ownerId },
+      include: {
+        _count: { select: { pages: true } },
+        pages: {
+          select: { id: true, _count: { select: { comments: true } } },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.comment.groupBy({
+      by: ["pageId"],
+      where: { status: CommentStatus.PENDING, page: { site: { ownerId } } },
+      _count: { _all: true },
+    }),
+  ])
+
+  const pendingByPageId = new Map(
+    pendingByPage.map((r) => [r.pageId, r._count._all])
+  )
+
+  return sites.map((site) => ({
+    ...site,
+    totalComments: site.pages.reduce((acc, p) => acc + p._count.comments, 0),
+    pendingComments: site.pages.reduce(
+      (acc, p) => acc + (pendingByPageId.get(p.id) ?? 0),
+      0
+    ),
+  }))
 }
 
 export async function getSiteByIdForOwner(siteId: string, ownerId: string) {
