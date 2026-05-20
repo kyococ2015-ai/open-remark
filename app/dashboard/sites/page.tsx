@@ -19,8 +19,6 @@ import {
   RiMessage2Line,
   RiSettings3Line,
   RiCodeLine,
-  RiTimeLine,
-  RiFileList2Line,
 } from "@remixicon/react"
 
 export default async function SitesPage() {
