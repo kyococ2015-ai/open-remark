@@ -11,66 +11,7 @@ export default async function SignInPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       {/* Left — brand panel */}
-      <div className="relative hidden flex-col justify-between bg-foreground p-12 text-background lg:flex">
-        {/* Subtle grid texture */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              "linear-gradient(var(--color-background) 1px, transparent 1px), linear-gradient(90deg, var(--color-background) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }}
-        />
-
-        {/* Logo */}
-        <div className="relative flex items-center gap-2.5">
-          <span className="flex size-7 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-            R
-          </span>
-          <span className="text-sm font-semibold tracking-tight">
-            OpenRemark
-          </span>
-        </div>
-
-        {/* Hero copy */}
-        <div className="relative space-y-6">
-          <p className="text-4xl leading-[1.15] font-semibold tracking-tight text-pretty">
-            Comments that belong
-            <br />
-            to your site — not
-            <br />
-            someone else&apos;s platform.
-          </p>
-
-          <ul className="space-y-3 text-sm text-background/60">
-            {[
-              "Self-hosted, open source, yours forever",
-              "Drop-in embed — one script tag",
-              "Moderation, spam filtering, full control",
-            ].map((item) => (
-              <li key={item} className="flex items-center gap-2.5">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 16 16"
-                  className="size-3.5 shrink-0 text-primary"
-                  fill="currentColor"
-                >
-                  <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z" />
-                </svg>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Footer */}
-        <p className="relative text-xs text-background/30">
-          Open source · MIT license
-        </p>
-      </div>
       <SignInPanel />
-
       {/* Right — sign-in form */}
       <div className="flex flex-col items-center justify-center px-6 py-16">
         {/* Mobile logo */}

@@ -103,7 +103,10 @@ export default function HomePage() {
       <main id="main-content">
         {/* Hero */}
         <section className="relative mx-auto max-w-5xl overflow-hidden px-4 pt-28 pb-16 text-center">
-          <Badge variant="secondary" className="mb-5 px-3 py-1 text-sm">
+          <Badge
+            variant="secondary"
+            className="mb-5 rounded-sm px-3 py-3 text-sm"
+          >
             Open source · Self-hostable
           </Badge>
           <h1 className="mb-6 text-5xl font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">
