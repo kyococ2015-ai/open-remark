@@ -11,7 +11,7 @@ import {
 
 export default async function SignInPage() {
   const session = await auth()
-  if (session) redirect("/dashboard/sites")
+  if (session) redirect("/dashboard")
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
@@ -29,7 +29,7 @@ export default async function SignInPage() {
           <form
             action={async () => {
               "use server"
-              await signIn("google", { redirectTo: "/dashboard/sites" })
+              await signIn("google", { redirectTo: "/dashboard" })
             }}
           >
             <Button type="submit" className="w-full" size="lg">

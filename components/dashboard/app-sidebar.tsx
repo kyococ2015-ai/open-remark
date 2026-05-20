@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
+import { useTheme } from "next-themes"
 import {
   RiDashboardLine,
   RiGlobalLine,
@@ -11,6 +12,8 @@ import {
   RiExpandUpDownLine,
   RiAddLine,
   RiMessage2Fill,
+  RiSunLine,
+  RiMoonLine,
 } from "@remixicon/react"
 import {
   Sidebar,
@@ -52,6 +55,7 @@ type Props = {
 
 export function AppSidebar({ user }: Props) {
   const pathname = usePathname()
+  const { resolvedTheme, setTheme } = useTheme()
   const initials = (user.name ?? user.email ?? "U")
     .split(" ")
     .map((w) => w[0])
@@ -140,6 +144,23 @@ export function AppSidebar({ user }: Props) {
       {/* ── Footer / user ───────────────────────────────── */}
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip={resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
+              onClick={() =>
+                setTheme(resolvedTheme === "dark" ? "light" : "dark")
+              }
+            >
+              {resolvedTheme === "dark" ? (
+                <RiSunLine className="size-4 shrink-0" aria-hidden="true" />
+              ) : (
+                <RiMoonLine className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              <span className="group-data-[collapsible=icon]:hidden">
+                {resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
+              </span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

@@ -1,6 +1,6 @@
 import { db } from "@/lib/db"
 import { ApiError } from "@/lib/api/error"
-import { CommentStatus } from "@/generated/prisma/client"
+import { CommentStatus, Prisma } from "@/generated/prisma/client"
 
 export async function moderateComment(
   commentId: string,
@@ -57,8 +57,10 @@ export async function getSiteCommentStats(siteId: string) {
   return { total, pending, approved, spam }
 }
 
+type DailyCount = { date: string; count: number }
+
 export async function getOwnerOverview(ownerId: string) {
-  const sites = await db.site.findMany({
+  const allSites = await db.site.findMany({
     where: { ownerId },
     include: {
       _count: { select: { pages: true } },
@@ -69,10 +71,9 @@ export async function getOwnerOverview(ownerId: string) {
       },
     },
     orderBy: { createdAt: "desc" },
-    take: 5,
   })
 
-  const siteIds = sites.map((s) => s.id)
+  const siteIds = allSites.map((s) => s.id)
 
   const [
     totalComments,
@@ -80,6 +81,7 @@ export async function getOwnerOverview(ownerId: string) {
     approvedComments,
     spamComments,
     recentComments,
+    rawActivity,
   ] = await Promise.all([
     db.comment.count({ where: { page: { siteId: { in: siteIds } } } }),
     db.comment.count({
@@ -108,15 +110,40 @@ export async function getOwnerOverview(ownerId: string) {
         commenter: { select: { name: true } },
       },
     }),
+    siteIds.length > 0
+      ? db.$queryRaw<Array<{ date: Date; count: bigint }>>`
+          SELECT DATE_TRUNC('day', c."createdAt") AS date, COUNT(*) AS count
+          FROM "Comment" c
+          JOIN "Page" p ON c."pageId" = p.id
+          WHERE p."siteId" IN (${Prisma.join(siteIds)})
+            AND c."createdAt" >= NOW() - INTERVAL '30 days'
+          GROUP BY date
+          ORDER BY date ASC
+        `
+      : Promise.resolve([]),
   ])
 
+  // Fill in zeros for all 30 days
+  const activityMap = new Map<string, number>()
+  for (const row of rawActivity) {
+    const key = new Date(row.date).toISOString().slice(0, 10)
+    activityMap.set(key, Number(row.count))
+  }
+  const commentActivity: DailyCount[] = Array.from({ length: 30 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (29 - i))
+    const key = d.toISOString().slice(0, 10)
+    return { date: key, count: activityMap.get(key) ?? 0 }
+  })
+
   return {
-    totalSites: sites.length,
+    totalSites: allSites.length,
     totalComments,
     pendingComments,
     approvedComments,
     spamComments,
-    sites,
+    sites: allSites.slice(0, 5),
     recentComments,
+    commentActivity,
   }
 }

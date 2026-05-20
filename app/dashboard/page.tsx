@@ -3,6 +3,9 @@ import { auth } from "@/lib/auth"
 import { getOwnerOverview } from "@/lib/services/moderation-service"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { StatCard } from "@/components/dashboard/stat-card"
+import { CommentActivityChart } from "@/components/dashboard/comment-activity-chart"
+import { CommentStatusChart } from "@/components/dashboard/comment-status-chart"
+import { TopSitesChart } from "@/components/dashboard/top-sites-chart"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -14,11 +17,22 @@ import {
   RiTimeLine,
   RiGlobalLine,
   RiArrowRightLine,
+  RiSpamLine,
 } from "@remixicon/react"
 
 export default async function OverviewPage() {
   const session = await auth()
   const overview = await getOwnerOverview(session!.user!.id as string)
+
+  const topSites = overview.sites.map((site) => ({
+    name: site.name,
+    comments: site.pages.reduce((acc, p) => acc + p._count.comments, 0),
+  }))
+
+  const approvalRate =
+    overview.totalComments > 0
+      ? Math.round((overview.approvedComments / overview.totalComments) * 100)
+      : 0
 
   return (
     <div>
@@ -28,7 +42,7 @@ export default async function OverviewPage() {
       />
 
       <div className="flex flex-col gap-8 p-8">
-        {/* Stats grid */}
+        {/* Stat cards */}
         <div className="grid gap-8 border-b pb-8 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Sites"
@@ -54,6 +68,11 @@ export default async function OverviewPage() {
             value={overview.approvedComments}
             icon={RiCheckboxCircleLine}
             variant="success"
+            description={
+              overview.totalComments > 0
+                ? `${approvalRate}% approval rate`
+                : undefined
+            }
           />
         </div>
 
@@ -71,8 +90,106 @@ export default async function OverviewPage() {
           </div>
         )}
 
+        {/* Charts row */}
+        <div className="grid gap-8 border-b pb-8 lg:grid-cols-3">
+          {/* Activity chart */}
+          <div className="flex flex-col gap-3 lg:col-span-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                Comment Activity
+              </h2>
+              <span className="text-xs text-muted-foreground">
+                Last 30 days
+              </span>
+            </div>
+            <Separator />
+            <CommentActivityChart data={overview.commentActivity} />
+          </div>
+
+          {/* Status breakdown */}
+          <div className="flex flex-col gap-3">
+            <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+              Status Breakdown
+            </h2>
+            <Separator />
+            <div className="flex flex-1 items-center py-2">
+              {overview.totalComments === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No comments yet.
+                </p>
+              ) : (
+                <CommentStatusChart
+                  approved={overview.approvedComments}
+                  pending={overview.pendingComments}
+                  spam={overview.spamComments}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Top sites chart + secondary stats */}
+        <div className="grid gap-8 border-b pb-8 lg:grid-cols-3">
+          {/* Top sites bar chart */}
+          <div className="flex flex-col gap-3 lg:col-span-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+                Comments by Site
+              </h2>
+            </div>
+            <Separator />
+            <TopSitesChart sites={topSites} />
+          </div>
+
+          {/* Quick stats column */}
+          <div className="flex flex-col gap-3">
+            <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
+              Quick Stats
+            </h2>
+            <Separator />
+            <div className="flex flex-col gap-4 py-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <RiSpamLine className="size-4" />
+                  <span>Spam caught</span>
+                </div>
+                <span className="text-sm font-semibold tabular-nums">
+                  {overview.spamComments}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <RiCheckboxCircleLine className="size-4" />
+                  <span>Approval rate</span>
+                </div>
+                <span className="text-sm font-semibold tabular-nums">
+                  {approvalRate}%
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <RiGlobalLine className="size-4" />
+                  <span>Active sites</span>
+                </div>
+                <span className="text-sm font-semibold tabular-nums">
+                  {overview.totalSites}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <RiMessage2Line className="size-4" />
+                  <span>30-day activity</span>
+                </div>
+                <span className="text-sm font-semibold tabular-nums">
+                  {overview.commentActivity.reduce((s, d) => s + d.count, 0)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sites list + Recent comments */}
         <div className="grid gap-8 lg:grid-cols-2">
-          {/* Sites list */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
@@ -130,7 +247,6 @@ export default async function OverviewPage() {
             </div>
           </div>
 
-          {/* Recent comments */}
           <div className="flex flex-col gap-4">
             <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
               Recent Comments
