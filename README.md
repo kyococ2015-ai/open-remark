@@ -1,8 +1,12 @@
-# Open Remark
+# OpenRemark - An open-source comment system for static websites
+
+<img width="1590" height="672" alt="open-remark" src="https://github.com/user-attachments/assets/3d134793-f2bc-415a-a478-fa9f9f6e22b1" />
 
 ![Beta](https://img.shields.io/badge/status-beta-orange) ![Version](https://img.shields.io/badge/version-0.1.0--beta.1-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
 A self-hostable comment system for static websites — Astro, Hugo, Next.js, and any site that accepts HTML.
+
+[**Live Demo**](https://open-remark.vercel.app/demo.html)
 
 **Features:** Google sign-in · threaded replies · spam/moderation dashboard · shadow DOM widget · origin allowlisting
 
@@ -77,5 +81,6 @@ See [docs/architecture.md](docs/architecture.md) for system design, request flow
 | `NEXT_PUBLIC_APP_URL`  | Public app URL (used in embed snippets)                                          |
 
 ## License
+[MIT License](https://github.com/zeon-studio/open-remark/blob/main/LICENSE) 
 
-MIT
+This project is maintained by [Zeon Studio](https://zeon.studio/?ref=openremark)
