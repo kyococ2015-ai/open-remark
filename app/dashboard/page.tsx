@@ -8,6 +8,7 @@ import { CommentStatusChart } from "@/components/dashboard/comment-status-chart"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { SiteLogo } from "@/components/ui/site-logo"
 import { Separator } from "@/components/ui/separator"
 import { formatDistanceToNow } from "date-fns"
 import {
@@ -150,8 +151,12 @@ export default async function OverviewPage() {
                     href={`/dashboard/sites/${site.id}`}
                     className="flex items-center gap-4 border-l-2 border-transparent py-4 transition-all hover:border-primary hover:bg-primary/5 hover:pl-3"
                   >
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-sm font-medium">
-                      {site.name.charAt(0).toUpperCase()}
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
+                      <SiteLogo
+                        domain={site.domain}
+                        size={22}
+                        className="rounded-sm"
+                      />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">

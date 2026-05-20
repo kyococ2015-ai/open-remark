@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { SiteLogo } from "@/components/ui/site-logo"
 import {
   RiDashboardLine,
   RiMessage2Line,
@@ -67,11 +68,20 @@ function NavContent({
           <RiArrowLeftLine className="size-3.5" />
           All sites
         </Link>
-        <div className="px-1">
-          <p className="truncate text-sm leading-tight font-semibold">
-            {siteName}
-          </p>
-          <p className="truncate text-xs text-muted-foreground">{siteDomain}</p>
+        <div className="flex items-center gap-2.5 px-1">
+          <SiteLogo
+            domain={siteDomain}
+            size={24}
+            className="shrink-0 rounded-sm"
+          />
+          <div className="min-w-0">
+            <p className="truncate text-sm leading-tight font-semibold">
+              {siteName}
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              {siteDomain}
+            </p>
+          </div>
         </div>
       </div>
 

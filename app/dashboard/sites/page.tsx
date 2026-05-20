@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { SiteLogo } from "@/components/ui/site-logo"
 import {
   RiAddLine,
   RiGlobalLine,
@@ -73,8 +74,12 @@ export default async function SitesPage() {
                 >
                   {/* Header */}
                   <CardHeader className="flex flex-row items-start gap-3 p-5 pb-4">
-                    <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-muted text-lg font-semibold text-foreground">
-                      {site.name.charAt(0).toUpperCase()}
+                    <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-muted">
+                      <SiteLogo
+                        domain={site.domain}
+                        size={28}
+                        className="rounded-sm"
+                      />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-base leading-tight font-semibold">

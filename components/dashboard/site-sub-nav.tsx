@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
+import { SiteLogo } from "@/components/ui/site-logo"
 import {
   RiArrowRightSLine,
   RiDashboardLine,
@@ -57,6 +58,11 @@ export function SiteSubNav({ siteId, siteName, siteDomain }: Props) {
           <RiArrowRightSLine
             className="size-3.5 shrink-0 text-muted-foreground"
             aria-hidden
+          />
+          <SiteLogo
+            domain={siteDomain}
+            size={16}
+            className="shrink-0 rounded-sm"
           />
           <span className="truncate font-semibold">{siteName}</span>
           <span className="hidden shrink-0 text-muted-foreground sm:inline">
