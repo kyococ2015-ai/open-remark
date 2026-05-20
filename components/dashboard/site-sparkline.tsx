@@ -14,10 +14,11 @@ export function SiteSparkline({ data, id }: Props) {
   const gradId = `sg-${id}`
 
   return (
-    <ChartContainer config={chartConfig} className="h-12 w-full">
+    <ChartContainer config={chartConfig} className="h-12 w-full min-w-0">
       <AreaChart
         data={formatted}
         margin={{ top: 4, right: 0, left: 0, bottom: 0 }}
+        style={{ pointerEvents: "none" }}
       >
         <defs>
           <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
@@ -30,7 +31,7 @@ export function SiteSparkline({ data, id }: Props) {
           type="monotone"
           dataKey="count"
           stroke="var(--chart-1)"
-          strokeWidth={2}
+          strokeWidth={1}
           fill={`url(#${gradId})`}
           baseValue={-0.5}
           dot={false}

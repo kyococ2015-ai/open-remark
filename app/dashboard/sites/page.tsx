@@ -101,51 +101,44 @@ export default async function SitesPage() {
                     </Badge>
                   </CardHeader>
 
-                  {/* Sparkline */}
-                  <div className="px-5 pb-2">
-                    <SiteSparkline data={site.sparkline} id={site.id} />
-                  </div>
-
-                  {/* Stats strip */}
-                  <CardContent className="px-5 pb-4">
-                    <div className="grid grid-cols-3 divide-x rounded-md bg-muted/40">
-                      <div className="flex flex-col items-start px-4 py-3">
-                        <span className="text-xl leading-tight font-semibold tabular-nums">
-                          {site.totalComments}
-                        </span>
-                        <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                          <RiMessage2Line
-                            className="size-3.5"
-                            aria-hidden="true"
-                          />
-                          Comments
-                        </span>
+                  {/* Stats + Sparkline */}
+                  <CardContent className="border-t px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      {/* Stats */}
+                      <div className="flex flex-1 items-center divide-x">
+                        <div className="flex flex-col pr-4">
+                          <span className="text-lg leading-tight font-semibold tabular-nums">
+                            {site.totalComments}
+                          </span>
+                          <span className="mt-0.5 text-xs text-muted-foreground">
+                            Comments
+                          </span>
+                        </div>
+                        <div className="flex flex-col px-4">
+                          <span
+                            className={cn(
+                              "text-lg leading-tight font-semibold tabular-nums",
+                              site.pendingComments > 0 && "text-warning"
+                            )}
+                          >
+                            {site.pendingComments}
+                          </span>
+                          <span className="mt-0.5 text-xs text-muted-foreground">
+                            Pending
+                          </span>
+                        </div>
+                        <div className="flex flex-col pl-4">
+                          <span className="text-lg leading-tight font-semibold tabular-nums">
+                            {site._count.pages}
+                          </span>
+                          <span className="mt-0.5 text-xs text-muted-foreground">
+                            Pages
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex flex-col items-start px-4 py-3">
-                        <span
-                          className={cn(
-                            "text-xl leading-tight font-semibold tabular-nums",
-                            site.pendingComments > 0 && "text-warning"
-                          )}
-                        >
-                          {site.pendingComments}
-                        </span>
-                        <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                          <RiTimeLine className="size-3.5" aria-hidden="true" />
-                          Pending
-                        </span>
-                      </div>
-                      <div className="flex flex-col items-start px-4 py-3">
-                        <span className="text-xl leading-tight font-semibold tabular-nums">
-                          {site._count.pages}
-                        </span>
-                        <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
-                          <RiFileList2Line
-                            className="size-3.5"
-                            aria-hidden="true"
-                          />
-                          Pages
-                        </span>
+                      {/* Sparkline */}
+                      <div className="w-[110px] shrink-0">
+                        <SiteSparkline data={site.sparkline} id={site.id} />
                       </div>
                     </div>
                   </CardContent>
