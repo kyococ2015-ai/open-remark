@@ -245,7 +245,7 @@ export default function HomePage() {
               className="flex size-6 items-center justify-center rounded bg-primary text-xs font-bold text-primary-foreground"
               aria-hidden="true"
             >
-              Z
+              R
             </div>
             <span>Open Remark</span>
           </div>

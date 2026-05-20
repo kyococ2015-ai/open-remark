@@ -88,17 +88,19 @@ export function AppSidebar({ user }: Props) {
       <SidebarContent>
         {/* New site shortcut */}
         <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
+          <SidebarGroupContent className="group-data-[collapsible=icon]:px-0">
+            <SidebarMenu className="group-data-[collapsible=icon]:items-center">
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
                   tooltip="New site"
-                  className="bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+                  className="border-2 border-dashed border-primary/40 bg-primary/5 py-5 text-primary/70 transition-colors duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:py-2 group-data-[collapsible=icon]:text-sidebar-foreground hover:bg-primary/10 hover:text-primary group-data-[collapsible=icon]:hover:bg-primary/10 group-data-[collapsible=icon]:hover:text-primary"
                 >
                   <Link href="/dashboard/sites/new">
-                    <RiAddLine aria-hidden="true" />
-                    <span>New site</span>
+                    <RiAddLine className="size-4 shrink-0" aria-hidden="true" />
+                    <span className="text-sm font-medium group-data-[collapsible=icon]:hidden">
+                      New site
+                    </span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
