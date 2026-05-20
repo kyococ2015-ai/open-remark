@@ -124,10 +124,6 @@ Follow this file when touching `prisma/schema.prisma`. Highlights:
 - Optimistic UI uses `hooks/use-optimistic-state.ts`.
 - If logic is needed in 2+ places, extract to `lib/` or `lib/utils.ts` — don't duplicate.
 
-## Knowledge-base handoff (project-specific workflow)
-
-After finishing meaningful work, append architecture decisions, gotchas, rejected approaches, and open questions to `KNOWLEDGE-BASE-FOR-HUMAN.md` using the format documented there. Code commit comments are not a substitute.
-
 ## Environment
 
 Required env (see `.env.example`): `DATABASE_URL`, `AUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `WIDGET_JWT_SECRET`, `NEXT_PUBLIC_APP_URL`.
