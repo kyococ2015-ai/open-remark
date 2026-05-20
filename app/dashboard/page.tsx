@@ -70,24 +70,10 @@ export default async function OverviewPage() {
           />
         </div>
 
-        {/* Pending alert */}
-        {overview.pendingComments > 0 && (
-          <div className="border-warning flex items-center justify-between border-l-2 px-4 py-3">
-            <p className="text-warning text-sm">
-              <strong>{overview.pendingComments}</strong> comment
-              {overview.pendingComments !== 1 ? "s" : ""} waiting for review
-              across your sites
-            </p>
-            <Button asChild size="sm" variant="outline">
-              <Link href="/dashboard/sites">Review now</Link>
-            </Button>
-          </div>
-        )}
-
         {/* Charts row */}
-        <div className="grid gap-8 border-b pb-8 lg:grid-cols-3">
+        <div className="flex flex-wrap gap-8 border-b pb-8">
           {/* Activity chart */}
-          <div className="flex flex-col gap-3 lg:col-span-2">
+          <div className="flex w-full max-w-[750px] flex-col gap-3">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
                 Comment Activity
