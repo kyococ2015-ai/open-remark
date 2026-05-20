@@ -93,7 +93,10 @@
         align-items: center;
         justify-content: center;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        transition:
+          background-color 0.2s,
+          color 0.2s,
+          border-color 0.2s;
         z-index: 100;
       }
 
@@ -168,24 +171,30 @@
       <section class="comments-section" aria-label="Comments">
         <h2>Comments</h2>
 
-        <p id="widget-theme-status" style="font-size: 13px; color: #64748b; margin-bottom: 12px;">
-        Widget theme: <strong>—</strong>
-      </p>
+        <p
+          id="widget-theme-status"
+          style="font-size: 13px; color: #64748b; margin-bottom: 12px"
+        >
+          Widget theme: <strong>—</strong>
+        </p>
 
-      <!-- Open Remark -->
-        <div data-open-remark data-site-key="" data-slug="demo.html" data-on-theme-change="onWidgetThemeChange"></div>
+        <!-- Open Remark -->
+        <div
+          data-open-remark
+          data-site-key=""
+          data-slug="demo.html"
+          data-on-theme-change="onWidgetThemeChange"
+        ></div>
         <script>
           // update site-key based on your environment (production vs development).
-          const commentsContainer = document.querySelector(
-            "[data-open-remark]"
-          )
+          const commentsContainer = document.querySelector("[data-open-remark]")
           const isDevelopment =
             window.location.hostname === "localhost" ||
             window.location.hostname === "127.0.0.1"
           commentsContainer.setAttribute(
             "data-site-key",
             isDevelopment
-              ? "site-1778491207104-0" // Development site key
+              ? "site-1779188263123-0" // Development site key
               : "cmp9e2and000304jpphxqfo8t" // Production site key
           )
         </script>
@@ -222,31 +231,31 @@
 
     <script>
       function onWidgetThemeChange(theme) {
-        const status = document.getElementById("widget-theme-status");
+        const status = document.getElementById("widget-theme-status")
         if (status) {
-          status.innerHTML = 'Widget theme: <strong>' + theme + '</strong>';
+          status.innerHTML = "Widget theme: <strong>" + theme + "</strong>"
         }
       }
 
       const MOON_ICON =
-        '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
       const SUN_ICON =
-        '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+        '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
 
-      const toggleBtn = document.getElementById("theme-toggle");
-      const iconSvg = document.getElementById("theme-icon");
+      const toggleBtn = document.getElementById("theme-toggle")
+      const iconSvg = document.getElementById("theme-icon")
 
       function updateIcon() {
-        const isDark = document.documentElement.classList.contains("dark");
-        iconSvg.innerHTML = isDark ? MOON_ICON : SUN_ICON;
+        const isDark = document.documentElement.classList.contains("dark")
+        iconSvg.innerHTML = isDark ? MOON_ICON : SUN_ICON
       }
 
       toggleBtn.addEventListener("click", () => {
-        document.documentElement.classList.toggle("dark");
-        updateIcon();
-      });
+        document.documentElement.classList.toggle("dark")
+        updateIcon()
+      })
 
-      updateIcon();
+      updateIcon()
     </script>
   </body>
 </html>

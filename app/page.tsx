@@ -70,7 +70,7 @@ export default function HomePage() {
             className="flex items-center gap-2 text-sm font-semibold"
           >
             <div className="flex size-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
-              Z
+              R
             </div>
             Open Remark
           </Link>

@@ -36,6 +36,11 @@ export default function RootLayout({
       {config.google_tag_manager.enable && (
         <GoogleTagManager gtmId={config.google_tag_manager.gtm_id} />
       )}
+
+      {/* Meta Informations */}
+      {/* Favicon */}
+      <link rel="icon" type="image/x-icon" href="/images/favicon.png" />
+
       <body suppressHydrationWarning>
         <a
           href="#main-content"
