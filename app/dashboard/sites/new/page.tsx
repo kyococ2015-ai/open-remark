@@ -24,17 +24,18 @@ export default function NewSitePage() {
     setLoading(true)
 
     const form = new FormData(e.currentTarget)
+    const domain = (form.get("domain") as string) ?? ""
+    const origin = domain
+      ? (domain.match(/^https?:\/\//) ? domain : `https://${domain}`).replace(
+          /\/+$/,
+          ""
+        )
+      : ""
     const body = {
       name: form.get("name") as string,
-      domain: form.get("domain") as string,
+      domain,
       autoApprove: form.get("autoApprove") === "on",
-      allowedOrigins: [
-        (form.get("domain") as string)
-          ? (form.get("domain") as string).match(/^https?:\/\//)
-            ? (form.get("domain") as string)
-            : `https://${form.get("domain")}`
-          : "",
-      ],
+      allowedOrigins: origin ? [origin] : [],
     }
 
     const res = await fetch("/api/v1/sites", {

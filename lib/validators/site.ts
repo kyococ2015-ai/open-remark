@@ -2,6 +2,14 @@ import { z } from "zod"
 
 export const ThemeSchema = z.enum(["AUTO", "LIGHT", "DARK"])
 
+const OriginSchema = z
+  .string()
+  .transform((v) => (v === "*" ? v : v.replace(/\/+$/, "")))
+  .refine(
+    (v) => v === "*" || z.string().url().safeParse(v).success,
+    "Must be a valid URL or *"
+  )
+
 export const CreateSiteSchema = z.object({
   name: z.string().min(1).max(100),
   domain: z
@@ -10,17 +18,7 @@ export const CreateSiteSchema = z.object({
     .max(253)
     .regex(/^[a-zA-Z0-9.:\/\-]+$/, "Invalid domain"),
   autoApprove: z.boolean().optional().default(false),
-  allowedOrigins: z
-    .array(
-      z
-        .string()
-        .refine(
-          (v) => v === "*" || z.string().url().safeParse(v).success,
-          "Must be a valid URL or *"
-        )
-    )
-    .optional()
-    .default([]),
+  allowedOrigins: z.array(OriginSchema).optional().default([]),
   theme: ThemeSchema.optional().default("AUTO"),
   primaryColor: z
     .string()
@@ -39,16 +37,7 @@ export const UpdateSiteSchema = z.object({
     .regex(/^[a-zA-Z0-9.:\/\-]+$/, "Invalid domain")
     .optional(),
   autoApprove: z.boolean().optional(),
-  allowedOrigins: z
-    .array(
-      z
-        .string()
-        .refine(
-          (v) => v === "*" || z.string().url().safeParse(v).success,
-          "Must be a valid URL or *"
-        )
-    )
-    .optional(),
+  allowedOrigins: z.array(OriginSchema).optional(),
   theme: ThemeSchema.optional(),
   primaryColor: z
     .string()

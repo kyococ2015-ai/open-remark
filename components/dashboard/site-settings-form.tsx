@@ -44,12 +44,25 @@ type Props = {
   site: Site
 }
 
+function parseOrigins(raw: string): string[] {
+  try {
+    const arr = JSON.parse(raw) as string[]
+    return Array.isArray(arr) ? arr : []
+  } catch {
+    return []
+  }
+}
+
 export function SiteSettingsForm({ site: initialSite }: Props) {
   const router = useRouter()
   const [site, setSite] = useState<Site>(initialSite)
   const [loading, setLoading] = useState(false)
   const [savingAppearance, setSavingAppearance] = useState(false)
   const [deleting, setDeleting] = useState(false)
+
+  const [originsText, setOriginsText] = useState(() =>
+    parseOrigins(initialSite.allowedOrigins).join("\n")
+  )
 
   // Local appearance state for live preview
   const [theme, setTheme] = useState<Theme>(site.theme)
@@ -62,10 +75,13 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
     e.preventDefault()
     setLoading(true)
     const form = new FormData(e.currentTarget)
-    const originsRaw = (form.get("allowedOrigins") as string)
+    const normalized = (form.get("allowedOrigins") as string)
       .split("\n")
       .map((s) => s.trim())
       .filter(Boolean)
+      .map((s) => (s === "*" ? s : s.replace(/\/+$/, "")))
+
+    setOriginsText(normalized.join("\n"))
 
     const res = await fetch(`/api/v1/sites/${siteId}`, {
       method: "PATCH",
@@ -74,13 +90,15 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
         name: (form.get("name") as string) || "",
         domain: (form.get("domain") as string) || "",
         autoApprove: form.get("autoApprove") === "on",
-        allowedOrigins: originsRaw,
+        allowedOrigins: normalized,
       }),
     })
 
     if (res.ok) {
       toast.success("Settings saved")
-      setSite(await res.json())
+      const updated = (await res.json()) as Site
+      setSite(updated)
+      setOriginsText(parseOrigins(updated.allowedOrigins).join("\n"))
     } else {
       toast.error("Failed to save")
     }
@@ -120,14 +138,6 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
     }
   }
 
-  const origins = (() => {
-    try {
-      return (JSON.parse(site.allowedOrigins) as string[]).join("\n")
-    } catch {
-      return ""
-    }
-  })()
-
   const appearanceDirty =
     theme !== site.theme ||
     primaryColor !== site.primaryColor ||
@@ -161,7 +171,8 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
               <Textarea
                 id="allowedOrigins"
                 name="allowedOrigins"
-                defaultValue={origins}
+                value={originsText}
+                onChange={(e) => setOriginsText(e.target.value)}
                 rows={4}
                 placeholder={"https://myblog.com\nhttps://www.myblog.com"}
               />
