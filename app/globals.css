@@ -2,6 +2,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@layer base {
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+}
+
 @import "../styles/design-tokens.css";
 
 @keyframes grid-drift {
