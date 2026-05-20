@@ -74,7 +74,21 @@ export default function HomePage() {
           </Link>
           <div className="flex items-center gap-3">
             <Button asChild variant="ghost">
-              <Link href="/sign-in">Sign in</Link>
+              <Link
+                href="https://github.com/zeon-studio/open-remark"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open OpenRemark GitHub repository"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="size-5"
+                  aria-hidden="true"
+                >
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.11.82-.26.82-.577 0-.285-.01-1.04-.015-2.04-3.338.725-4.042-1.61-4.042-1.61-.546-1.385-1.333-1.754-1.333-1.754-1.09-.745.083-.73.083-.73 1.205.085 1.84 1.236 1.84 1.236 1.07 1.835 2.805 1.305 3.49.997.108-.775.42-1.305.762-1.605-2.665-.304-5.466-1.335-5.466-5.935 0-1.31.47-2.38 1.235-3.22-.125-.303-.535-1.525.115-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.655 1.65.245 2.873.12 3.176.77.84 1.235 1.91 1.235 3.22 0 4.61-2.805 5.625-5.475 5.92.43.37.81 1.1.81 2.22 0 1.605-.015 2.895-.015 3.285 0 .315.21.69.825.575C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z" />
+                </svg>
+              </Link>
             </Button>
             <Button asChild>
               <Link href="/sign-in">
