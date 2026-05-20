@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { CommentStatus } from "@/generated/prisma/client"
 import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
 import { Badge } from "@/components/ui/badge"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
@@ -94,7 +95,7 @@ export default async function CommentsPage({ params, searchParams }: Props) {
             <CommentSearchInput />
 
             {/* Status filters */}
-            <div className="flex flex-wrap gap-1.5">
+            <ButtonGroup>
               {STATUSES.map((s) => (
                 <Button
                   key={s}
@@ -102,17 +103,17 @@ export default async function CommentsPage({ params, searchParams }: Props) {
                   variant={
                     (s === "ALL" && !status) || s === status
                       ? "default"
-                      : "ghost"
+                      : "outline"
                   }
                   size="sm"
-                  className="h-7 px-2.5 text-xs"
+                  className="h-7 px-3 text-xs"
                 >
                   <Link href={statusHref(s)}>
                     {s.charAt(0) + s.slice(1).toLowerCase()}
                   </Link>
                 </Button>
               ))}
-            </div>
+            </ButtonGroup>
           </div>
         </div>
 
