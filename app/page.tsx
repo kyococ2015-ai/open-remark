@@ -62,26 +62,23 @@ export default function HomePage() {
       {/* Nav */}
       <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur">
         <nav
-          className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4"
+          className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4"
           aria-label="Main navigation"
         >
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-sm font-semibold"
-          >
-            <div className="flex size-7 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <div className="flex size-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
               R
             </div>
             Open Remark
           </Link>
           <div className="flex items-center gap-3">
-            <Button asChild variant="ghost" size="sm">
+            <Button asChild variant="ghost">
               <Link href="/sign-in">Sign in</Link>
             </Button>
-            <Button asChild size="sm">
+            <Button asChild>
               <Link href="/sign-in">
                 Get started
-                <ArrowRight className="ml-1 size-3.5" aria-hidden="true" />
+                <ArrowRight className="ml-1 size-4" aria-hidden="true" />
               </Link>
             </Button>
           </div>
@@ -90,32 +87,76 @@ export default function HomePage() {
 
       <main id="main-content">
         {/* Hero */}
-        <section className="mx-auto max-w-5xl px-4 py-24 text-center">
-          <Badge variant="secondary" className="mb-4">
+        <section className="relative mx-auto max-w-5xl overflow-hidden px-4 pt-28 pb-16 text-center">
+          <Badge variant="secondary" className="mb-5 px-3 py-1 text-sm">
             Open source · Self-hostable
           </Badge>
-          <h1 className="mb-6 text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+          <h1 className="mb-6 text-5xl font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">
             Comments for your
             <br />
             static website
           </h1>
-          <p className="mx-auto mb-8 max-w-2xl text-lg text-balance text-muted-foreground">
+          <p className="mx-auto mb-10 max-w-2xl text-xl leading-relaxed text-balance text-muted-foreground">
             Add a fully-featured comment system to any Astro, Hugo, or Next.js
             site in two lines of HTML. Google sign-in, threaded replies, spam
             protection, and a moderation dashboard — all included.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Button asChild size="lg">
+          <div className="mb-16 flex flex-wrap items-center justify-center gap-4">
+            <Button asChild size="lg" className="h-13 px-8 text-base">
               <Link href="/sign-in">
                 Start for free
-                <ArrowRight className="ml-2 size-4" aria-hidden="true" />
+                <ArrowRight className="ml-2 size-5" aria-hidden="true" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="h-13 px-8 text-base"
+            >
               <Link href="/demo.html" target="_blank" rel="noopener">
                 Live demo
               </Link>
             </Button>
+          </div>
+
+          {/* Video — browser chrome */}
+          <div className="relative">
+            {/* Ambient glow behind card */}
+            <div
+              className="pointer-events-none absolute inset-x-0 -bottom-6 mx-auto h-24 w-2/3 rounded-full bg-primary/20 blur-3xl"
+              aria-hidden="true"
+            />
+            <div className="relative overflow-hidden rounded-xl border bg-card shadow-2xl ring-1 ring-primary/10">
+              {/* Chrome bar */}
+              <div className="flex items-center gap-1.5 border-b bg-muted/60 px-4 py-3">
+                <div
+                  className="size-2.5 rounded-full bg-red-400"
+                  aria-hidden="true"
+                />
+                <div
+                  className="size-2.5 rounded-full bg-yellow-400"
+                  aria-hidden="true"
+                />
+                <div
+                  className="size-2.5 rounded-full bg-green-400"
+                  aria-hidden="true"
+                />
+                <div className="mx-auto rounded-sm bg-background/80 px-8 py-0.5 font-mono text-xs text-muted-foreground">
+                  open-remark · demo
+                </div>
+              </div>
+              {/* 16:9 iframe */}
+              <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
+                <iframe
+                  className="absolute inset-0 h-full w-full"
+                  src="https://www.youtube-nocookie.com/embed/uOYTTEZhHfI?rel=0&modestbranding=1"
+                  title="Open Remark demo"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
           </div>
         </section>
 
@@ -151,24 +192,24 @@ export default function HomePage() {
         </section>
 
         {/* Features */}
-        <section className="mx-auto max-w-5xl px-4 py-24">
-          <h2 className="mb-3 text-center text-2xl font-bold text-balance">
+        <section className="mx-auto max-w-5xl px-4 py-28">
+          <h2 className="mb-4 text-center text-3xl font-bold text-balance">
             Everything you need, nothing you don&apos;t
           </h2>
-          <p className="mb-12 text-center text-balance text-muted-foreground">
+          <p className="mb-14 text-center text-lg text-balance text-muted-foreground">
             No tracking pixels, no cookie banners, no third-party data sharing.
           </p>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (
               <div
                 key={f.title}
-                className="flex flex-col gap-2 rounded-lg border bg-card p-5"
+                className="flex flex-col gap-3 rounded-xl border bg-card p-6"
               >
-                <div className="flex size-9 items-center justify-center rounded-md bg-primary/10">
-                  <f.icon className="size-4 text-primary" aria-hidden="true" />
+                <div className="flex size-10 items-center justify-center rounded-md bg-primary/10">
+                  <f.icon className="size-5 text-primary" aria-hidden="true" />
                 </div>
-                <h3 className="font-semibold">{f.title}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">
+                <h3 className="text-base font-semibold">{f.title}</h3>
+                <p className="text-base leading-relaxed text-muted-foreground">
                   {f.description}
                 </p>
               </div>
@@ -177,12 +218,12 @@ export default function HomePage() {
         </section>
 
         {/* How it works */}
-        <section className="border-y bg-muted/40 py-24">
+        <section className="border-y bg-muted/40 py-28">
           <div className="mx-auto max-w-3xl px-4">
-            <h2 className="mb-12 text-center text-2xl font-bold text-balance">
+            <h2 className="mb-14 text-center text-3xl font-bold text-balance">
               Up and running in minutes
             </h2>
-            <ol className="flex flex-col gap-8" aria-label="Setup steps">
+            <ol className="flex flex-col gap-10" aria-label="Setup steps">
               {[
                 {
                   step: "1",
@@ -205,13 +246,17 @@ export default function HomePage() {
                   body: "Approve, reject, or mark comments as spam — all from one place.",
                 },
               ].map((item) => (
-                <li key={item.step} className="flex gap-4">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                <li key={item.step} className="flex gap-5">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-base font-bold text-primary-foreground">
                     {item.step}
                   </div>
                   <div>
-                    <h3 className="mb-1 font-semibold">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground">{item.body}</p>
+                    <h3 className="mb-1.5 text-base font-semibold">
+                      {item.title}
+                    </h3>
+                    <p className="text-base text-muted-foreground">
+                      {item.body}
+                    </p>
                   </div>
                 </li>
               ))}
@@ -220,18 +265,18 @@ export default function HomePage() {
         </section>
 
         {/* CTA */}
-        <section className="mx-auto max-w-2xl px-4 py-24 text-center">
-          <h2 className="mb-4 text-3xl font-bold text-balance">
+        <section className="mx-auto max-w-2xl px-4 py-28 text-center">
+          <h2 className="mb-5 text-4xl font-bold text-balance">
             Ready to add comments?
           </h2>
-          <p className="mb-8 text-balance text-muted-foreground">
+          <p className="mb-10 text-xl leading-relaxed text-balance text-muted-foreground">
             Free to get started. Self-host on your own infrastructure if you
             prefer.
           </p>
-          <Button asChild size="lg">
+          <Button asChild size="lg" className="h-13 px-8 text-base">
             <Link href="/sign-in">
               Get started free
-              <ArrowRight className="ml-2 size-4" aria-hidden="true" />
+              <ArrowRight className="ml-2 size-5" aria-hidden="true" />
             </Link>
           </Button>
         </section>

@@ -187,7 +187,7 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
                 id="autoApprove"
                 name="autoApprove"
                 defaultChecked={site.autoApprove}
-                className="size-4 rounded border-input"
+                className="size-4 rounded-sm border-input"
               />
               <Label htmlFor="autoApprove" className="cursor-pointer">
                 Auto-approve comments

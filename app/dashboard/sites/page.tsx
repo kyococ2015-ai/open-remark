@@ -44,7 +44,7 @@ export default async function SitesPage() {
 
       <div className="p-4 sm:p-6">
         {sites.length === 0 ? (
-          <div className="flex flex-col items-center justify-center border border-dashed py-20 text-center">
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-20 text-center">
             <RiGlobalLine
               className="mb-4 size-10 text-muted-foreground"
               aria-hidden="true"
@@ -73,7 +73,7 @@ export default async function SitesPage() {
                 >
                   {/* Header */}
                   <CardHeader className="flex flex-row items-start gap-3 p-5 pb-4">
-                    <div className="flex size-11 shrink-0 items-center justify-center bg-muted text-lg font-semibold text-foreground">
+                    <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-muted text-lg font-semibold text-foreground">
                       {site.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -108,7 +108,7 @@ export default async function SitesPage() {
 
                   {/* Stats strip */}
                   <CardContent className="px-5 pb-4">
-                    <div className="grid grid-cols-3 divide-x bg-muted/40">
+                    <div className="grid grid-cols-3 divide-x rounded-md bg-muted/40">
                       <div className="flex flex-col items-start px-4 py-3">
                         <span className="text-xl leading-tight font-semibold tabular-nums">
                           {site.totalComments}
@@ -168,7 +168,7 @@ export default async function SitesPage() {
                         <Button
                           asChild
                           variant="outline"
-                          size="sm"
+                          size="icon-sm"
                           aria-label={`Install widget for ${site.name}`}
                         >
                           <Link href={`/dashboard/sites/${site.id}/install`}>
@@ -183,7 +183,7 @@ export default async function SitesPage() {
                         <Button
                           asChild
                           variant="outline"
-                          size="sm"
+                          size="icon-sm"
                           aria-label={`Settings for ${site.name}`}
                         >
                           <Link href={`/dashboard/sites/${site.id}/settings`}>

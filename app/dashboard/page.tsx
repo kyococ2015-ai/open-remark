@@ -150,7 +150,7 @@ export default async function OverviewPage() {
                     href={`/dashboard/sites/${site.id}`}
                     className="flex items-center gap-4 border-l-2 border-transparent py-4 transition-all hover:border-primary hover:bg-primary/5 hover:pl-3"
                   >
-                    <div className="flex size-9 shrink-0 items-center justify-center bg-muted text-sm font-medium">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-sm font-medium">
                       {site.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
