@@ -85,13 +85,22 @@ export default async function SitesPage() {
                       <p className="truncate text-base leading-tight font-semibold">
                         {site.name}
                       </p>
-                      <p className="mt-0.5 flex items-center gap-1 truncate text-sm text-muted-foreground">
+                      <a
+                        href={
+                          site.domain.startsWith("http")
+                            ? site.domain
+                            : `https://${site.domain}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-0.5 flex items-center gap-1 truncate text-sm text-muted-foreground hover:underline"
+                      >
                         <RiGlobalLine
                           className="size-3.5 shrink-0"
                           aria-hidden="true"
                         />
                         {site.domain}
-                      </p>
+                      </a>
                     </div>
                     <Badge
                       variant="outline"
