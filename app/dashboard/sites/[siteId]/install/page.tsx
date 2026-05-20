@@ -172,7 +172,7 @@ export function Comments({ slug }: { slug: string }) {
           <StepHeader
             number={3}
             title="Verify the integration"
-            description="Open a page on your site where you added the snippet. You should see the Open Remark widget. Post a test comment to confirm everything works."
+            description="Open a page on your site where you added the snippet. You should see the OpenRemark widget. Post a test comment to confirm everything works."
           />
           <div className="ml-12 flex items-center gap-2 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
             <CheckCircle2 className="text-success size-4 shrink-0" />

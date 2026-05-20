@@ -15,7 +15,7 @@
                              │ HTTP (CORS)
                              ▼
 ┌─────────────────────────────────────────────────────────┐
-│  Open Remark Server (Next.js)                         │
+│  OpenRemark Server (Next.js)                         │
 │                                                         │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
 │  │ /api/widget/ │  │  /api/v1/    │  │  /dashboard  │  │

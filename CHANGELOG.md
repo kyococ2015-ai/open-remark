@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Open Remark are documented here.
+All notable changes to OpenRemark are documented here.
 
 ## [0.1.0-beta.1] — 2026-05-19
 

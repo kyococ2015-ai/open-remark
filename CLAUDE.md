@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Open Remark — self-hostable comment system for static sites. Next.js 16 (App Router) server + vanilla-TS shadow-DOM embed widget + PostgreSQL via Prisma.
+OpenRemark — self-hostable comment system for static sites. Next.js 16 (App Router) server + vanilla-TS shadow-DOM embed widget + PostgreSQL via Prisma.
 
 Status: beta. APIs and schema may change without migration paths.
 

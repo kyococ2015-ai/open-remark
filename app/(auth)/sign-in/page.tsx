@@ -27,7 +27,7 @@ export default async function SignInPage() {
             R
           </span>
           <span className="text-sm font-semibold tracking-tight">
-            Open Remark
+            OpenRemark
           </span>
         </div>
 
@@ -76,7 +76,7 @@ export default async function SignInPage() {
             R
           </span>
           <span className="text-sm font-semibold tracking-tight">
-            Open Remark
+            OpenRemark
           </span>
         </div>
 

@@ -7,8 +7,9 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 
 export const metadata: Metadata = {
-  title: "Open Remark",
-  description: "Comment system for static websites",
+  title: "OpenRemark - An Open-source Comment System for Static Websites",
+  description:
+    "OpenRemark is an open-source comment system for static sites built with Astro, Hugo, or Next.js. It aims to provide a fully featured commenting experience with minimal setup.",
 }
 
 const fontSans = Geist({

@@ -76,7 +76,7 @@ export function AppSidebar({ user }: Props) {
                 </div>
                 <div className="flex flex-col leading-tight">
                   <span className="text-sm font-bold tracking-tight">
-                    Open Remark
+                    OpenRemark
                   </span>
                   <span className="text-xs font-normal text-sidebar-foreground/70">
                     Comment platform

@@ -1,9 +1,9 @@
-# Embedding Open Remark in Hugo
+# Embedding OpenRemark in Hugo
 
 ## Prerequisites
 
 - A Hugo site (v0.110+)
-- A Open Remark account with a registered site
+- A OpenRemark account with a registered site
 - Your **site key** from the dashboard
 
 ## 1. Create a comments partial
@@ -76,4 +76,4 @@ data-slug="{{ with .Params.commentSlug }}{{ . }}{{ else }}{{ .RelPermalink }}{{ 
 ## Allowed origins
 
 Add `https://yourblog.com` to the **Allowed origins** list in your site's
-Settings page on the Open Remark dashboard.
+Settings page on the OpenRemark dashboard.

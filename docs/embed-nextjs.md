@@ -1,9 +1,9 @@
-# Embedding Open Remark in Next.js
+# Embedding OpenRemark in Next.js
 
 ## Prerequisites
 
 - A Next.js site (v13+ App Router)
-- A Open Remark account with a registered site
+- A OpenRemark account with a registered site
 - Your **site key** from the dashboard
 
 ## 1. Create a Comments component
@@ -86,7 +86,7 @@ This way, if you rename the post URL, existing comments follow the stable ID.
 ## Allowed origins
 
 Add `https://yourblog.com` to the **Allowed origins** list in your site's
-Settings page on the Open Remark dashboard. For local dev, add
+Settings page on the OpenRemark dashboard. For local dev, add
 `http://localhost:3000` too (remove it before going to production).
 
 ## Content Security Policy

@@ -69,7 +69,7 @@ export default function HomePage() {
             <div className="flex size-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
               R
             </div>
-            Open Remark
+            OpenRemark
           </Link>
           <div className="flex items-center gap-3">
             <Button asChild variant="ghost">
@@ -151,7 +151,7 @@ export default function HomePage() {
                 <iframe
                   className="absolute inset-0 h-full w-full"
                   src="https://www.youtube-nocookie.com/embed/uOYTTEZhHfI?rel=0&modestbranding=1"
-                  title="Open Remark demo"
+                  title="OpenRemark Demo"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
@@ -292,14 +292,14 @@ export default function HomePage() {
             >
               R
             </div>
-            <span>Open Remark</span>
+            <span>OpenRemark</span>
           </div>
           <p>
             An open source project by{" "}
             <Link
-              href="https://zeon.studio"
+              href="https://zeon.studio?ref=openremark"
               target="_blank"
-              rel="noopener noreferrer"
+              rel="noopener"
               className="underline underline-offset-4 hover:text-foreground"
             >
               Zeon Studio
