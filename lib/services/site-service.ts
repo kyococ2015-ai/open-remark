@@ -4,7 +4,9 @@ import { CommentStatus } from "@/generated/prisma/client"
 import type { CreateSiteInput, UpdateSiteInput } from "@/lib/validators/site"
 
 export async function getSitesByOwner(ownerId: string) {
-  const [sites, pendingByPage] = await Promise.all([
+  const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+
+  const [sites, pendingByPage, recentActivity] = await Promise.all([
     db.site.findMany({
       where: { ownerId },
       include: {
@@ -20,20 +22,43 @@ export async function getSitesByOwner(ownerId: string) {
       where: { status: CommentStatus.PENDING, page: { site: { ownerId } } },
       _count: { _all: true },
     }),
+    db.comment.findMany({
+      where: { page: { site: { ownerId } }, createdAt: { gte: twoWeeksAgo } },
+      select: { createdAt: true, page: { select: { siteId: true } } },
+    }),
   ])
 
   const pendingByPageId = new Map(
     pendingByPage.map((r) => [r.pageId, r._count._all])
   )
 
-  return sites.map((site) => ({
-    ...site,
-    totalComments: site.pages.reduce((acc, p) => acc + p._count.comments, 0),
-    pendingComments: site.pages.reduce(
-      (acc, p) => acc + (pendingByPageId.get(p.id) ?? 0),
-      0
-    ),
-  }))
+  // Build 14-day daily buckets per site
+  const days = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date(twoWeeksAgo)
+    d.setDate(d.getDate() + i + 1)
+    return d.toISOString().slice(0, 10)
+  })
+  const activityBySite = new Map<string, Map<string, number>>()
+  for (const c of recentActivity) {
+    const siteId = c.page.siteId
+    const day = c.createdAt.toISOString().slice(0, 10)
+    if (!activityBySite.has(siteId)) activityBySite.set(siteId, new Map())
+    const m = activityBySite.get(siteId)!
+    m.set(day, (m.get(day) ?? 0) + 1)
+  }
+
+  return sites.map((site) => {
+    const dayMap = activityBySite.get(site.id) ?? new Map()
+    return {
+      ...site,
+      totalComments: site.pages.reduce((acc, p) => acc + p._count.comments, 0),
+      pendingComments: site.pages.reduce(
+        (acc, p) => acc + (pendingByPageId.get(p.id) ?? 0),
+        0
+      ),
+      sparkline: days.map((d) => dayMap.get(d) ?? 0),
+    }
+  })
 }
 
 export async function getSiteByIdForOwner(siteId: string, ownerId: string) {

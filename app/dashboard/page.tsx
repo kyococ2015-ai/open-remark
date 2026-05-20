@@ -5,7 +5,6 @@ import { PageHeader } from "@/components/dashboard/page-header"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { CommentActivityChart } from "@/components/dashboard/comment-activity-chart"
 import { CommentStatusChart } from "@/components/dashboard/comment-status-chart"
-import { TopSitesChart } from "@/components/dashboard/top-sites-chart"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -17,17 +16,11 @@ import {
   RiTimeLine,
   RiGlobalLine,
   RiArrowRightLine,
-  RiSpamLine,
 } from "@remixicon/react"
 
 export default async function OverviewPage() {
   const session = await auth()
   const overview = await getOwnerOverview(session!.user!.id as string)
-
-  const topSites = overview.sites.map((site) => ({
-    name: site.name,
-    comments: site.pages.reduce((acc, p) => acc + p._count.comments, 0),
-  }))
 
   const approvalRate =
     overview.totalComments > 0
@@ -124,66 +117,6 @@ export default async function OverviewPage() {
                   spam={overview.spamComments}
                 />
               )}
-            </div>
-          </div>
-        </div>
-
-        {/* Top sites chart + secondary stats */}
-        <div className="grid gap-8 border-b pb-8 lg:grid-cols-3">
-          {/* Top sites bar chart */}
-          <div className="flex flex-col gap-3 lg:col-span-2">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-                Comments by Site
-              </h2>
-            </div>
-            <Separator />
-            <TopSitesChart sites={topSites} />
-          </div>
-
-          {/* Quick stats column */}
-          <div className="flex flex-col gap-3">
-            <h2 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-              Quick Stats
-            </h2>
-            <Separator />
-            <div className="flex flex-col gap-4 py-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <RiSpamLine className="size-4" />
-                  <span>Spam caught</span>
-                </div>
-                <span className="text-sm font-semibold tabular-nums">
-                  {overview.spamComments}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <RiCheckboxCircleLine className="size-4" />
-                  <span>Approval rate</span>
-                </div>
-                <span className="text-sm font-semibold tabular-nums">
-                  {approvalRate}%
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <RiGlobalLine className="size-4" />
-                  <span>Active sites</span>
-                </div>
-                <span className="text-sm font-semibold tabular-nums">
-                  {overview.totalSites}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <RiMessage2Line className="size-4" />
-                  <span>30-day activity</span>
-                </div>
-                <span className="text-sm font-semibold tabular-nums">
-                  {overview.commentActivity.reduce((s, d) => s + d.count, 0)}
-                </span>
-              </div>
             </div>
           </div>
         </div>

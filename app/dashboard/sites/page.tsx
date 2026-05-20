@@ -2,14 +2,17 @@ import Link from "next/link"
 import { auth } from "@/lib/auth"
 import { getSitesByOwner } from "@/lib/services/site-service"
 import { PageHeader } from "@/components/dashboard/page-header"
+import { SiteSparkline } from "@/components/dashboard/site-sparkline"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 import {
   RiAddLine,
   RiGlobalLine,
@@ -39,7 +42,7 @@ export default async function SitesPage() {
         }
       />
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {sites.length === 0 ? (
           <div className="flex flex-col items-center justify-center border border-dashed py-20 text-center">
             <RiGlobalLine
@@ -64,22 +67,22 @@ export default async function SitesPage() {
           <TooltipProvider>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {sites.map((site) => (
-                <div
+                <Card
                   key={site.id}
-                  className="flex flex-col border bg-card transition-shadow hover:shadow-sm"
+                  className="flex flex-col gap-0 py-0 shadow-none transition-shadow hover:shadow-md"
                 >
                   {/* Header */}
-                  <div className="flex items-start gap-3 p-4 pb-3">
-                    <div className="flex size-10 shrink-0 items-center justify-center bg-primary/10 text-sm font-bold text-primary">
+                  <CardHeader className="flex flex-row items-start gap-3 p-5 pb-4">
+                    <div className="flex size-11 shrink-0 items-center justify-center bg-muted text-lg font-semibold text-foreground">
                       {site.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm leading-tight font-semibold">
+                      <p className="truncate text-base leading-tight font-semibold">
                         {site.name}
                       </p>
-                      <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
+                      <p className="mt-0.5 flex items-center gap-1 truncate text-sm text-muted-foreground">
                         <RiGlobalLine
-                          className="size-3 shrink-0"
+                          className="size-3.5 shrink-0"
                           aria-hidden="true"
                         />
                         {site.domain}
@@ -87,56 +90,68 @@ export default async function SitesPage() {
                     </div>
                     <Badge
                       variant="outline"
-                      className={
+                      className={cn(
+                        "shrink-0 px-1.5 py-0 text-xs",
                         site.autoApprove
-                          ? "border-success/30 bg-success/10 text-success shrink-0 px-1.5 py-0 text-[10px]"
-                          : "border-warning/30 bg-warning/10 text-warning shrink-0 px-1.5 py-0 text-[10px]"
-                      }
+                          ? "border-success/30 bg-success/10 text-success"
+                          : "border-warning/30 bg-warning/10 text-warning"
+                      )}
                     >
                       {site.autoApprove ? "Auto-approve" : "Moderated"}
                     </Badge>
+                  </CardHeader>
+
+                  {/* Sparkline */}
+                  <div className="px-5 pb-2">
+                    <SiteSparkline data={site.sparkline} id={site.id} />
                   </div>
 
                   {/* Stats strip */}
-                  <div className="mx-4 mb-4 grid grid-cols-3 bg-muted/50">
-                    <div className="flex flex-col items-center py-2.5">
-                      <span className="text-base leading-tight font-semibold tabular-nums">
-                        {site.totalComments}
-                      </span>
-                      <span className="mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground">
-                        <RiMessage2Line className="size-3" aria-hidden="true" />
-                        Comments
-                      </span>
+                  <CardContent className="px-5 pb-4">
+                    <div className="grid grid-cols-3 divide-x bg-muted/40">
+                      <div className="flex flex-col items-start px-4 py-3">
+                        <span className="text-xl leading-tight font-semibold tabular-nums">
+                          {site.totalComments}
+                        </span>
+                        <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                          <RiMessage2Line
+                            className="size-3.5"
+                            aria-hidden="true"
+                          />
+                          Comments
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-start px-4 py-3">
+                        <span
+                          className={cn(
+                            "text-xl leading-tight font-semibold tabular-nums",
+                            site.pendingComments > 0 && "text-warning"
+                          )}
+                        >
+                          {site.pendingComments}
+                        </span>
+                        <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                          <RiTimeLine className="size-3.5" aria-hidden="true" />
+                          Pending
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-start px-4 py-3">
+                        <span className="text-xl leading-tight font-semibold tabular-nums">
+                          {site._count.pages}
+                        </span>
+                        <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                          <RiFileList2Line
+                            className="size-3.5"
+                            aria-hidden="true"
+                          />
+                          Pages
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex flex-col items-center py-2.5">
-                      <span
-                        className={`text-base leading-tight font-semibold tabular-nums ${
-                          site.pendingComments > 0 ? "text-warning" : ""
-                        }`}
-                      >
-                        {site.pendingComments}
-                      </span>
-                      <span className="mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground">
-                        <RiTimeLine className="size-3" aria-hidden="true" />
-                        Pending
-                      </span>
-                    </div>
-                    <div className="flex flex-col items-center py-2.5">
-                      <span className="text-base leading-tight font-semibold tabular-nums">
-                        {site._count.pages}
-                      </span>
-                      <span className="mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground">
-                        <RiFileList2Line
-                          className="size-3"
-                          aria-hidden="true"
-                        />
-                        Pages
-                      </span>
-                    </div>
-                  </div>
+                  </CardContent>
 
                   {/* Footer actions */}
-                  <div className="flex items-center gap-2 p-3">
+                  <CardFooter className="gap-2 border-t px-3 py-3">
                     <Button
                       asChild
                       variant="outline"
@@ -144,16 +159,8 @@ export default async function SitesPage() {
                       className="flex-1"
                     >
                       <Link href={`/dashboard/sites/${site.id}/comments`}>
-                        <RiMessage2Line
-                          className="size-3.5"
-                          aria-hidden="true"
-                        />
+                        <RiMessage2Line className="size-4" aria-hidden="true" />
                         Comments
-                        {site.pendingComments > 0 && (
-                          <span className="bg-warning text-warning-foreground ml-auto flex size-4 items-center justify-center text-[10px] font-semibold tabular-nums">
-                            {site.pendingComments}
-                          </span>
-                        )}
                       </Link>
                     </Button>
                     <Tooltip>
@@ -162,13 +169,10 @@ export default async function SitesPage() {
                           asChild
                           variant="outline"
                           size="sm"
-                          aria-label={`Integration steps for ${site.name}`}
+                          aria-label={`Install widget for ${site.name}`}
                         >
                           <Link href={`/dashboard/sites/${site.id}/install`}>
-                            <RiCodeLine
-                              className="size-3.5"
-                              aria-hidden="true"
-                            />
+                            <RiCodeLine className="size-4" aria-hidden="true" />
                           </Link>
                         </Button>
                       </TooltipTrigger>
@@ -184,7 +188,7 @@ export default async function SitesPage() {
                         >
                           <Link href={`/dashboard/sites/${site.id}/settings`}>
                             <RiSettings3Line
-                              className="size-3.5"
+                              className="size-4"
                               aria-hidden="true"
                             />
                           </Link>
@@ -192,8 +196,8 @@ export default async function SitesPage() {
                       </TooltipTrigger>
                       <TooltipContent>Settings</TooltipContent>
                     </Tooltip>
-                  </div>
-                </div>
+                  </CardFooter>
+                </Card>
               ))}
             </div>
           </TooltipProvider>
