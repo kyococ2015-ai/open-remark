@@ -249,7 +249,17 @@ export default function HomePage() {
             </div>
             <span>Open Remark</span>
           </div>
-          <p>Built with Next.js, Prisma &amp; shadcn/ui</p>
+          <p>
+            An open source project by{" "}
+            <Link
+              href="https://zeon.studio"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-4 hover:text-foreground"
+            >
+              Zeon Studio
+            </Link>
+          </p>
         </div>
       </footer>
     </div>

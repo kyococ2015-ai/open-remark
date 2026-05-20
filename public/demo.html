@@ -135,6 +135,34 @@
       html.dark #widget-theme-status {
         color: #94a3b8;
       }
+
+      .site-footer {
+        margin-top: 48px;
+        padding-top: 24px;
+        border-top: 1px solid #e2e8f0;
+        text-align: center;
+        font-size: 13px;
+        color: #64748b;
+      }
+
+      .site-footer a {
+        color: #64748b;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .site-footer a:hover {
+        color: #0f172a;
+      }
+
+      html.dark .site-footer {
+        border-top-color: #1e293b;
+        color: #64748b;
+      }
+
+      html.dark .site-footer a:hover {
+        color: #f8fafc;
+      }
     </style>
   </head>
   <body>
@@ -200,6 +228,9 @@
         </script>
         <script async src="/embed.js"></script>
       </section>
+      <footer class="site-footer">
+        <p>An open source project by <a href="https://zeon.studio" target="_blank" rel="noopener noreferrer">Zeon Studio</a></p>
+      </footer>
     </div>
 
     <button

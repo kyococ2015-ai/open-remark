@@ -148,7 +148,7 @@ export default async function OverviewPage() {
                   <Link
                     key={site.id}
                     href={`/dashboard/sites/${site.id}`}
-                    className="flex items-center gap-4 border-b py-4 transition-all hover:border-l-2 hover:border-primary hover:pl-3"
+                    className="flex items-center gap-4 border-l-2 border-transparent py-4 transition-all hover:border-primary hover:bg-primary/5 hover:pl-3"
                   >
                     <div className="flex size-9 shrink-0 items-center justify-center bg-muted text-sm font-medium">
                       {site.name.charAt(0).toUpperCase()}
@@ -195,7 +195,7 @@ export default async function OverviewPage() {
                   <Link
                     key={comment.id}
                     href={`/dashboard/sites/${comment.page.site.id}/comments?status=${comment.status}`}
-                    className="flex items-center gap-4 border-b py-4 transition-all hover:border-l-2 hover:border-primary hover:pl-3"
+                    className="flex items-center gap-4 border-l-2 border-transparent py-4 transition-all hover:border-primary hover:bg-primary/5 hover:pl-3"
                   >
                     <Avatar className="size-8 shrink-0">
                       <AvatarFallback className="text-xs">
