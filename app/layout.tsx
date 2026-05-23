@@ -38,6 +38,12 @@ export default function RootLayout({
         <GoogleTagManager gtmId={config.google_tag_manager.gtm_id} />
       )}
 
+      <script
+        async
+        crossOrigin="anonymous"
+        src="https://tweakcn.com/live-preview.min.js"
+      />
+
       {/* Meta Informations */}
       {/* Favicon */}
       <link rel="icon" type="image/x-icon" href="/images/favicon.png" />
