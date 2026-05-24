@@ -843,3 +843,8 @@
   color: var(--z-text);
   text-decoration: underline;
 }
+
+.z-footer-link:focus-visible {
+  outline: 2px solid var(--z-primary);
+  outline-offset: 2px;
+}
