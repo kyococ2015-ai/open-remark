@@ -79,6 +79,33 @@ function renderCommentBody(text: string): HTMLElement {
   return p
 }
 
+function renderCommentMeta(
+  commenter: CommentData["commenter"],
+  status: CommentData["status"]
+): HTMLElement {
+  const meta = document.createElement("div")
+  meta.className = "z-comment-meta"
+
+  const nameEl = document.createElement("span")
+  nameEl.className = "z-comment-author"
+  nameEl.textContent = commenter.name
+  meta.appendChild(nameEl)
+
+  const userEl = document.createElement("span")
+  userEl.className = "z-comment-username"
+  userEl.textContent = `@${commenter.username}`
+  meta.appendChild(userEl)
+
+  if (status === "PENDING") {
+    const badge = document.createElement("span")
+    badge.className = "z-pending-badge"
+    badge.textContent = "Pending"
+    meta.appendChild(badge)
+  }
+
+  return meta
+}
+
 const HEART_OUTLINE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`
 const HEART_FILLED = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`
 const REPLY_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`
@@ -130,21 +157,7 @@ function renderCommentItem(
 
       const right = document.createElement("div")
       right.className = "z-comment-right"
-
-      const meta = document.createElement("div")
-      meta.className = "z-comment-meta"
-
-      const nameEl = document.createElement("span")
-      nameEl.className = "z-comment-author"
-      nameEl.textContent = comment.commenter.name
-      meta.appendChild(nameEl)
-
-      const userEl = document.createElement("span")
-      userEl.className = "z-comment-username"
-      userEl.textContent = `@${comment.commenter.username}`
-      meta.appendChild(userEl)
-
-      right.appendChild(meta)
+      right.appendChild(renderCommentMeta(comment.commenter, comment.status))
 
       const deletedBody = document.createElement("span")
       deletedBody.className = "z-comment-deleted-body"
@@ -196,21 +209,7 @@ function renderCommentItem(
 
     const right = document.createElement("div")
     right.className = "z-comment-right"
-
-    const meta = document.createElement("div")
-    meta.className = "z-comment-meta"
-
-    const nameEl = document.createElement("span")
-    nameEl.className = "z-comment-author"
-    nameEl.textContent = comment.commenter.name
-    meta.appendChild(nameEl)
-
-    const userEl = document.createElement("span")
-    userEl.className = "z-comment-username"
-    userEl.textContent = `@${comment.commenter.username}`
-    meta.appendChild(userEl)
-
-    right.appendChild(meta)
+    right.appendChild(renderCommentMeta(comment.commenter, comment.status))
 
     const spamBody = document.createElement("span")
     spamBody.className = "z-comment-deleted-body"
@@ -261,28 +260,7 @@ function renderCommentItem(
 
   const right = document.createElement("div")
   right.className = "z-comment-right"
-
-  const meta = document.createElement("div")
-  meta.className = "z-comment-meta"
-
-  const nameEl = document.createElement("span")
-  nameEl.className = "z-comment-author"
-  nameEl.textContent = comment.commenter.name
-  meta.appendChild(nameEl)
-
-  const userEl = document.createElement("span")
-  userEl.className = "z-comment-username"
-  userEl.textContent = `@${comment.commenter.username}`
-  meta.appendChild(userEl)
-
-  if (comment.status === "PENDING") {
-    const badge = document.createElement("span")
-    badge.className = "z-pending-badge"
-    badge.textContent = "Pending"
-    meta.appendChild(badge)
-  }
-
-  right.appendChild(meta)
+  right.appendChild(renderCommentMeta(comment.commenter, comment.status))
 
   if (!isEditing) {
     const body = renderCommentBody(comment.body)
