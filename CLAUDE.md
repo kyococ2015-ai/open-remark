@@ -33,7 +33,6 @@ pnpm db:benchmark:run
 
 # Widget bundle
 pnpm widget:build     # minified → public/embed.js (+ debug → public/embed.debug.js)
-pnpm widget:dev       # non-minified, faster
 ```
 
 No test runner configured. `pnpm dev` regenerates Prisma client and rebuilds the widget every start — don't skip it.
