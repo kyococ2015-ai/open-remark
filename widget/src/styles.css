@@ -823,3 +823,23 @@
     background: var(--z-subtle);
   }
 }
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+.z-footer {
+  padding: 10px 16px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--z-muted);
+  border-top: 1px solid var(--z-border);
+}
+
+.z-footer-link {
+  color: var(--z-muted);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.z-footer-link:hover {
+  color: var(--z-text);
+  text-decoration: underline;
+}
