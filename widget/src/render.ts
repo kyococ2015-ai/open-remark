@@ -1,6 +1,100 @@
 import type { CommentData, AuthState, Commenter } from "./types"
 import { MAX_CHARS_COMMENT, MAX_CHARS_EDIT } from "./constants"
 
+interface InlineFormConfig {
+  headerLabel: string | null
+  currentUser: Commenter | null
+  initialValue: string
+  placeholder: string
+  ariaLabel: string
+  maxChars: number
+  submitLabel: string
+  submittingLabel: string
+  isSubmitting: boolean
+  onSubmit: (body: string) => void | Promise<void>
+  onCancel: () => void
+}
+
+function renderInlineForm(cfg: InlineFormConfig): HTMLElement {
+  const wrap = document.createElement("div")
+  wrap.className = "z-inline-form"
+
+  if (cfg.headerLabel && cfg.currentUser) {
+    const header = document.createElement("div")
+    header.className = "z-inline-form-header"
+    header.appendChild(
+      avatarEl(cfg.currentUser.name, cfg.currentUser.image, true)
+    )
+    const label = document.createElement("span")
+    label.className = "z-inline-form-label"
+    label.textContent = cfg.headerLabel
+    header.appendChild(label)
+    wrap.appendChild(header)
+  }
+
+  const textarea = document.createElement("textarea")
+  textarea.value = cfg.initialValue
+  textarea.placeholder = cfg.placeholder
+  textarea.setAttribute("aria-label", cfg.ariaLabel)
+  textarea.rows = 2
+  textarea.disabled = cfg.isSubmitting
+  wrap.appendChild(textarea)
+
+  const footer = document.createElement("div")
+  footer.className = "z-inline-form-footer"
+
+  const counter = document.createElement("span")
+  counter.className = "z-char-counter"
+  counter.setAttribute("aria-live", "polite")
+  counter.textContent = `${cfg.initialValue.length} / ${cfg.maxChars}`
+  footer.appendChild(counter)
+
+  const btnWrap = document.createElement("div")
+  btnWrap.className = "z-inline-form-btns"
+
+  const cancelBtn = document.createElement("button")
+  cancelBtn.className = "z-btn z-btn-ghost z-btn-sm"
+  cancelBtn.type = "button"
+  cancelBtn.textContent = "Cancel"
+  cancelBtn.addEventListener("click", cfg.onCancel)
+  btnWrap.appendChild(cancelBtn)
+
+  const submitBtn = document.createElement("button")
+  submitBtn.className = "z-btn z-btn-primary z-btn-sm"
+  submitBtn.type = "button"
+  submitBtn.textContent = cfg.isSubmitting
+    ? cfg.submittingLabel
+    : cfg.submitLabel
+  submitBtn.disabled = cfg.isSubmitting || cfg.initialValue.length === 0
+  submitBtn.addEventListener("click", async () => {
+    const body = textarea.value.trim()
+    if (!body || body.length > cfg.maxChars) {
+      textarea.focus()
+      return
+    }
+    await cfg.onSubmit(body)
+  })
+  btnWrap.appendChild(submitBtn)
+  footer.appendChild(btnWrap)
+  wrap.appendChild(footer)
+
+  textarea.addEventListener("input", () => {
+    textarea.style.height = "auto"
+    textarea.style.height = `${textarea.scrollHeight}px`
+    const len = textarea.value.length
+    counter.textContent = `${len} / ${cfg.maxChars}`
+    counter.classList.toggle(
+      "z-char-counter-warn",
+      len >= cfg.maxChars * 0.9 && len < cfg.maxChars
+    )
+    counter.classList.toggle("z-char-counter-over", len > cfg.maxChars)
+    submitBtn.disabled = cfg.isSubmitting || len === 0 || len > cfg.maxChars
+  })
+
+  setTimeout(() => textarea.focus(), 0)
+  return wrap
+}
+
 export function formatRelativeTime(isoDate: string): string {
   const diff = Date.now() - new Date(isoDate).getTime()
   const mins = Math.floor(diff / 60_000)
@@ -452,78 +546,19 @@ function renderInlineReplyForm(
   onCancel: () => void,
   isSubmitting: boolean
 ): HTMLElement {
-  const wrap = document.createElement("div")
-  wrap.className = "z-inline-form"
-
-  const header = document.createElement("div")
-  header.className = "z-inline-form-header"
-  header.appendChild(avatarEl(currentUser.name, currentUser.image, true))
-
-  const label = document.createElement("span")
-  label.className = "z-inline-form-label"
-  label.textContent = `Reply to ${replyTo.commenter.name}`
-  header.appendChild(label)
-  wrap.appendChild(header)
-
-  const textarea = document.createElement("textarea")
-  textarea.placeholder = `Reply to ${replyTo.commenter.name}…`
-  textarea.setAttribute("aria-label", `Reply to ${replyTo.commenter.name}`)
-  textarea.rows = 2
-  textarea.disabled = isSubmitting
-  wrap.appendChild(textarea)
-
-  const footer = document.createElement("div")
-  footer.className = "z-inline-form-footer"
-
-  const counter = document.createElement("span")
-  counter.className = "z-char-counter"
-  counter.setAttribute("aria-live", "polite")
-  counter.textContent = `0 / ${MAX_CHARS_COMMENT}`
-  footer.appendChild(counter)
-
-  const btnWrap = document.createElement("div")
-  btnWrap.className = "z-inline-form-btns"
-
-  const cancelBtn = document.createElement("button")
-  cancelBtn.className = "z-btn z-btn-ghost z-btn-sm"
-  cancelBtn.type = "button"
-  cancelBtn.textContent = "Cancel"
-  cancelBtn.addEventListener("click", onCancel)
-  btnWrap.appendChild(cancelBtn)
-
-  const submitBtn = document.createElement("button")
-  submitBtn.className = "z-btn z-btn-primary z-btn-sm"
-  submitBtn.type = "button"
-  submitBtn.textContent = isSubmitting ? "Posting…" : "Reply"
-  submitBtn.disabled = isSubmitting
-  submitBtn.addEventListener("click", async () => {
-    const body = textarea.value.trim()
-    if (!body || body.length > MAX_CHARS_COMMENT) {
-      textarea.focus()
-      return
-    }
-    await onSubmit(body, replyTo.id)
+  return renderInlineForm({
+    headerLabel: `Reply to ${replyTo.commenter.name}`,
+    currentUser,
+    initialValue: "",
+    placeholder: `Reply to ${replyTo.commenter.name}…`,
+    ariaLabel: `Reply to ${replyTo.commenter.name}`,
+    maxChars: MAX_CHARS_COMMENT,
+    submitLabel: "Reply",
+    submittingLabel: "Posting…",
+    isSubmitting,
+    onSubmit: (body) => onSubmit(body, replyTo.id),
+    onCancel,
   })
-  btnWrap.appendChild(submitBtn)
-  footer.appendChild(btnWrap)
-  wrap.appendChild(footer)
-
-  textarea.addEventListener("input", () => {
-    textarea.style.height = "auto"
-    textarea.style.height = `${textarea.scrollHeight}px`
-    const len = textarea.value.length
-    counter.textContent = `${len} / ${MAX_CHARS_COMMENT}`
-    counter.classList.toggle(
-      "z-char-counter-warn",
-      len >= MAX_CHARS_COMMENT * 0.9 && len < MAX_CHARS_COMMENT
-    )
-    counter.classList.toggle("z-char-counter-over", len > MAX_CHARS_COMMENT)
-    submitBtn.disabled = isSubmitting || len === 0 || len > MAX_CHARS_COMMENT
-  })
-
-  setTimeout(() => textarea.focus(), 0)
-
-  return wrap
 }
 
 function renderInlineEditForm(
@@ -532,69 +567,19 @@ function renderInlineEditForm(
   onCancel: () => void,
   isSubmitting: boolean
 ): HTMLElement {
-  const wrap = document.createElement("div")
-  wrap.className = "z-inline-form"
-
-  const textarea = document.createElement("textarea")
-  textarea.value = comment.body
-  textarea.placeholder = "Edit your comment…"
-  textarea.setAttribute("aria-label", "Edit comment")
-  textarea.rows = 2
-  textarea.disabled = isSubmitting
-  wrap.appendChild(textarea)
-
-  const footer = document.createElement("div")
-  footer.className = "z-inline-form-footer"
-
-  const counter = document.createElement("span")
-  counter.className = "z-char-counter"
-  counter.setAttribute("aria-live", "polite")
-  counter.textContent = `${comment.body.length} / ${MAX_CHARS_EDIT}`
-  footer.appendChild(counter)
-
-  const btnWrap = document.createElement("div")
-  btnWrap.className = "z-inline-form-btns"
-
-  const cancelBtn = document.createElement("button")
-  cancelBtn.className = "z-btn z-btn-ghost z-btn-sm"
-  cancelBtn.type = "button"
-  cancelBtn.textContent = "Cancel"
-  cancelBtn.addEventListener("click", onCancel)
-  btnWrap.appendChild(cancelBtn)
-
-  const submitBtn = document.createElement("button")
-  submitBtn.className = "z-btn z-btn-primary z-btn-sm"
-  submitBtn.type = "button"
-  submitBtn.textContent = isSubmitting ? "Saving…" : "Save"
-  submitBtn.disabled = isSubmitting
-  submitBtn.addEventListener("click", async () => {
-    const body = textarea.value.trim()
-    if (!body || body.length > MAX_CHARS_EDIT) {
-      textarea.focus()
-      return
-    }
-    await onSubmit(comment.id, body)
+  return renderInlineForm({
+    headerLabel: null,
+    currentUser: null,
+    initialValue: comment.body,
+    placeholder: "Edit your comment…",
+    ariaLabel: "Edit comment",
+    maxChars: MAX_CHARS_EDIT,
+    submitLabel: "Save",
+    submittingLabel: "Saving…",
+    isSubmitting,
+    onSubmit: (body) => onSubmit(comment.id, body),
+    onCancel,
   })
-  btnWrap.appendChild(submitBtn)
-  footer.appendChild(btnWrap)
-  wrap.appendChild(footer)
-
-  textarea.addEventListener("input", () => {
-    textarea.style.height = "auto"
-    textarea.style.height = `${textarea.scrollHeight}px`
-    const len = textarea.value.length
-    counter.textContent = `${len} / ${MAX_CHARS_EDIT}`
-    counter.classList.toggle(
-      "z-char-counter-warn",
-      len >= MAX_CHARS_EDIT * 0.9 && len < MAX_CHARS_EDIT
-    )
-    counter.classList.toggle("z-char-counter-over", len > MAX_CHARS_EDIT)
-    submitBtn.disabled = isSubmitting || len === 0 || len > MAX_CHARS_EDIT
-  })
-
-  setTimeout(() => textarea.focus(), 0)
-
-  return wrap
 }
 
 export function renderCommentList(
