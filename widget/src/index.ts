@@ -22,6 +22,8 @@ import {
   renderLoading,
   renderLoadingAuthBar,
   renderBannedBanner,
+  type CommentHandlers,
+  type CommentState,
 } from "./render"
 
 declare const __APP_URL__: string
@@ -447,6 +449,31 @@ class ZeonWidget {
     return header
   }
 
+  private buildHandlers(): CommentHandlers {
+    return {
+      onReply: (comment) => this.handleReplyClick(comment),
+      onLike: (comment) => this.handleLike(comment),
+      onEdit: (comment) => this.handleEditClick(comment),
+      onCancelEdit: () => this.handleCancelEdit(),
+      onSubmitEdit: (id, body) => this.handleSubmitEdit(id, body),
+      onDelete: (comment) => this.handleDeleteClick(comment),
+      onCancelDelete: () => this.handleCancelDelete(),
+      onConfirmDelete: (id) => this.handleConfirmDelete(id),
+      onSubmitReply: (body, parentId) => this.handleSubmit(body, parentId),
+      onCancelReply: () => this.handleCancelReply(),
+    }
+  }
+
+  private buildState(): CommentState {
+    return {
+      replyingToId: this.replyingToId,
+      editingId: this.isEditingId,
+      deletingId: this.deletingId,
+      isSubmitting: this.isSubmitting,
+      currentUser: this.currentUser,
+    }
+  }
+
   private render() {
     this.root.innerHTML = ""
     this.root.appendChild(this.buildHeader())
@@ -482,24 +509,7 @@ class ZeonWidget {
     }
 
     this.root.appendChild(
-      renderCommentList(
-        this.comments,
-        (comment) => this.handleReplyClick(comment),
-        (comment) => this.handleLike(comment),
-        this.replyingToId,
-        this.currentUser,
-        (body, parentId) => this.handleSubmit(body, parentId),
-        () => this.handleCancelReply(),
-        this.isSubmitting,
-        this.isEditingId,
-        (comment) => this.handleEditClick(comment),
-        () => this.handleCancelEdit(),
-        (id, body) => this.handleSubmitEdit(id, body),
-        this.deletingId,
-        (comment) => this.handleDeleteClick(comment),
-        () => this.handleCancelDelete(),
-        (id) => this.handleConfirmDelete(id)
-      )
+      renderCommentList(this.comments, this.buildHandlers(), this.buildState())
     )
 
     if (this.activeConfig?.enable && this.activeConfig?.poweredByHtml) {

@@ -1,6 +1,27 @@
 import type { CommentData, AuthState, Commenter } from "./types"
 import { MAX_CHARS_COMMENT, MAX_CHARS_EDIT } from "./constants"
 
+export interface CommentHandlers {
+  onReply: (comment: CommentData) => void
+  onLike: (comment: CommentData) => void
+  onEdit: (comment: CommentData) => void
+  onCancelEdit: () => void
+  onSubmitEdit: (commentId: string, body: string) => void
+  onDelete: (comment: CommentData) => void
+  onCancelDelete: () => void
+  onConfirmDelete: (commentId: string) => void
+  onSubmitReply: (body: string, parentId: string) => void
+  onCancelReply: () => void
+}
+
+export interface CommentState {
+  replyingToId: string | null
+  editingId: string | null
+  deletingId: string | null
+  isSubmitting: boolean
+  currentUser: Commenter | null
+}
+
 interface InlineFormConfig {
   headerLabel: string | null
   currentUser: Commenter | null
@@ -204,25 +225,27 @@ const HEART_OUTLINE = `<svg width="14" height="14" viewBox="0 0 24 24" fill="non
 const HEART_FILLED = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`
 const REPLY_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`
 
-function renderCommentItem(
+export function renderCommentItem(
   comment: CommentData,
   depth: number,
-  onReply: (comment: CommentData) => void,
-  onLike: (comment: CommentData) => void,
-  replyingToId: string | null,
-  currentUser: Commenter | null,
-  onSubmitReply: (body: string, parentId: string) => void,
-  onCancelReply: () => void,
-  isSubmitting: boolean,
-  editingId: string | null,
-  onEdit: (comment: CommentData) => void,
-  onCancelEdit: () => void,
-  onSubmitEdit: (commentId: string, body: string) => void,
-  deletingId: string | null,
-  onDelete: (comment: CommentData) => void,
-  onCancelDelete: () => void,
-  onConfirmDelete: (commentId: string) => void
+  handlers: CommentHandlers,
+  state: CommentState
 ): HTMLElement {
+  const {
+    onReply,
+    onLike,
+    onEdit,
+    onCancelEdit,
+    onSubmitEdit,
+    onDelete,
+    onCancelDelete,
+    onConfirmDelete,
+    onSubmitReply,
+    onCancelReply,
+  } = handlers
+  const { replyingToId, editingId, deletingId, isSubmitting, currentUser } =
+    state
+
   const li = document.createElement("li")
   li.className = depth === 0 ? "z-comment" : "z-reply"
   li.dataset.id = comment.id
@@ -268,25 +291,7 @@ function renderCommentItem(
       repliesList.setAttribute("aria-label", "Replies")
       for (const reply of comment.replies) {
         repliesList.appendChild(
-          renderCommentItem(
-            reply,
-            depth + 1,
-            onReply,
-            onLike,
-            replyingToId,
-            currentUser,
-            onSubmitReply,
-            onCancelReply,
-            isSubmitting,
-            editingId,
-            onEdit,
-            onCancelEdit,
-            onSubmitEdit,
-            deletingId,
-            onDelete,
-            onCancelDelete,
-            onConfirmDelete
-          )
+          renderCommentItem(reply, depth + 1, handlers, state)
         )
       }
       li.appendChild(repliesList)
@@ -319,25 +324,7 @@ function renderCommentItem(
       repliesList.setAttribute("aria-label", "Replies")
       for (const reply of comment.replies) {
         repliesList.appendChild(
-          renderCommentItem(
-            reply,
-            depth + 1,
-            onReply,
-            onLike,
-            replyingToId,
-            currentUser,
-            onSubmitReply,
-            onCancelReply,
-            isSubmitting,
-            editingId,
-            onEdit,
-            onCancelEdit,
-            onSubmitEdit,
-            deletingId,
-            onDelete,
-            onCancelDelete,
-            onConfirmDelete
-          )
+          renderCommentItem(reply, depth + 1, handlers, state)
         )
       }
       li.appendChild(repliesList)
@@ -506,25 +493,7 @@ function renderCommentItem(
     )
     for (const reply of comment.replies) {
       repliesList.appendChild(
-        renderCommentItem(
-          reply,
-          depth + 1,
-          onReply,
-          onLike,
-          replyingToId,
-          currentUser,
-          onSubmitReply,
-          onCancelReply,
-          isSubmitting,
-          editingId,
-          onEdit,
-          onCancelEdit,
-          onSubmitEdit,
-          deletingId,
-          onDelete,
-          onCancelDelete,
-          onConfirmDelete
-        )
+        renderCommentItem(reply, depth + 1, handlers, state)
       )
     }
     li.appendChild(repliesList)
@@ -578,21 +547,8 @@ function renderInlineEditForm(
 
 export function renderCommentList(
   comments: CommentData[],
-  onReply: (comment: CommentData) => void,
-  onLike: (comment: CommentData) => void,
-  replyingToId: string | null,
-  currentUser: Commenter | null,
-  onSubmitReply: (body: string, parentId: string) => void,
-  onCancelReply: () => void,
-  isSubmitting: boolean,
-  editingId: string | null,
-  onEdit: (comment: CommentData) => void,
-  onCancelEdit: () => void,
-  onSubmitEdit: (commentId: string, body: string) => void,
-  deletingId: string | null,
-  onDelete: (comment: CommentData) => void,
-  onCancelDelete: () => void,
-  onConfirmDelete: (commentId: string) => void
+  handlers: CommentHandlers,
+  state: CommentState
 ): HTMLElement {
   if (comments.length === 0) {
     const el = document.createElement("div")
@@ -625,27 +581,7 @@ export function renderCommentList(
   list.className = "z-list"
   list.setAttribute("aria-label", "Comments")
   for (const c of comments) {
-    list.appendChild(
-      renderCommentItem(
-        c,
-        0,
-        onReply,
-        onLike,
-        replyingToId,
-        currentUser,
-        onSubmitReply,
-        onCancelReply,
-        isSubmitting,
-        editingId,
-        onEdit,
-        onCancelEdit,
-        onSubmitEdit,
-        deletingId,
-        onDelete,
-        onCancelDelete,
-        onConfirmDelete
-      )
-    )
+    list.appendChild(renderCommentItem(c, 0, handlers, state))
   }
   return list
 }
