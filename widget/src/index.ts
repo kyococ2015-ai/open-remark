@@ -546,6 +546,11 @@ class ZeonWidget {
       attributeFilter: ["class"],
     })
   }
+
+  destroy() {
+    this.htmlObserver?.disconnect()
+    this.root.innerHTML = ""
+  }
 }
 
 function detectAppUrl(): string {
@@ -557,9 +562,10 @@ function detectAppUrl(): string {
   return __APP_URL__
 }
 
-function mount() {
+function mount(): ZeonWidget[] {
   const appUrl = detectAppUrl()
   const elements = document.querySelectorAll<HTMLElement>("[data-open-remark]")
+  const instances: ZeonWidget[] = []
 
   for (const el of elements) {
     const siteKey = el.dataset.siteKey
@@ -578,8 +584,11 @@ function mount() {
       }
     }
 
-    new ZeonWidget({ siteKey, slug, container: el, appUrl, onThemeChange })
+    instances.push(
+      new ZeonWidget({ siteKey, slug, container: el, appUrl, onThemeChange })
+    )
   }
+  return instances
 }
 
 if (document.readyState === "loading") {
