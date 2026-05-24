@@ -427,12 +427,6 @@ function renderCommentItem(
         const isOpen = dropdown.style.display === "block"
         dropdown.style.display = isOpen ? "none" : "block"
       })
-
-      document.addEventListener("click", (e) => {
-        if (!menuWrap.contains(e.target as Node)) {
-          dropdown.style.display = "none"
-        }
-      })
     }
 
     if (comment.editedAt) {

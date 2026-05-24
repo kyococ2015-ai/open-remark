@@ -148,6 +148,17 @@ class ZeonWidget {
     this.root.className = "z-root"
     this.shadow.appendChild(this.root)
 
+    this.shadow.addEventListener("click", (e) => {
+      const dropdowns =
+        this.root.querySelectorAll<HTMLElement>(".z-menu-dropdown")
+      for (const d of dropdowns) {
+        const wrap = d.closest(".z-comment-actions-wrap")
+        if (wrap && !wrap.contains(e.target as Node)) {
+          d.style.display = "none"
+        }
+      }
+    })
+
     this.render()
     this.loadComments()
   }
