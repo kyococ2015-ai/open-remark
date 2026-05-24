@@ -923,6 +923,7 @@ export function renderLoading(): HTMLElement {
   return wrap
 }
 
+// html comes from config.json (server-controlled, not user input) — safe to use innerHTML
 export function renderFooter(html: string): HTMLElement {
   const footer = document.createElement("footer")
   footer.className = "z-footer"
