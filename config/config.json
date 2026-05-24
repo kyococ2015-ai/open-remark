@@ -2,5 +2,10 @@
   "google_tag_manager": {
     "enable": true,
     "gtm_id": "GTM-PTDPPT6L"
+  },
+  "branding": {
+    "hide_powered_by": false,
+    "_note": "powered_by_html must include class=\"z-footer-link\" to receive widget styles",
+    "powered_by_html": "Powered by <a href=\"https://open-remark.com\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"z-footer-link\">Open-Remark</a>"
   }
 }
