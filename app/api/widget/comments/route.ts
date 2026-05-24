@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { CreateCommentSchema } from "@/lib/validators/comment"
+import appConfig from "@/config/config.json"
 import {
   getApprovedCommentsForPage,
   createComment,
@@ -54,6 +55,8 @@ export async function GET(req: NextRequest) {
         primaryColor: site.primaryColor,
         radius: site.radius,
         currentUser: userEmail ? { isBanned } : undefined,
+        hidePoweredBy: appConfig.branding.hide_powered_by,
+        poweredByHtml: appConfig.branding.powered_by_html,
       },
     })
   } catch (err) {
