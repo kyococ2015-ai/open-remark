@@ -112,7 +112,37 @@ hooks/use-optimistic-state.ts;
 
 --- 
 
-## 6. Comments and Readability
+## 6. Application Configuration
+
+All app-level configuration must live in `config/config.json`. Do **not** scatter config across environment variables, DOM attributes, or hardcoded values when the setting is a feature flag or site-wide option.
+
+### Pattern
+
+Add a top-level key to `config/config.json`:
+
+```json
+{
+  "google_tag_manager": {
+    "enable": true,
+    "gtm_id": "GTM-XXXXXXX"
+  },
+  "branding": {
+    "hide_powered_by": false
+  }
+}
+```
+
+Read it server-side (e.g. in a service or route handler) and pass the value down to the client only where needed — never expose the entire config object to the widget or browser.
+
+### Rules
+
+- New feature flags → add to `config/config.json`, not `.env`
+- Widget-visible flags → server reads `config.json`, injects into the API response (e.g. `WidgetThemeConfig`)
+- Never read `config/config.json` directly from widget source or client components
+
+---
+
+## 7. Comments and Readability
 
 Always write clear and concise comments but not bloated to explain the purpose of complex code blocks, functions, or components.
 

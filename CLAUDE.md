@@ -82,7 +82,8 @@ PostgreSQL (Prisma adapter-pg)
 - `widget/src/` — `index.ts` (entry), `api.ts`, `auth.ts`, `render.ts`, `styles.css`, `types.ts`. Builds via `widget/build.ts` → `public/embed.js`.
 - `proxy.ts` (root) — Next middleware. Renamed from `middleware.ts`.
 - `prisma.config.ts` — Prisma schema/migrations config.
-- `config/config.json`, `.agents/instructions/*.md` — agent-facing rules (see below).
+- `config/config.json` — app-level feature flags and config (GTM, branding, etc.). All new config goes here — not in `.env` or hardcoded. Server reads it; widget-visible values are injected into API responses only.
+- `.agents/instructions/*.md` — agent-facing rules (see below).
 
 ### Widget specifics
 
