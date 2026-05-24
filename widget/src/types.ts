@@ -45,4 +45,6 @@ export type WidgetThemeConfig = {
   primaryColor: string
   radius: number
   currentUser?: { isBanned: boolean }
+  hidePoweredBy: boolean
+  poweredByHtml: string
 }
