@@ -16,6 +16,7 @@ import { loadStoredAuth, signInWithGoogle, clearAuth } from "./auth"
 import {
   renderAuthBar,
   renderCommentForm,
+  renderCommentItem,
   renderCommentList,
   renderError,
   renderFooter,
@@ -289,7 +290,7 @@ class ZeonWidget {
       )
       comment.hasLiked = result.liked
       comment.likeCount = result.count
-      this.render()
+      this.patchComment(comment.id)
     } catch (err: unknown) {
       this.handleApiError(err, "Failed to update like")
     }
@@ -332,34 +333,49 @@ class ZeonWidget {
       return
     }
     this.replyingToId = comment.id
-    this.render()
+    this.patchComment(comment.id)
   }
 
   private handleCancelReply() {
+    const prev = this.replyingToId
     this.replyingToId = null
-    this.render()
+    if (prev) {
+      this.patchComment(prev)
+    } else {
+      this.render()
+    }
   }
 
   private handleEditClick(comment: CommentData) {
     if (this.auth.status !== "authenticated") return
     this.isEditingId = comment.id
-    this.render()
+    this.patchComment(comment.id)
   }
 
   private handleCancelEdit() {
+    const prev = this.isEditingId
     this.isEditingId = null
-    this.render()
+    if (prev) {
+      this.patchComment(prev)
+    } else {
+      this.render()
+    }
   }
 
   private handleDeleteClick(comment: CommentData) {
     if (this.auth.status !== "authenticated") return
     this.deletingId = comment.id
-    this.render()
+    this.patchComment(comment.id)
   }
 
   private handleCancelDelete() {
+    const prev = this.deletingId
     this.deletingId = null
-    this.render()
+    if (prev) {
+      this.patchComment(prev)
+    } else {
+      this.render()
+    }
   }
 
   private async handleConfirmDelete(commentId: string) {
@@ -472,6 +488,23 @@ class ZeonWidget {
       isSubmitting: this.isSubmitting,
       currentUser: this.currentUser,
     }
+  }
+
+  private patchComment(commentId: string) {
+    const el = this.root.querySelector<HTMLElement>(`[data-id="${commentId}"]`)
+    const comment = this.findComment(commentId)
+    if (!el || !comment) {
+      this.render()
+      return
+    }
+    const depth = el.closest(".z-replies") !== null ? 1 : 0
+    const updated = renderCommentItem(
+      comment,
+      depth,
+      this.buildHandlers(),
+      this.buildState()
+    )
+    el.replaceWith(updated)
   }
 
   private render() {
