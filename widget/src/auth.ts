@@ -1,5 +1,6 @@
 import type { AuthState, AuthUser } from "./types"
 import { exchangeGoogleToken } from "./api"
+import { AUTH_POPUP_WIDTH, AUTH_POPUP_HEIGHT } from "./constants"
 
 const STORAGE_KEY = "zeon_widget_token"
 const OAUTH_VERIFIER_KEY = "zeon_oauth_verifier"
@@ -76,10 +77,8 @@ export async function signInWithGoogle(
   sessionStorage.setItem(OAUTH_STATE_KEY, state)
 
   return new Promise((resolve, reject) => {
-    const width = 500
-    const height = 600
-    const left = window.screenX + (window.outerWidth - width) / 2
-    const top = window.screenY + (window.outerHeight - height) / 2
+    const left = window.screenX + (window.outerWidth - AUTH_POPUP_WIDTH) / 2
+    const top = window.screenY + (window.outerHeight - AUTH_POPUP_HEIGHT) / 2
 
     const popup = window.open(
       `https://accounts.google.com/o/oauth2/v2/auth?` +
@@ -94,7 +93,7 @@ export async function signInWithGoogle(
           state,
         }),
       "zeon-google-signin",
-      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no`
+      `width=${AUTH_POPUP_WIDTH},height=${AUTH_POPUP_HEIGHT},left=${left},top=${top},toolbar=no,menubar=no`
     )
 
     if (!popup) {

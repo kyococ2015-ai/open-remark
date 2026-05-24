@@ -1,4 +1,5 @@
 import type { CommentData, AuthState, Commenter } from "./types"
+import { MAX_CHARS_COMMENT, MAX_CHARS_EDIT } from "./constants"
 
 export function formatRelativeTime(isoDate: string): string {
   const diff = Date.now() - new Date(isoDate).getTime()
@@ -473,8 +474,6 @@ function renderInlineReplyForm(
   onCancel: () => void,
   isSubmitting: boolean
 ): HTMLElement {
-  const MAX_CHARS = 2000
-
   const wrap = document.createElement("div")
   wrap.className = "z-inline-form"
 
@@ -501,7 +500,7 @@ function renderInlineReplyForm(
   const counter = document.createElement("span")
   counter.className = "z-char-counter"
   counter.setAttribute("aria-live", "polite")
-  counter.textContent = `0 / ${MAX_CHARS}`
+  counter.textContent = `0 / ${MAX_CHARS_COMMENT}`
   footer.appendChild(counter)
 
   const btnWrap = document.createElement("div")
@@ -521,7 +520,7 @@ function renderInlineReplyForm(
   submitBtn.disabled = isSubmitting
   submitBtn.addEventListener("click", async () => {
     const body = textarea.value.trim()
-    if (!body || body.length > MAX_CHARS) {
+    if (!body || body.length > MAX_CHARS_COMMENT) {
       textarea.focus()
       return
     }
@@ -535,13 +534,13 @@ function renderInlineReplyForm(
     textarea.style.height = "auto"
     textarea.style.height = `${textarea.scrollHeight}px`
     const len = textarea.value.length
-    counter.textContent = `${len} / ${MAX_CHARS}`
+    counter.textContent = `${len} / ${MAX_CHARS_COMMENT}`
     counter.classList.toggle(
       "z-char-counter-warn",
-      len >= MAX_CHARS * 0.9 && len < MAX_CHARS
+      len >= MAX_CHARS_COMMENT * 0.9 && len < MAX_CHARS_COMMENT
     )
-    counter.classList.toggle("z-char-counter-over", len > MAX_CHARS)
-    submitBtn.disabled = isSubmitting || len === 0 || len > MAX_CHARS
+    counter.classList.toggle("z-char-counter-over", len > MAX_CHARS_COMMENT)
+    submitBtn.disabled = isSubmitting || len === 0 || len > MAX_CHARS_COMMENT
   })
 
   setTimeout(() => textarea.focus(), 0)
@@ -555,8 +554,6 @@ function renderInlineEditForm(
   onCancel: () => void,
   isSubmitting: boolean
 ): HTMLElement {
-  const MAX_CHARS = 5000
-
   const wrap = document.createElement("div")
   wrap.className = "z-inline-form"
 
@@ -574,7 +571,7 @@ function renderInlineEditForm(
   const counter = document.createElement("span")
   counter.className = "z-char-counter"
   counter.setAttribute("aria-live", "polite")
-  counter.textContent = `${comment.body.length} / ${MAX_CHARS}`
+  counter.textContent = `${comment.body.length} / ${MAX_CHARS_EDIT}`
   footer.appendChild(counter)
 
   const btnWrap = document.createElement("div")
@@ -594,7 +591,7 @@ function renderInlineEditForm(
   submitBtn.disabled = isSubmitting
   submitBtn.addEventListener("click", async () => {
     const body = textarea.value.trim()
-    if (!body || body.length > MAX_CHARS) {
+    if (!body || body.length > MAX_CHARS_EDIT) {
       textarea.focus()
       return
     }
@@ -608,13 +605,13 @@ function renderInlineEditForm(
     textarea.style.height = "auto"
     textarea.style.height = `${textarea.scrollHeight}px`
     const len = textarea.value.length
-    counter.textContent = `${len} / ${MAX_CHARS}`
+    counter.textContent = `${len} / ${MAX_CHARS_EDIT}`
     counter.classList.toggle(
       "z-char-counter-warn",
-      len >= MAX_CHARS * 0.9 && len < MAX_CHARS
+      len >= MAX_CHARS_EDIT * 0.9 && len < MAX_CHARS_EDIT
     )
-    counter.classList.toggle("z-char-counter-over", len > MAX_CHARS)
-    submitBtn.disabled = isSubmitting || len === 0 || len > MAX_CHARS
+    counter.classList.toggle("z-char-counter-over", len > MAX_CHARS_EDIT)
+    submitBtn.disabled = isSubmitting || len === 0 || len > MAX_CHARS_EDIT
   })
 
   setTimeout(() => textarea.focus(), 0)
@@ -735,8 +732,6 @@ export function renderAuthBar(
   return bar
 }
 
-const MAX_CHARS = 2000
-
 export function renderCommentForm(
   onSubmit: (body: string, parentId?: string) => Promise<void>,
   replyTo: CommentData | null,
@@ -775,13 +770,13 @@ export function renderCommentForm(
     textarea.style.height = "auto"
     textarea.style.height = `${textarea.scrollHeight}px`
     const len = textarea.value.length
-    counter.textContent = `${len} / ${MAX_CHARS}`
+    counter.textContent = `${len} / ${MAX_CHARS_COMMENT}`
     counter.classList.toggle(
       "z-char-counter-warn",
-      len >= MAX_CHARS * 0.9 && len < MAX_CHARS
+      len >= MAX_CHARS_COMMENT * 0.9 && len < MAX_CHARS_COMMENT
     )
-    counter.classList.toggle("z-char-counter-over", len > MAX_CHARS)
-    submitBtn.disabled = isSubmitting || len === 0 || len > MAX_CHARS
+    counter.classList.toggle("z-char-counter-over", len > MAX_CHARS_COMMENT)
+    submitBtn.disabled = isSubmitting || len === 0 || len > MAX_CHARS_COMMENT
   })
 
   form.appendChild(textarea)
@@ -792,7 +787,7 @@ export function renderCommentForm(
   const counter = document.createElement("span")
   counter.className = "z-char-counter"
   counter.setAttribute("aria-live", "polite")
-  counter.textContent = `0 / ${MAX_CHARS}`
+  counter.textContent = `0 / ${MAX_CHARS_COMMENT}`
   footer.appendChild(counter)
 
   const submitBtn = document.createElement("button")
@@ -806,14 +801,14 @@ export function renderCommentForm(
   submitBtn.disabled = isSubmitting
   submitBtn.addEventListener("click", async () => {
     const body = textarea.value.trim()
-    if (!body || body.length > MAX_CHARS) {
+    if (!body || body.length > MAX_CHARS_COMMENT) {
       textarea.focus()
       return
     }
     await onSubmit(body, replyTo?.id)
     textarea.value = ""
     textarea.style.height = ""
-    counter.textContent = `0 / ${MAX_CHARS}`
+    counter.textContent = `0 / ${MAX_CHARS_COMMENT}`
     counter.classList.remove("z-char-counter-warn", "z-char-counter-over")
     submitBtn.disabled = true
   })
