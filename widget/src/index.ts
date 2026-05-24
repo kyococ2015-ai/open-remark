@@ -18,6 +18,7 @@ import {
   renderCommentForm,
   renderCommentList,
   renderError,
+  renderFooter,
   renderLoading,
   renderLoadingAuthBar,
   renderBannedBanner,
@@ -497,6 +498,10 @@ class ZeonWidget {
         (id) => this.handleConfirmDelete(id)
       )
     )
+
+    if (!this.activeConfig?.hidePoweredBy && this.activeConfig?.poweredByHtml) {
+      this.root.appendChild(renderFooter(this.activeConfig.poweredByHtml))
+    }
   }
 
   private applyTheme(cfg: WidgetThemeConfig) {
