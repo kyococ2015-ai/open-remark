@@ -132,7 +132,13 @@ class ZeonWidget {
     this.themeStyle = document.createElement("style")
     const cached = loadCachedTheme(config.siteKey)
     this.applyTheme(
-      cached ?? { theme: "AUTO", primaryColor: "#0f172a", radius: 8 }
+      cached ?? {
+        theme: "AUTO",
+        primaryColor: "#0f172a",
+        radius: 8,
+        hidePoweredBy: false,
+        poweredByHtml: "",
+      }
     )
     this.shadow.appendChild(this.themeStyle)
     this.setupThemeObservers()

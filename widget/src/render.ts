@@ -922,3 +922,10 @@ export function renderLoading(): HTMLElement {
   wrap.appendChild(list)
   return wrap
 }
+
+export function renderFooter(html: string): HTMLElement {
+  const footer = document.createElement("footer")
+  footer.className = "z-footer"
+  footer.innerHTML = html
+  return footer
+}
