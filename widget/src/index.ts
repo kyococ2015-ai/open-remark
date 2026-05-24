@@ -137,7 +137,7 @@ class ZeonWidget {
         theme: "AUTO",
         primaryColor: "#0f172a",
         radius: 8,
-        hidePoweredBy: false,
+        enable: true,
         poweredByHtml: "",
       }
     )
@@ -499,7 +499,7 @@ class ZeonWidget {
       )
     )
 
-    if (!this.activeConfig?.hidePoweredBy && this.activeConfig?.poweredByHtml) {
+    if (this.activeConfig?.enable && this.activeConfig?.poweredByHtml) {
       this.root.appendChild(renderFooter(this.activeConfig.poweredByHtml))
     }
   }

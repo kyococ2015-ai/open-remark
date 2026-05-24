@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
         primaryColor: site.primaryColor,
         radius: site.radius,
         currentUser: userEmail ? { isBanned } : undefined,
-        hidePoweredBy: appConfig.branding.hide_powered_by,
+        enable: appConfig.branding.enable,
         poweredByHtml: appConfig.branding.powered_by_html,
       },
     })

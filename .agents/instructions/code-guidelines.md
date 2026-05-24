@@ -110,7 +110,7 @@ When dealing with API calls in dashboard, try to use new React features like:
 hooks/use-optimistic-state.ts;
 ```
 
---- 
+---
 
 ## 6. Application Configuration
 
@@ -127,7 +127,7 @@ Add a top-level key to `config/config.json`:
     "gtm_id": "GTM-XXXXXXX"
   },
   "branding": {
-    "hide_powered_by": false
+    "enable": false
   }
 }
 ```
