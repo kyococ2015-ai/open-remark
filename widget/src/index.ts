@@ -111,6 +111,7 @@ class ZeonWidget {
   private themeStyle: HTMLStyleElement
   private auth: AuthState
   private comments: CommentData[] = []
+  private commentMap = new Map<string, CommentData>()
   private replyTo: CommentData | null = null
   private replyingToId: string | null = null
   private isEditingId: string | null = null
@@ -190,6 +191,7 @@ class ZeonWidget {
       saveCachedTheme(this.config.siteKey, themeConfig)
       this.isBanned = themeConfig.currentUser?.isBanned ?? false
       this.comments = comments
+      this.buildCommentMap()
       this.render()
     } catch {
       this.renderErrorState("Failed to load comments. Please try again later.")
@@ -261,16 +263,11 @@ class ZeonWidget {
       } else {
         this.comments = [comment, ...this.comments]
       }
+      this.buildCommentMap()
       this.replyTo = null
       this.replyingToId = null
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to post"
-      if (message.toLowerCase().includes("suspended")) {
-        this.isBanned = true
-        this.render()
-        return
-      }
-      this.renderErrorBanner(message)
+      this.handleApiError(err, "Failed to post")
     } finally {
       this.isSubmitting = false
       this.render()
@@ -292,25 +289,22 @@ class ZeonWidget {
       comment.likeCount = result.count
       this.render()
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Failed to update like"
-      if (message.toLowerCase().includes("suspended")) {
-        this.isBanned = true
-        this.render()
-        return
+      this.handleApiError(err, "Failed to update like")
+    }
+  }
+
+  private buildCommentMap() {
+    this.commentMap.clear()
+    for (const c of this.comments) {
+      this.commentMap.set(c.id, c)
+      for (const r of c.replies ?? []) {
+        this.commentMap.set(r.id, r)
       }
-      this.renderErrorBanner("Failed to update like")
     }
   }
 
   private findComment(id: string): CommentData | null {
-    for (const c of this.comments) {
-      if (c.id === id) return c
-      for (const r of c.replies ?? []) {
-        if (r.id === id) return r
-      }
-    }
-    return null
+    return this.commentMap.get(id) ?? null
   }
 
   private findParentComment(replyId: string): CommentData | null {
@@ -318,6 +312,16 @@ class ZeonWidget {
       if (c.replies?.some((r) => r.id === replyId)) return c
     }
     return null
+  }
+
+  private handleApiError(err: unknown, fallback: string): void {
+    const message = err instanceof Error ? err.message : fallback
+    if (message.toLowerCase().includes("suspended")) {
+      this.isBanned = true
+      this.render()
+      return
+    }
+    this.renderErrorBanner(message)
   }
 
   private handleReplyClick(comment: CommentData) {
@@ -373,13 +377,7 @@ class ZeonWidget {
       }
       this.deletingId = null
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to delete"
-      if (message.toLowerCase().includes("suspended")) {
-        this.isBanned = true
-        this.render()
-        return
-      }
-      this.renderErrorBanner(message)
+      this.handleApiError(err, "Failed to delete")
     } finally {
       this.isSubmitting = false
       this.render()
@@ -404,13 +402,7 @@ class ZeonWidget {
       }
       this.isEditingId = null
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to update"
-      if (message.toLowerCase().includes("suspended")) {
-        this.isBanned = true
-        this.render()
-        return
-      }
-      this.renderErrorBanner(message)
+      this.handleApiError(err, "Failed to update")
     } finally {
       this.isSubmitting = false
       this.render()
