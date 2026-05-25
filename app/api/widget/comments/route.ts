@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
 
     // Extract user from optional auth header for personalized state
     let userEmail: string | undefined
+    let commenterId: string | undefined
     let isBanned = false
     const authHeader = req.headers.get("authorization")
     if (authHeader?.startsWith("Bearer ")) {
@@ -43,11 +44,17 @@ export async function GET(req: NextRequest) {
       const payload = await verifyWidgetToken(token)
       if (payload) {
         userEmail = payload.sub
+        commenterId = payload.commenterId
         isBanned = await isCommenterBannedOnSite(site.id, payload.commenterId)
       }
     }
 
-    const comments = await getApprovedCommentsForPage(site.id, slug, userEmail)
+    const comments = await getApprovedCommentsForPage(
+      site.id,
+      slug,
+      userEmail,
+      commenterId
+    )
     return buildCorsResponse(req, {
       comments,
       config: {
