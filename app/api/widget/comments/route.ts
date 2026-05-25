@@ -44,8 +44,10 @@ export async function GET(req: NextRequest) {
       const payload = await verifyWidgetToken(token)
       if (payload) {
         userEmail = payload.sub
-        commenterId = payload.commenterId
         isBanned = await isCommenterBannedOnSite(site.id, payload.commenterId)
+        if (!isBanned) {
+          commenterId = payload.commenterId
+        }
       }
     }
 
