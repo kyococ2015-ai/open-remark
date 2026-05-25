@@ -14,8 +14,18 @@ function buildCommenterSelect() {
   }
 }
 
-function buildCommentSelect(userEmail?: string) {
+function buildCommentSelect(userEmail?: string, commenterId?: string) {
   const likeWhere = userEmail ? { where: { userEmail } } : undefined
+
+  const replyWhere = commenterId
+    ? {
+        OR: [
+          { status: { in: [CommentStatus.APPROVED, CommentStatus.DELETED] } },
+          { status: CommentStatus.PENDING, commenterId },
+        ],
+      }
+    : { status: { in: [CommentStatus.APPROVED, CommentStatus.DELETED] } }
+
   return {
     id: true,
     body: true,
@@ -28,6 +38,7 @@ function buildCommentSelect(userEmail?: string) {
     _count: { select: { likes: true } },
     likes: likeWhere ? { ...likeWhere, select: { id: true } } : undefined,
     replies: {
+      where: replyWhere,
       select: {
         id: true,
         body: true,
@@ -113,22 +124,43 @@ export async function getCommentsBySite(
 export async function getApprovedCommentsForPage(
   siteId: string,
   slug: string,
-  userEmail?: string
+  userEmail?: string,
+  commenterId?: string
 ) {
   const page = await db.page.findUnique({
     where: { siteId_slug: { siteId, slug } },
   })
   if (!page) return []
 
-  const raw = await db.comment.findMany({
-    where: {
-      pageId: page.id,
-      status: { in: [CommentStatus.APPROVED, CommentStatus.DELETED] },
-      parentId: null,
-    },
-    select: buildCommentSelect(userEmail),
-    orderBy: { createdAt: "desc" },
-  })
+  const select = buildCommentSelect(userEmail, commenterId)
+
+  const [approvedRaw, pendingRaw] = await Promise.all([
+    db.comment.findMany({
+      where: {
+        pageId: page.id,
+        status: { in: [CommentStatus.APPROVED, CommentStatus.DELETED] },
+        parentId: null,
+      },
+      select,
+      orderBy: { createdAt: "desc" },
+    }),
+    commenterId
+      ? db.comment.findMany({
+          where: {
+            pageId: page.id,
+            status: CommentStatus.PENDING,
+            parentId: null,
+            commenterId,
+          },
+          select,
+          orderBy: { createdAt: "desc" },
+        })
+      : Promise.resolve([]),
+  ])
+
+  const raw = [...approvedRaw, ...pendingRaw].sort(
+    (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+  )
 
   // Collect commenterIds of deleted comments to check ban status
   const deletedCommenterIds = [
