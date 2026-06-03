@@ -124,6 +124,11 @@ export async function updateSite(
       ...(input.emailFooterText !== undefined && {
         emailFooterText: input.emailFooterText,
       }),
+      ...(input.smtpHost !== undefined && { smtpHost: input.smtpHost }),
+      ...(input.smtpPort !== undefined && { smtpPort: input.smtpPort }),
+      ...(input.smtpUser !== undefined && { smtpUser: input.smtpUser }),
+      ...(input.smtpPass !== undefined && { smtpPass: input.smtpPass }),
+      ...(input.smtpFrom !== undefined && { smtpFrom: input.smtpFrom }),
     },
   })
 }

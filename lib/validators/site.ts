@@ -53,6 +53,11 @@ export const UpdateSiteSchema = z.object({
     .nullable()
     .optional(),
   emailFooterText: z.string().max(300).nullable().optional(),
+  smtpHost: z.string().max(253).nullable().optional(),
+  smtpPort: z.number().int().min(1).max(65535).nullable().optional(),
+  smtpUser: z.string().max(255).nullable().optional(),
+  smtpPass: z.string().max(255).nullable().optional(),
+  smtpFrom: z.string().email("Must be a valid email").nullable().optional(),
 })
 
 export type CreateSiteInput = z.infer<typeof CreateSiteSchema>

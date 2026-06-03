@@ -235,6 +235,11 @@ export async function createComment(
       emailLogoUrl: true,
       emailAccentColor: true,
       emailFooterText: true,
+      smtpHost: true,
+      smtpPort: true,
+      smtpUser: true,
+      smtpPass: true,
+      smtpFrom: true,
       owner: { select: { email: true } },
     },
   })

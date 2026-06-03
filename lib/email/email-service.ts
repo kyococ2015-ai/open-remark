@@ -1,16 +1,22 @@
 import { render } from "@react-email/render"
 import { NewCommentEmail } from "./templates/new-comment"
 import { ReplyEmail } from "./templates/reply"
-import { getTransporter, getFromAddress } from "./transport"
+import { buildTransporter, getFromAddress } from "./transport"
 import appConfig from "@/config/config.json"
 
 type SiteEmailConfig = {
+  id: string
   domain: string
   emailNotificationsEnabled: boolean
   emailSubjectPrefix: string | null
   emailLogoUrl: string | null
   emailAccentColor: string | null
   emailFooterText: string | null
+  smtpHost: string | null
+  smtpPort: number | null
+  smtpUser: string | null
+  smtpPass: string | null
+  smtpFrom: string | null
 }
 
 type CommenterInfo = {
@@ -54,7 +60,7 @@ export async function notifyNewComment(
   owner: { email: string }
 ): Promise<void> {
   if (!site.emailNotificationsEnabled) return
-  const transport = getTransporter()
+  const transport = buildTransporter(site)
   if (!transport) return
 
   try {
@@ -76,7 +82,7 @@ export async function notifyNewComment(
     )
 
     await transport.sendMail({
-      from: `"${fromName}" <${getFromAddress()}>`,
+      from: `"${fromName}" <${getFromAddress(site)}>`,
       to: owner.email,
       subject: `${subjectPrefix} ${commenter.name} commented on "${pageTitle}"`,
       html,
@@ -96,7 +102,7 @@ export async function notifyReply(
 ): Promise<void> {
   if (!site.emailNotificationsEnabled) return
   if (!parentCommenter.notificationsEnabled) return
-  const transport = getTransporter()
+  const transport = buildTransporter(site)
   if (!transport) return
 
   try {
@@ -122,7 +128,7 @@ export async function notifyReply(
     )
 
     await transport.sendMail({
-      from: `"${fromName}" <${getFromAddress()}>`,
+      from: `"${fromName}" <${getFromAddress(site)}>`,
       to: parentCommenter.email,
       subject: `${subjectPrefix} Someone replied to your comment on "${pageTitle}"`,
       html,

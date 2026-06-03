@@ -40,6 +40,11 @@ type Site = {
   emailLogoUrl: string | null
   emailAccentColor: string | null
   emailFooterText: string | null
+  smtpHost: string | null
+  smtpPort: number | null
+  smtpUser: string | null
+  smtpPass: string | null
+  smtpFrom: string | null
 }
 
 const PRESET_COLORS = [
@@ -114,6 +119,13 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
   const [emailFooterText, setEmailFooterText] = useState(
     initialSite.emailFooterText ?? ""
   )
+  const [smtpHost, setSmtpHost] = useState(initialSite.smtpHost ?? "")
+  const [smtpPort, setSmtpPort] = useState(
+    initialSite.smtpPort ? String(initialSite.smtpPort) : "465"
+  )
+  const [smtpUser, setSmtpUser] = useState(initialSite.smtpUser ?? "")
+  const [smtpPass, setSmtpPass] = useState(initialSite.smtpPass ?? "")
+  const [smtpFrom, setSmtpFrom] = useState(initialSite.smtpFrom ?? "")
   const [savingEmail, setSavingEmail] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewType, setPreviewType] = useState<"new-comment" | "reply">(
@@ -259,6 +271,11 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
           emailLogoUrl: emailLogoUrl || null,
           emailAccentColor: emailAccentColor || null,
           emailFooterText: emailFooterText || null,
+          smtpHost: smtpHost || null,
+          smtpPort: smtpPort ? parseInt(smtpPort, 10) : null,
+          smtpUser: smtpUser || null,
+          smtpPass: smtpPass || null,
+          smtpFrom: smtpFrom || null,
         }),
       })
       if (!res.ok) throw new Error("Failed to save")
@@ -669,6 +686,72 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
                 onChange={(e) => setEmailFooterText(e.target.value)}
                 rows={2}
                 maxLength={300}
+              />
+            </div>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-4">
+            <p className="text-sm font-medium">SMTP Relay</p>
+            <p className="-mt-2 text-xs text-muted-foreground">
+              Configure per-site SMTP credentials. Supports any provider
+              including Resend (smtp.resend.com:465).
+            </p>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="smtp-host">Host</Label>
+                <Input
+                  id="smtp-host"
+                  placeholder="smtp.resend.com"
+                  value={smtpHost}
+                  onChange={(e) => setSmtpHost(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="smtp-port">Port</Label>
+                <Input
+                  id="smtp-port"
+                  type="number"
+                  placeholder="465"
+                  value={smtpPort}
+                  onChange={(e) => setSmtpPort(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="smtp-user">Username</Label>
+              <Input
+                id="smtp-user"
+                placeholder="resend"
+                value={smtpUser}
+                onChange={(e) => setSmtpUser(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="smtp-pass">Password / API Key</Label>
+              <Input
+                id="smtp-pass"
+                type="password"
+                placeholder="••••••••"
+                value={smtpPass}
+                onChange={(e) => setSmtpPass(e.target.value)}
+                autoComplete="new-password"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="smtp-from">From address</Label>
+              <Input
+                id="smtp-from"
+                type="email"
+                placeholder="noreply@yourdomain.com"
+                value={smtpFrom}
+                onChange={(e) => setSmtpFrom(e.target.value)}
               />
             </div>
           </div>

@@ -1,27 +1,30 @@
-// lib/email/transport.ts
 import nodemailer from "nodemailer"
-import type { Transporter } from "nodemailer"
 
-let _transporter: Transporter | null = null
-
-export function getTransporter(): Transporter | null {
-  if (_transporter) return _transporter
-
-  const host = process.env.SMTP_HOST
-  const user = process.env.SMTP_USER
-  const pass = process.env.SMTP_PASS
-  if (!host || !user || !pass) return null
-
-  const port = parseInt(process.env.SMTP_PORT ?? "465", 10)
-  _transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
-  })
-  return _transporter
+export type SiteSmtpConfig = {
+  smtpHost: string | null
+  smtpPort: number | null
+  smtpUser: string | null
+  smtpPass: string | null
+  smtpFrom: string | null
 }
 
-export function getFromAddress(): string {
-  return process.env.SMTP_FROM ?? "noreply@example.com"
+/**
+ * Build a Nodemailer transporter from per-site SMTP config.
+ * Returns null if required credentials are missing — callers skip email silently.
+ */
+export function buildTransporter(site: SiteSmtpConfig) {
+  const { smtpHost, smtpUser, smtpPass } = site
+  if (!smtpHost || !smtpUser || !smtpPass) return null
+
+  const port = site.smtpPort ?? 465
+  return nodemailer.createTransport({
+    host: smtpHost,
+    port,
+    secure: port === 465,
+    auth: { user: smtpUser, pass: smtpPass },
+  })
+}
+
+export function getFromAddress(site: SiteSmtpConfig): string {
+  return site.smtpFrom ?? "noreply@example.com"
 }
