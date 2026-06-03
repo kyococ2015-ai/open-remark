@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -125,6 +125,7 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
   )
   const [smtpUser, setSmtpUser] = useState(initialSite.smtpUser ?? "")
   const [smtpPass, setSmtpPass] = useState(initialSite.smtpPass ?? "")
+  const [showSmtpPass, setShowSmtpPass] = useState(false)
   const [smtpFrom, setSmtpFrom] = useState(initialSite.smtpFrom ?? "")
 
   // All four required SMTP fields must be filled before notifications can be enabled
@@ -751,14 +752,29 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
 
             <div className="space-y-1.5">
               <Label htmlFor="smtp-pass">Password / API Key</Label>
-              <Input
-                id="smtp-pass"
-                type="password"
-                placeholder="••••••••"
-                value={smtpPass}
-                onChange={(e) => setSmtpPass(e.target.value)}
-                autoComplete="new-password"
-              />
+              <div className="relative">
+                <Input
+                  id="smtp-pass"
+                  type={showSmtpPass ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={smtpPass}
+                  onChange={(e) => setSmtpPass(e.target.value)}
+                  autoComplete="new-password"
+                  className="pr-9"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowSmtpPass((v) => !v)}
+                  className="absolute inset-y-0 right-0 flex items-center px-2.5 text-muted-foreground hover:text-foreground"
+                  aria-label={showSmtpPass ? "Hide password" : "Show password"}
+                >
+                  {showSmtpPass ? (
+                    <EyeOff className="size-4" />
+                  ) : (
+                    <Eye className="size-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="space-y-1.5">
