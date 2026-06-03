@@ -48,3 +48,8 @@ export const UpdateSiteSchema = z.object({
 
 export type CreateSiteInput = z.infer<typeof CreateSiteSchema>
 export type UpdateSiteInput = z.infer<typeof UpdateSiteSchema>
+
+export const TransferSiteSchema = z.object({
+  email: z.string().email(),
+})
+export type TransferSiteInput = z.infer<typeof TransferSiteSchema>
