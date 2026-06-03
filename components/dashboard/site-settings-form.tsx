@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
@@ -75,6 +75,13 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
     email: string
   } | null>(null)
   const [transferError, setTransferError] = useState("")
+  const transferTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (transferTimerRef.current) clearTimeout(transferTimerRef.current)
+    }
+  }, [])
 
   const [originsText, setOriginsText] = useState(() =>
     parseOrigins(initialSite.allowedOrigins).join("\n")
@@ -157,37 +164,50 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
   async function handleLookup() {
     setTransferStep("looking")
     setTransferError("")
-    const res = await fetch(
-      `/api/v1/users/lookup?email=${encodeURIComponent(transferEmail)}`
-    )
-    if (res.ok) {
-      const user = (await res.json()) as {
-        id: string
-        name: string | null
-        email: string
+    try {
+      const res = await fetch(
+        `/api/v1/users/lookup?email=${encodeURIComponent(transferEmail)}`
+      )
+      if (res.ok) {
+        const user = (await res.json()) as {
+          id: string
+          name: string | null
+          email: string
+        }
+        setTransferRecipient({ name: user.name, email: user.email })
+        setTransferStep("looked-up")
+      } else {
+        const data = (await res.json()) as { error?: string }
+        setTransferError(data.error ?? "No user found with that email.")
+        setTransferStep("error")
       }
-      setTransferRecipient({ name: user.name, email: user.email })
-      setTransferStep("looked-up")
-    } else {
-      const data = (await res.json()) as { error?: string }
-      setTransferError(data.error ?? "No user found with that email.")
+    } catch {
+      setTransferError("Network error. Please try again.")
       setTransferStep("error")
     }
   }
 
   async function handleTransfer() {
     setTransferStep("transferring")
-    const res = await fetch(`/api/v1/sites/${siteId}/transfer`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: transferEmail }),
-    })
-    if (res.ok) {
-      setTransferStep("success")
-      setTimeout(() => router.push("/dashboard/sites"), 3000)
-    } else {
-      const data = (await res.json()) as { error?: string }
-      toast.error(data.error ?? "Transfer failed")
+    try {
+      const res = await fetch(`/api/v1/sites/${siteId}/transfer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: transferEmail }),
+      })
+      if (res.ok) {
+        setTransferStep("success")
+        transferTimerRef.current = setTimeout(
+          () => router.push("/dashboard/sites"),
+          3000
+        )
+      } else {
+        const data = (await res.json()) as { error?: string }
+        toast.error(data.error ?? "Transfer failed")
+        setTransferStep("looked-up")
+      }
+    } catch {
+      toast.error("Network error. Transfer failed.")
       setTransferStep("looked-up")
     }
   }
