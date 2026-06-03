@@ -109,6 +109,21 @@ export async function updateSite(
       ...(input.theme && { theme: input.theme }),
       ...(input.primaryColor && { primaryColor: input.primaryColor }),
       ...(typeof input.radius === "number" && { radius: input.radius }),
+      ...(typeof input.emailNotificationsEnabled === "boolean" && {
+        emailNotificationsEnabled: input.emailNotificationsEnabled,
+      }),
+      ...(input.emailSubjectPrefix !== undefined && {
+        emailSubjectPrefix: input.emailSubjectPrefix,
+      }),
+      ...(input.emailLogoUrl !== undefined && {
+        emailLogoUrl: input.emailLogoUrl,
+      }),
+      ...(input.emailAccentColor !== undefined && {
+        emailAccentColor: input.emailAccentColor,
+      }),
+      ...(input.emailFooterText !== undefined && {
+        emailFooterText: input.emailFooterText,
+      }),
     },
   })
 }

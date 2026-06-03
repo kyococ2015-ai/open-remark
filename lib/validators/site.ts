@@ -44,6 +44,15 @@ export const UpdateSiteSchema = z.object({
     .regex(/^#[0-9a-fA-F]{6}$/, "Must be a 6-digit hex color")
     .optional(),
   radius: z.number().int().min(0).max(24).optional(),
+  emailNotificationsEnabled: z.boolean().optional(),
+  emailSubjectPrefix: z.string().max(50).nullable().optional(),
+  emailLogoUrl: z.string().url("Must be a valid URL").nullable().optional(),
+  emailAccentColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Must be a 6-digit hex color")
+    .nullable()
+    .optional(),
+  emailFooterText: z.string().max(300).nullable().optional(),
 })
 
 export type CreateSiteInput = z.infer<typeof CreateSiteSchema>
