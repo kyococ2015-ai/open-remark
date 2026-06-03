@@ -196,9 +196,30 @@ class ZeonWidget {
       this.comments = comments
       this.buildCommentMap()
       this.render()
+      this.scrollToCommentFromHash()
     } catch {
       this.renderErrorState("Failed to load comments. Please try again later.")
     }
+  }
+
+  private scrollToCommentFromHash() {
+    const hash = window.location.hash
+    if (!hash.startsWith("#comment-")) return
+    const commentId = hash.slice("#comment-".length)
+    const el = this.root.querySelector<HTMLElement>(`[data-id="${commentId}"]`)
+    if (!el) return
+    // Small delay lets the browser finish painting before scrolling
+    setTimeout(() => {
+      el.scrollIntoView({ behavior: "smooth", block: "center" })
+      el.style.outline = `2px solid var(--z-primary)`
+      el.style.outlineOffset = "4px"
+      el.style.borderRadius = "var(--z-radius)"
+      setTimeout(() => {
+        el.style.outline = ""
+        el.style.outlineOffset = ""
+        el.style.borderRadius = ""
+      }, 2000)
+    }, 100)
   }
 
   private async handleSignIn() {
