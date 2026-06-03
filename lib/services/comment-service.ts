@@ -271,6 +271,7 @@ export async function createComment(
       select: {
         id: true,
         body: true,
+        commenterId: true,
         commenter: {
           select: {
             name: true,
@@ -281,7 +282,7 @@ export async function createComment(
         },
       },
     })
-    if (parent && parent.commenter.email !== raw.commenter.email) {
+    if (parent && parent.commenterId !== commenterId) {
       void notifyReply(
         { id: raw.id, body: raw.body },
         { name: raw.commenter.name },

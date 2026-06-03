@@ -57,24 +57,24 @@ export async function notifyNewComment(
   const transport = getTransporter()
   if (!transport) return
 
-  const { subjectPrefix, accentColor, footerText, fromName } =
-    resolveConfig(site)
-  const pageTitle = page.slug
-
-  const html = await render(
-    NewCommentEmail({
-      commenterName: commenter.name,
-      pageTitle,
-      commentBody: truncate(comment.body, 200),
-      viewUrl: buildCommentUrl(site, page, comment.id),
-      accentColor,
-      logoUrl: site.emailLogoUrl,
-      footerText,
-      siteUrl: `https://${site.domain}`,
-    })
-  )
-
   try {
+    const { subjectPrefix, accentColor, footerText, fromName } =
+      resolveConfig(site)
+    const pageTitle = page.slug
+
+    const html = await render(
+      NewCommentEmail({
+        commenterName: commenter.name,
+        pageTitle,
+        commentBody: truncate(comment.body, 200),
+        viewUrl: buildCommentUrl(site, page, comment.id),
+        accentColor,
+        logoUrl: site.emailLogoUrl,
+        footerText,
+        siteUrl: `https://${site.domain}`,
+      })
+    )
+
     await transport.sendMail({
       from: `"${fromName}" <${getFromAddress()}>`,
       to: owner.email,
@@ -99,28 +99,28 @@ export async function notifyReply(
   const transport = getTransporter()
   if (!transport) return
 
-  const { subjectPrefix, accentColor, footerText, fromName } =
-    resolveConfig(site)
-  const pageTitle = page.slug
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ""
-  const unsubscribeUrl = `${appUrl}/api/unsubscribe?token=${parentCommenter.notificationToken}`
-
-  const html = await render(
-    ReplyEmail({
-      replierName: replier.name,
-      pageTitle,
-      originalBody: truncate(parentComment.body, 150),
-      replyBody: truncate(reply.body, 200),
-      viewUrl: buildCommentUrl(site, page, reply.id),
-      accentColor,
-      logoUrl: site.emailLogoUrl,
-      footerText,
-      siteUrl: `https://${site.domain}`,
-      unsubscribeUrl,
-    })
-  )
-
   try {
+    const { subjectPrefix, accentColor, footerText, fromName } =
+      resolveConfig(site)
+    const pageTitle = page.slug
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ""
+    const unsubscribeUrl = `${appUrl}/api/unsubscribe?token=${parentCommenter.notificationToken}`
+
+    const html = await render(
+      ReplyEmail({
+        replierName: replier.name,
+        pageTitle,
+        originalBody: truncate(parentComment.body, 150),
+        replyBody: truncate(reply.body, 200),
+        viewUrl: buildCommentUrl(site, page, reply.id),
+        accentColor,
+        logoUrl: site.emailLogoUrl,
+        footerText,
+        siteUrl: `https://${site.domain}`,
+        unsubscribeUrl,
+      })
+    )
+
     await transport.sendMail({
       from: `"${fromName}" <${getFromAddress()}>`,
       to: parentCommenter.email,
