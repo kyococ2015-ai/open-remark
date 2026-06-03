@@ -72,6 +72,7 @@ export async function getCommentersBySite(
       deletedCount,
       spamCount,
       isBanned: bannedSet.has(commenter.id),
+      notificationsEnabled: commenter.notificationsEnabled,
     }
   })
 
@@ -174,6 +175,29 @@ export async function isCommenterBannedOnSite(
     where: { siteId_commenterId: { siteId, commenterId } },
   })
   return !!record
+}
+
+export async function updateCommenterNotifications(
+  commenterId: string,
+  notificationsEnabled: boolean
+): Promise<void> {
+  await db.commenter.update({
+    where: { id: commenterId },
+    data: { notificationsEnabled },
+  })
+}
+
+export async function unsubscribeCommenter(token: string): Promise<boolean> {
+  const commenter = await db.commenter.findUnique({
+    where: { notificationToken: token },
+    select: { id: true },
+  })
+  if (!commenter) return false
+  await db.commenter.update({
+    where: { id: commenter.id },
+    data: { notificationsEnabled: false },
+  })
+  return true
 }
 
 export async function lookupUserByEmail(email: string) {
