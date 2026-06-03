@@ -126,6 +126,17 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
   const [smtpUser, setSmtpUser] = useState(initialSite.smtpUser ?? "")
   const [smtpPass, setSmtpPass] = useState(initialSite.smtpPass ?? "")
   const [smtpFrom, setSmtpFrom] = useState(initialSite.smtpFrom ?? "")
+
+  // All four required SMTP fields must be filled before notifications can be enabled
+  const smtpConfigured =
+    smtpHost.trim() !== "" &&
+    smtpUser.trim() !== "" &&
+    smtpPass.trim() !== "" &&
+    smtpFrom.trim() !== ""
+
+  // If SMTP config is removed, auto-disable notifications
+  if (!smtpConfigured && emailEnabled) setEmailEnabled(false)
+
   const [savingEmail, setSavingEmail] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewType, setPreviewType] = useState<"new-comment" | "reply">(
@@ -636,10 +647,16 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
             <div>
               <p className="text-sm font-medium">Enable notifications</p>
               <p className="text-xs text-muted-foreground">
-                Send email alerts for this site
+                {smtpConfigured
+                  ? "Send email alerts for this site"
+                  : "Configure SMTP relay below before enabling"}
               </p>
             </div>
-            <Switch checked={emailEnabled} onCheckedChange={setEmailEnabled} />
+            <Switch
+              checked={emailEnabled}
+              onCheckedChange={setEmailEnabled}
+              disabled={!smtpConfigured}
+            />
           </div>
 
           <Separator />
