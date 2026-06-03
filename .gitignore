@@ -22,6 +22,7 @@
 public/embed.js
 public/embed.debug.js
 docs/superpowers
+.superpowers
 
 # misc
 .DS_Store
@@ -51,3 +52,4 @@ prisma/dev.db-journal
 
 # Agents
 .claude/worktrees
+.superpowers/brainstorm/25425-1780484314/content/email-notif-approaches.html
