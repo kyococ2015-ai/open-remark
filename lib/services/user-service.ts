@@ -175,3 +175,9 @@ export async function isCommenterBannedOnSite(
   })
   return !!record
 }
+
+export async function lookupUserByEmail(email: string) {
+  const user = await db.user.findUnique({ where: { email } })
+  if (!user) throw new ApiError("No user found with that email", 404)
+  return { id: user.id, name: user.name, email: user.email }
+}
