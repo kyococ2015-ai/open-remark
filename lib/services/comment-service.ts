@@ -3,6 +3,7 @@ import { ApiError } from "@/lib/api/error"
 import { sanitizeBody } from "@/lib/sanitize"
 import { CommentStatus } from "@/generated/prisma/client"
 import type { CreateCommentInput } from "@/lib/validators/comment"
+import { notifyNewComment, notifyReply } from "@/lib/email/email-service"
 
 function buildCommenterSelect() {
   return {
@@ -226,13 +227,23 @@ export async function createComment(
 
   const site = await db.site.findUniqueOrThrow({
     where: { siteKey: data.siteKey },
-    select: { id: true },
+    select: {
+      id: true,
+      domain: true,
+      emailNotificationsEnabled: true,
+      emailSubjectPrefix: true,
+      emailLogoUrl: true,
+      emailAccentColor: true,
+      emailFooterText: true,
+      owner: { select: { email: true } },
+    },
   })
 
   const page = await db.page.upsert({
     where: { siteId_slug: { siteId: site.id, slug: data.slug } },
     update: {},
     create: { siteId: site.id, slug: data.slug, url: data.url },
+    select: { id: true, slug: true, url: true },
   })
 
   const raw = await db.comment.create({
@@ -245,6 +256,42 @@ export async function createComment(
     },
     select: buildCommentSelect(),
   })
+
+  void notifyNewComment(
+    { id: raw.id, body: raw.body },
+    { name: raw.commenter.name },
+    { slug: page.slug, url: page.url ?? null },
+    site,
+    { email: site.owner.email }
+  )
+
+  if (data.parentId) {
+    const parent = await db.comment.findUnique({
+      where: { id: data.parentId },
+      select: {
+        id: true,
+        body: true,
+        commenter: {
+          select: {
+            name: true,
+            email: true,
+            notificationsEnabled: true,
+            notificationToken: true,
+          },
+        },
+      },
+    })
+    if (parent && parent.commenter.email !== raw.commenter.email) {
+      void notifyReply(
+        { id: raw.id, body: raw.body },
+        { name: raw.commenter.name },
+        { id: parent.id, body: parent.body },
+        parent.commenter,
+        { slug: page.slug, url: page.url ?? null },
+        site
+      )
+    }
+  }
 
   return {
     id: raw.id,
