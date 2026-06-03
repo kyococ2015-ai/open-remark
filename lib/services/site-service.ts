@@ -2,6 +2,7 @@ import { db } from "@/lib/db"
 import { ApiError } from "@/lib/api/error"
 import { CommentStatus } from "@/generated/prisma/client"
 import type { CreateSiteInput, UpdateSiteInput } from "@/lib/validators/site"
+import { lookupUserByEmail } from "@/lib/services/user-service"
 
 export async function getSitesByOwner(ownerId: string) {
   const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
@@ -115,4 +116,20 @@ export async function updateSite(
 export async function deleteSite(siteId: string, ownerId: string) {
   await getSiteByIdForOwner(siteId, ownerId)
   await db.site.delete({ where: { id: siteId } })
+}
+
+export async function transferSite(
+  siteId: string,
+  currentOwnerId: string,
+  newOwnerEmail: string
+) {
+  await getSiteByIdForOwner(siteId, currentOwnerId)
+  const newOwner = await lookupUserByEmail(newOwnerEmail)
+  if (newOwner.id === currentOwnerId) {
+    throw new ApiError("Cannot transfer to yourself", 400)
+  }
+  return db.site.update({
+    where: { id: siteId },
+    data: { ownerId: newOwner.id },
+  })
 }
