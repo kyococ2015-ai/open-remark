@@ -16,6 +16,13 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { Switch } from "@/components/ui/switch"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 type Theme = "AUTO" | "LIGHT" | "DARK"
 
@@ -28,6 +35,11 @@ type Site = {
   theme: Theme
   primaryColor: string
   radius: number
+  emailNotificationsEnabled: boolean
+  emailSubjectPrefix: string | null
+  emailLogoUrl: string | null
+  emailAccentColor: string | null
+  emailFooterText: string | null
 }
 
 const PRESET_COLORS = [
@@ -86,6 +98,29 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
   const [originsText, setOriginsText] = useState(() =>
     parseOrigins(initialSite.allowedOrigins).join("\n")
   )
+
+  const [emailEnabled, setEmailEnabled] = useState(
+    initialSite.emailNotificationsEnabled
+  )
+  const [emailSubjectPrefix, setEmailSubjectPrefix] = useState(
+    initialSite.emailSubjectPrefix ?? ""
+  )
+  const [emailLogoUrl, setEmailLogoUrl] = useState(
+    initialSite.emailLogoUrl ?? ""
+  )
+  const [emailAccentColor, setEmailAccentColor] = useState(
+    initialSite.emailAccentColor ?? ""
+  )
+  const [emailFooterText, setEmailFooterText] = useState(
+    initialSite.emailFooterText ?? ""
+  )
+  const [savingEmail, setSavingEmail] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [previewType, setPreviewType] = useState<"new-comment" | "reply">(
+    "new-comment"
+  )
+  const [previewHtml, setPreviewHtml] = useState("")
+  const [previewLoading, setPreviewLoading] = useState(false)
 
   // Local appearance state for live preview
   const [theme, setTheme] = useState<Theme>(site.theme)
@@ -209,6 +244,47 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
     } catch {
       toast.error("Network error. Transfer failed.")
       setTransferStep("looked-up")
+    }
+  }
+
+  async function handleSaveEmail() {
+    setSavingEmail(true)
+    try {
+      const res = await fetch(`/api/v1/sites/${site.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailNotificationsEnabled: emailEnabled,
+          emailSubjectPrefix: emailSubjectPrefix || null,
+          emailLogoUrl: emailLogoUrl || null,
+          emailAccentColor: emailAccentColor || null,
+          emailFooterText: emailFooterText || null,
+        }),
+      })
+      if (!res.ok) throw new Error("Failed to save")
+      toast.success("Email settings saved")
+    } catch {
+      toast.error("Failed to save email settings")
+    } finally {
+      setSavingEmail(false)
+    }
+  }
+
+  async function handlePreview(type: "new-comment" | "reply") {
+    setPreviewType(type)
+    setPreviewLoading(true)
+    setPreviewOpen(true)
+    try {
+      const res = await fetch(
+        `/api/v1/sites/${site.id}/email-preview?type=${type}`
+      )
+      if (!res.ok) throw new Error("Preview failed")
+      setPreviewHtml(await res.text())
+    } catch {
+      toast.error("Failed to load preview")
+      setPreviewOpen(false)
+    } finally {
+      setPreviewLoading(false)
     }
   }
 
@@ -529,6 +605,122 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
           )}
         </CardContent>
       </Card>
+
+      {/* Email Notifications */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Email Notifications</CardTitle>
+          <CardDescription>
+            Notify site owners on new comments and commenters on replies.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Enable notifications</p>
+              <p className="text-xs text-muted-foreground">
+                Send email alerts for this site
+              </p>
+            </div>
+            <Switch checked={emailEnabled} onCheckedChange={setEmailEnabled} />
+          </div>
+
+          <Separator />
+
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="email-subject-prefix">Subject prefix</Label>
+              <Input
+                id="email-subject-prefix"
+                placeholder="[New Comment]"
+                value={emailSubjectPrefix}
+                onChange={(e) => setEmailSubjectPrefix(e.target.value)}
+                maxLength={50}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="email-logo-url">Logo URL</Label>
+              <Input
+                id="email-logo-url"
+                placeholder="https://yourdomain.com/logo.png"
+                value={emailLogoUrl}
+                onChange={(e) => setEmailLogoUrl(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="email-accent-color">Accent color</Label>
+              <Input
+                id="email-accent-color"
+                placeholder="#6366f1"
+                value={emailAccentColor}
+                onChange={(e) => setEmailAccentColor(e.target.value)}
+                maxLength={7}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="email-footer-text">Footer text</Label>
+              <Textarea
+                id="email-footer-text"
+                placeholder="You're receiving this because you commented on this site."
+                value={emailFooterText}
+                onChange={(e) => setEmailFooterText(e.target.value)}
+                rows={2}
+                maxLength={300}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <Button onClick={handleSaveEmail} disabled={savingEmail} size="sm">
+              {savingEmail && <Loader2 className="mr-2 size-4 animate-spin" />}
+              Save
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePreview("new-comment")}
+            >
+              Preview: New Comment
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePreview("reply")}
+            >
+              Preview: Reply
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Preview dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {previewType === "new-comment"
+                ? "New Comment Email"
+                : "Reply Email"}{" "}
+              Preview
+            </DialogTitle>
+          </DialogHeader>
+          {previewLoading ? (
+            <div className="flex h-64 items-center justify-center">
+              <Loader2 className="size-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <iframe
+              srcDoc={previewHtml}
+              className="h-[480px] w-full rounded border"
+              title="Email preview"
+              sandbox="allow-same-origin"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Separator />
 
