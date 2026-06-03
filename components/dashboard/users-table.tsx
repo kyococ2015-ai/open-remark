@@ -6,6 +6,7 @@ import {
   banCommenter,
   unbanCommenter,
   deleteAllCommentsByCommenter,
+  toggleCommenterNotifications,
 } from "@/lib/services/comment-client"
 import { useOptimisticState } from "@/hooks/use-optimistic-state"
 import {
@@ -32,6 +33,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Switch } from "@/components/ui/switch"
 import { MoreHorizontal, ShieldAlert, Trash2, Eye } from "lucide-react"
 import { UserProfileDialog } from "./user-profile-dialog"
 import type {
@@ -117,6 +119,29 @@ export function UsersTable({ commenters, siteId }: Props) {
     }
   }
 
+  async function handleToggleNotifications(
+    commenterId: string,
+    enabled: boolean
+  ) {
+    const original = optimisticCommenters.find((c) => c.id === commenterId)
+    if (!original) return
+
+    updateItem((c) => c.id === commenterId, { notificationsEnabled: enabled })
+    setBusy(commenterId, true)
+
+    try {
+      await toggleCommenterNotifications(siteId, commenterId, enabled)
+      toast.success(
+        enabled ? "Notifications enabled" : "Notifications disabled"
+      )
+    } catch {
+      revertItem((c) => c.id === commenterId, original)
+      toast.error("Failed to update notification preference")
+    } finally {
+      setBusy(commenterId, false)
+    }
+  }
+
   async function handleUnban(commenterId: string) {
     const original = optimisticCommenters.find((c) => c.id === commenterId)
     if (!original) return
@@ -156,6 +181,7 @@ export function UsersTable({ commenters, siteId }: Props) {
               <TableHead>Deleted</TableHead>
               <TableHead>Spam</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Notifications</TableHead>
               <TableHead className="w-12" />
             </TableRow>
           </TableHeader>
@@ -197,6 +223,21 @@ export function UsersTable({ commenters, siteId }: Props) {
                   {commenter.isBanned && (
                     <Badge variant="destructive">Banned</Badge>
                   )}
+                </TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Switch
+                    checked={commenter.notificationsEnabled}
+                    onCheckedChange={(checked) =>
+                      handleToggleNotifications(commenter.id, checked)
+                    }
+                    disabled={isBusy(commenter.id)}
+                    aria-label={
+                      commenter.notificationsEnabled
+                        ? "Disable reply notifications"
+                        : "Enable reply notifications"
+                    }
+                    title="Disables reply notifications for this commenter on all sites"
+                  />
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
