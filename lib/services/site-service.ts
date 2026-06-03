@@ -129,7 +129,7 @@ export async function transferSite(
     throw new ApiError("Cannot transfer to yourself", 400)
   }
   return db.site.update({
-    where: { id: siteId },
+    where: { id: siteId, ownerId: currentOwnerId },
     data: { ownerId: newOwner.id },
   })
 }
