@@ -82,7 +82,13 @@ model Site {
   domain         String
   siteKey        String   @unique @default(cuid())
   allowedOrigins String   @default("[]")
-  autoApprove    Boolean  @default(false)
+  autoApprove     Boolean  @default(false)
+  allowAnonymous  Boolean  @default(false)
+  emailNotificationsEnabled  Boolean  @default(false)
+  emailSubjectPrefix         String?
+  emailLogoUrl               String?
+  emailAccentColor           String?
+  emailFooterText            String?
   theme          String   @default("AUTO")
   primaryColor   String   @default("#0891b2")
   radius         Int      @default(8)
@@ -119,6 +125,8 @@ model Commenter {
   username  String   @unique
   name      String
   image     String?
+  notificationsEnabled  Boolean  @default(true)
+  notificationToken     String   @unique @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
