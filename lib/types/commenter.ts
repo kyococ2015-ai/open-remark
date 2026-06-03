@@ -11,4 +11,5 @@ export type CommenterWithStats = CommenterProfile & {
   deletedCount: number
   spamCount: number
   isBanned: boolean
+  notificationsEnabled: boolean
 }

@@ -72,3 +72,17 @@ export async function unbanCommenter(siteId: string, commenterId: string) {
   if (!res.ok) throw new Error("Failed to remove ban")
   return res.json()
 }
+
+export async function toggleCommenterNotifications(
+  siteId: string,
+  commenterId: string,
+  notificationsEnabled: boolean
+) {
+  const res = await fetch(`/api/v1/sites/${siteId}/users/${commenterId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ notificationsEnabled }),
+  })
+  if (!res.ok) throw new Error("Failed to update notification preference")
+  return res.json() as Promise<{ notificationsEnabled: boolean }>
+}
