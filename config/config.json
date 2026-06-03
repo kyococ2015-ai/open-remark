@@ -7,5 +7,11 @@
     "enable": true,
     "_note": "powered_by_html must include class=\"z-footer-link\" to receive widget styles",
     "powered_by_html": "Powered by <a href=\"https://open-remark.vercel.app\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"z-footer-link\">Open-Remark</a>"
+  },
+  "email": {
+    "fromName": "OpenRemark",
+    "defaultSubjectPrefix": "[New Comment]",
+    "defaultAccentColor": "#6366f1",
+    "defaultFooterText": "You're receiving this because you commented on this site."
   }
 }
