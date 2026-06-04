@@ -4,7 +4,7 @@
 <img width="1662" height="819" alt="image" src="https://github.com/user-attachments/assets/70af105c-7375-4bca-a0cd-58f4b7b49b22" />
 
 
-![Beta](https://img.shields.io/badge/status-beta-orange) ![Version](https://img.shields.io/badge/version-0.1.0--beta.2-blue) ![License](https://img.shields.io/badge/license-MIT-green)
+![Beta](https://img.shields.io/badge/status-beta-orange) ![Version](https://img.shields.io/badge/version-0.2.0-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
 A self-hostable comment system for static websites — Astro, Hugo, Next.js, and any site that accepts HTML.
 
