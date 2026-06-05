@@ -10,6 +10,10 @@
 }
 
 @import "../styles/design-tokens.css";
+@layer components {
+  @import "../styles/components.css";
+}
+
 
 @keyframes grid-drift {
   from { background-position: 0 0; }
@@ -32,6 +36,3 @@
   66% { transform: translate(-20px, 25px); }
 }
 
-@layer components {
-  @import "../styles/components.css";
-}
