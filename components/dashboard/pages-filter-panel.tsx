@@ -25,6 +25,7 @@ import {
   RiFileCopyLine,
   RiCheckLine,
   RiExternalLinkLine,
+  RiSearchLine,
 } from "@remixicon/react"
 import { deletePage } from "@/lib/services/comment-client"
 
@@ -47,10 +48,15 @@ export function PagesFilterPanel({
 }: Props) {
   const router = useRouter()
   const [collapsed, setCollapsed] = useState(false)
+  const [filter, setFilter] = useState("")
   const [target, setTarget] = useState<Page | null>(null)
   const [typed, setTyped] = useState("")
   const [copied, setCopied] = useState(false)
   const [deleting, setDeleting] = useState(false)
+
+  const filteredPages = filter
+    ? pages.filter((p) => p.slug.toLowerCase().includes(filter.toLowerCase()))
+    : pages
 
   function openDelete(page: Page, e: React.MouseEvent) {
     e.preventDefault()
@@ -147,7 +153,7 @@ export function PagesFilterPanel({
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="space-y-0.5 overflow-x-hidden p-1.5">
+        <div className="space-y-0.5 p-1.5">
           {/* All pages */}
           <Link
             href={pageHref(null)}
@@ -160,9 +166,28 @@ export function PagesFilterPanel({
             <span className="flex-1 text-xs">All pages</span>
           </Link>
 
+          <div className="relative mt-1">
+            <RiSearchLine className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder="Filter pages…"
+              className="h-7 pr-6 pl-7 text-xs"
+            />
+            {filter && (
+              <button
+                onClick={() => setFilter("")}
+                aria-label="Clear filter"
+                className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <RiCloseLine className="size-3.5" />
+              </button>
+            )}
+          </div>
+
           <Separator className="my-1" />
 
-          {pages.map((p) => (
+          {filteredPages.map((p) => (
             <div
               key={p.id}
               className={`group relative flex items-center rounded-md transition-colors ${
@@ -193,7 +218,7 @@ export function PagesFilterPanel({
                   </Badge>
                 )}
               </Link>
-              <div className="absolute inset-y-0 right-0 hidden items-center gap-0.5 pr-1 group-hover:flex">
+              <div className="absolute inset-y-0 right-0 hidden items-center gap-0.5 rounded-r-md bg-gradient-to-l from-accent from-60% to-transparent pr-1 pl-4 group-hover:flex">
                 {p.url && (
                   <a
                     href={p.url}
