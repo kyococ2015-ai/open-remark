@@ -26,7 +26,8 @@ export function buildTransporter(site: SiteSmtpConfig) {
     connectionTimeout: 10_000,
     greetingTimeout: 10_000,
     socketTimeout: 15_000,
-    pool: false,
+    logger: true, // Enable logging for debugging purposes.
+    debug: true, // Enable debug output for troubleshooting.
   } as SMTPTransport.Options)
 }
 

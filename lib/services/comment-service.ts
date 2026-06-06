@@ -262,7 +262,7 @@ export async function createComment(
     select: buildCommentSelect(),
   })
 
-  void notifyNewComment(
+  await notifyNewComment(
     { id: raw.id, body: raw.body },
     { name: raw.commenter.name },
     { slug: page.slug, url: page.url ?? null },
@@ -288,7 +288,7 @@ export async function createComment(
       },
     })
     if (parent && parent.commenterId !== commenterId) {
-      void notifyReply(
+      await notifyReply(
         { id: raw.id, body: raw.body },
         { name: raw.commenter.name },
         { id: parent.id, body: parent.body },
