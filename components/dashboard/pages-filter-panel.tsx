@@ -182,18 +182,6 @@ export function PagesFilterPanel({
                 <span className="flex-1 truncate text-xs leading-snug">
                   {p.slug}
                 </span>
-                {p.url && (
-                  <a
-                    href={p.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    aria-label="Open page"
-                    className="hidden shrink-0 text-muted-foreground group-hover:block hover:text-foreground"
-                  >
-                    <RiExternalLinkLine className="size-3.5" />
-                  </a>
-                )}
                 {p.count > 0 && (
                   <Badge
                     variant="secondary"
@@ -203,6 +191,17 @@ export function PagesFilterPanel({
                   </Badge>
                 )}
               </Link>
+              {p.url && (
+                <a
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open page"
+                  className="mr-1 hidden size-6 shrink-0 items-center justify-center rounded text-muted-foreground group-hover:flex hover:text-foreground"
+                >
+                  <RiExternalLinkLine className="size-3.5" />
+                </a>
+              )}
               <button
                 type="button"
                 onClick={(e) => openDelete(p, e)}
