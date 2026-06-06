@@ -177,6 +177,22 @@ export async function isCommenterBannedOnSite(
   return !!record
 }
 
+export async function searchCommentersByUsername(
+  siteId: string,
+  query: string,
+  limit = 3
+) {
+  return db.commenter.findMany({
+    where: {
+      username: { startsWith: query, mode: "insensitive" },
+      comments: { some: { page: { siteId } } },
+    },
+    select: { id: true, name: true, username: true, image: true },
+    take: limit,
+    orderBy: { username: "asc" },
+  })
+}
+
 export async function getCommenterNotificationsEnabled(
   commenterId: string
 ): Promise<boolean> {

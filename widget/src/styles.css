@@ -870,6 +870,98 @@
   }
 }
 
+/* ─── Mention suggestion dropdown ───────────────────────────────────────── */
+.z-mention-dropdown {
+  position: fixed;
+  background: var(--z-bg);
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-sm);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 1px 4px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  display: none;
+  z-index: 9999;
+  min-width: 200px;
+}
+
+.z-mention-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background-color 0.1s;
+}
+
+.z-mention-item:hover,
+.z-mention-item-active {
+  background: var(--z-accent);
+}
+
+.z-mention-item-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 1px;
+}
+
+.z-mention-item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--z-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.z-mention-item-username {
+  font-size: 11px;
+  color: var(--z-muted);
+}
+
+/* ─── Profile hover tooltip ──────────────────────────────────────────────── */
+.z-user-tooltip {
+  position: fixed;
+  background: var(--z-bg);
+  border: 1px solid var(--z-border);
+  border-radius: var(--z-radius-sm);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    0 1px 4px rgba(0, 0, 0, 0.06);
+  padding: 8px 12px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  z-index: 9999;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.z-tooltip-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.z-tooltip-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--z-text);
+  line-height: 1.2;
+}
+
+.z-tooltip-username {
+  font-size: 12px;
+  color: var(--z-muted);
+  line-height: 1.2;
+}
+
 /* ─── Footer ─────────────────────────────────────────────────────────────── */
 .z-footer {
   padding: 10px 16px;

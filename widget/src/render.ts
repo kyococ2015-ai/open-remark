@@ -180,6 +180,7 @@ function renderCommentBody(text: string): HTMLElement {
     const mentionSpan = document.createElement("span")
     mentionSpan.className = "z-comment-mention"
     mentionSpan.textContent = match[0]
+    mentionSpan.dataset.username = match[1]
     p.appendChild(mentionSpan)
     lastIndex = mentionRegex.lastIndex
   }

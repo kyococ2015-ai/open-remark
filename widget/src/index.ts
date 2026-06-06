@@ -12,6 +12,7 @@ import {
   updateComment,
   deleteComment,
   updateNotificationPreference,
+  searchCommenters,
 } from "./api"
 import { loadStoredAuth, signInWithGoogle, clearAuth } from "./auth"
 import {
@@ -124,6 +125,14 @@ class ZeonWidget {
   private isBanned = false
   private notificationsEnabled = true
   private likingIds = new Set<string>()
+  private usernameMap = new Map<string, Commenter>()
+  private mentionDropdown: HTMLElement | null = null
+  private profileTooltip: HTMLElement | null = null
+  private mentionTextarea: HTMLTextAreaElement | null = null
+  private mentionQuery = ""
+  private mentionResults: Commenter[] = []
+  private mentionSelectedIndex = 0
+  private mentionDebounceTimer: ReturnType<typeof setTimeout> | null = null
   private activeConfig: WidgetThemeConfig | null = null
   private lastEffectiveTheme: "LIGHT" | "DARK" | null = null
   private htmlObserver: MutationObserver | null = null
@@ -163,6 +172,40 @@ class ZeonWidget {
         if (wrap && !wrap.contains(e.target as Node)) {
           d.style.display = "none"
         }
+      }
+    })
+
+    this.shadow.addEventListener("input", (e) => {
+      if ((e.target as Element).tagName === "TEXTAREA") {
+        this.handleMentionInput(e.target as HTMLTextAreaElement)
+      }
+    })
+
+    this.shadow.addEventListener("keydown", (e) => {
+      if ((e.target as Element).tagName === "TEXTAREA") {
+        this.handleMentionKeydown(
+          e.target as HTMLTextAreaElement,
+          e as KeyboardEvent
+        )
+      }
+    })
+
+    this.shadow.addEventListener("focusout", (e) => {
+      if ((e.target as Element).tagName === "TEXTAREA") {
+        this.hideMentionDropdown()
+      }
+    })
+
+    this.shadow.addEventListener("mouseover", (e) => {
+      const span = (e.target as Element).closest("[data-username]")
+      if (span instanceof HTMLElement) this.showProfileTooltip(span)
+    })
+
+    this.shadow.addEventListener("mouseout", (e: Event) => {
+      const me = e as MouseEvent
+      const span = (me.target as Element).closest("[data-username]")
+      if (span && !span.contains(me.relatedTarget as Node)) {
+        this.hideProfileTooltip()
       }
     })
 
@@ -348,10 +391,13 @@ class ZeonWidget {
 
   private buildCommentMap() {
     this.commentMap.clear()
+    this.usernameMap.clear()
     for (const c of this.comments) {
       this.commentMap.set(c.id, c)
+      this.usernameMap.set(c.commenter.username, c.commenter)
       for (const r of c.replies ?? []) {
         this.commentMap.set(r.id, r)
+        this.usernameMap.set(r.commenter.username, r.commenter)
       }
     }
   }
@@ -559,6 +605,7 @@ class ZeonWidget {
   }
 
   private render() {
+    this.hideMentionDropdown()
     this.root.innerHTML = ""
     this.root.appendChild(this.buildHeader())
 
@@ -646,6 +693,238 @@ class ZeonWidget {
   destroy() {
     this.htmlObserver?.disconnect()
     this.root.innerHTML = ""
+    this.mentionDropdown?.remove()
+    this.profileTooltip?.remove()
+  }
+
+  // ─── Mention autocomplete ─────────────────────────────────────────────────
+
+  private handleMentionInput(textarea: HTMLTextAreaElement) {
+    const pos = textarea.selectionStart ?? 0
+    const before = textarea.value.slice(0, pos)
+    const match = before.match(/@([a-z0-9]*)$/)
+    if (match) {
+      this.triggerMentionSearch(textarea, match[1])
+    } else {
+      this.hideMentionDropdown()
+    }
+  }
+
+  private handleMentionKeydown(
+    textarea: HTMLTextAreaElement,
+    e: KeyboardEvent
+  ) {
+    if (!this.mentionDropdown || this.mentionDropdown.style.display === "none")
+      return
+    if (this.mentionResults.length === 0) return
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault()
+        this.mentionSelectedIndex =
+          (this.mentionSelectedIndex + 1) % this.mentionResults.length
+        this.updateMentionSelection()
+        break
+      case "ArrowUp":
+        e.preventDefault()
+        this.mentionSelectedIndex =
+          (this.mentionSelectedIndex - 1 + this.mentionResults.length) %
+          this.mentionResults.length
+        this.updateMentionSelection()
+        break
+      case "Enter":
+      case "Tab":
+        e.preventDefault()
+        this.selectMention(
+          textarea,
+          this.mentionResults[this.mentionSelectedIndex]
+        )
+        break
+      case "Escape":
+        this.hideMentionDropdown()
+        break
+    }
+  }
+
+  private triggerMentionSearch(textarea: HTMLTextAreaElement, query: string) {
+    this.mentionTextarea = textarea
+    this.mentionQuery = query
+
+    if (this.mentionDebounceTimer) clearTimeout(this.mentionDebounceTimer)
+    if (!query) {
+      this.hideMentionDropdown()
+      return
+    }
+
+    this.mentionDebounceTimer = setTimeout(async () => {
+      try {
+        const results = await searchCommenters(
+          this.config.appUrl,
+          this.config.siteKey,
+          query
+        )
+        if (this.mentionQuery !== query) return
+        this.mentionResults = results
+        this.mentionSelectedIndex = 0
+        this.renderMentionDropdown(textarea)
+      } catch {
+        // silently ignore
+      }
+    }, 180)
+  }
+
+  private renderMentionDropdown(textarea: HTMLTextAreaElement) {
+    if (this.mentionResults.length === 0) {
+      this.hideMentionDropdown()
+      return
+    }
+
+    if (!this.mentionDropdown) {
+      this.mentionDropdown = document.createElement("div")
+      this.mentionDropdown.className = "z-mention-dropdown"
+      this.shadow.appendChild(this.mentionDropdown)
+    }
+
+    this.mentionDropdown.innerHTML = ""
+    this.mentionResults.forEach((commenter, i) => {
+      const item = document.createElement("button")
+      item.type = "button"
+      item.className =
+        "z-mention-item" +
+        (i === this.mentionSelectedIndex ? " z-mention-item-active" : "")
+
+      if (commenter.image) {
+        const img = document.createElement("img")
+        img.src = commenter.image
+        img.alt = commenter.name
+        img.className = "z-avatar z-avatar-sm"
+        item.appendChild(img)
+      } else {
+        const pl = document.createElement("div")
+        pl.className = "z-avatar-placeholder z-avatar-placeholder-sm"
+        pl.textContent = commenter.name.slice(0, 2).toUpperCase()
+        item.appendChild(pl)
+      }
+
+      const info = document.createElement("div")
+      info.className = "z-mention-item-info"
+
+      const name = document.createElement("span")
+      name.className = "z-mention-item-name"
+      name.textContent = commenter.name
+      info.appendChild(name)
+
+      const username = document.createElement("span")
+      username.className = "z-mention-item-username"
+      username.textContent = `@${commenter.username}`
+      info.appendChild(username)
+
+      item.appendChild(info)
+      item.addEventListener("mousedown", (e) => {
+        e.preventDefault() // keep textarea focused
+        this.selectMention(textarea, commenter)
+      })
+      this.mentionDropdown!.appendChild(item)
+    })
+
+    // Position above the textarea
+    const rect = textarea.getBoundingClientRect()
+    this.mentionDropdown.style.display = "block"
+    this.mentionDropdown.style.left = `${rect.left}px`
+    this.mentionDropdown.style.width = `${rect.width}px`
+    // bottom: distance from viewport bottom so dropdown grows upward
+    this.mentionDropdown.style.bottom = `${window.innerHeight - rect.top + 4}px`
+    this.mentionDropdown.style.top = "auto"
+  }
+
+  private updateMentionSelection() {
+    if (!this.mentionDropdown) return
+    this.mentionDropdown
+      .querySelectorAll(".z-mention-item")
+      .forEach((el, i) => {
+        el.classList.toggle(
+          "z-mention-item-active",
+          i === this.mentionSelectedIndex
+        )
+      })
+  }
+
+  private selectMention(textarea: HTMLTextAreaElement, commenter: Commenter) {
+    const pos = textarea.selectionStart ?? 0
+    const before = textarea.value.slice(0, pos)
+    const after = textarea.value.slice(pos)
+    const newBefore = before.replace(/@[a-z0-9]*$/, `@${commenter.username} `)
+    textarea.value = newBefore + after
+    const newPos = newBefore.length
+    textarea.setSelectionRange(newPos, newPos)
+    textarea.dispatchEvent(new Event("input", { bubbles: true }))
+    this.hideMentionDropdown()
+  }
+
+  private hideMentionDropdown() {
+    if (this.mentionDebounceTimer) {
+      clearTimeout(this.mentionDebounceTimer)
+      this.mentionDebounceTimer = null
+    }
+    if (this.mentionDropdown) this.mentionDropdown.style.display = "none"
+    this.mentionTextarea = null
+    this.mentionQuery = ""
+    this.mentionResults = []
+  }
+
+  // ─── Profile hover tooltip ────────────────────────────────────────────────
+
+  private showProfileTooltip(span: HTMLElement) {
+    const username = span.dataset.username
+    if (!username) return
+    const commenter = this.usernameMap.get(username)
+    if (!commenter) return
+
+    if (!this.profileTooltip) {
+      this.profileTooltip = document.createElement("div")
+      this.profileTooltip.className = "z-user-tooltip"
+      this.shadow.appendChild(this.profileTooltip)
+    }
+
+    this.profileTooltip.innerHTML = ""
+
+    if (commenter.image) {
+      const img = document.createElement("img")
+      img.src = commenter.image
+      img.alt = commenter.name
+      img.className = "z-avatar"
+      this.profileTooltip.appendChild(img)
+    } else {
+      const pl = document.createElement("div")
+      pl.className = "z-avatar-placeholder"
+      pl.textContent = commenter.name.slice(0, 2).toUpperCase()
+      this.profileTooltip.appendChild(pl)
+    }
+
+    const info = document.createElement("div")
+    info.className = "z-tooltip-info"
+
+    const nameEl = document.createElement("p")
+    nameEl.className = "z-tooltip-name"
+    nameEl.textContent = commenter.name
+    info.appendChild(nameEl)
+
+    const usernameEl = document.createElement("p")
+    usernameEl.className = "z-tooltip-username"
+    usernameEl.textContent = `@${commenter.username}`
+    info.appendChild(usernameEl)
+
+    this.profileTooltip.appendChild(info)
+
+    const rect = span.getBoundingClientRect()
+    this.profileTooltip.style.display = "flex"
+    this.profileTooltip.style.left = `${rect.left}px`
+    this.profileTooltip.style.bottom = `${window.innerHeight - rect.top + 6}px`
+    this.profileTooltip.style.top = "auto"
+  }
+
+  private hideProfileTooltip() {
+    if (this.profileTooltip) this.profileTooltip.style.display = "none"
   }
 }
 

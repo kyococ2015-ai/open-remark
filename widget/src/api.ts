@@ -100,6 +100,20 @@ export async function deleteComment(
   return res.json()
 }
 
+export async function searchCommenters(
+  appUrl: string,
+  siteKey: string,
+  q: string
+): Promise<
+  Array<{ id: string; name: string; username: string; image: string | null }>
+> {
+  const url = `${appUrl}/api/widget/commenters?siteKey=${encodeURIComponent(siteKey)}&q=${encodeURIComponent(q)}`
+  const res = await fetch(url)
+  if (!res.ok) return []
+  const data = await res.json()
+  return data.commenters ?? []
+}
+
 export async function updateNotificationPreference(
   appUrl: string,
   token: string,
