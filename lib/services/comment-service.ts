@@ -250,7 +250,7 @@ export async function createComment(
 
   const page = await db.page.upsert({
     where: { siteId_slug: { siteId: site.id, slug: data.slug } },
-    update: {},
+    update: data.url ? { url: data.url } : {},
     create: { siteId: site.id, slug: data.slug, url: data.url },
     select: { id: true, slug: true, url: true },
   })

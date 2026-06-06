@@ -21,6 +21,7 @@ export async function postComment(
     body: string
     siteKey: string
     slug: string
+    url?: string
     parentId?: string
     replyToId?: string
   }

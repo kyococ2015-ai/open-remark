@@ -42,6 +42,7 @@ import {
   Trash2,
   Eye,
   Pencil,
+  ExternalLink,
 } from "lucide-react"
 
 const COMMENT_STATUS = {
@@ -328,9 +329,21 @@ export function CommentsTable({ comments, onStatusChange }: Props) {
                     </p>
                   </TableCell>
                   <TableCell>
-                    <p className="max-w-36 truncate font-mono text-xs text-muted-foreground">
-                      {comment.page.slug}
-                    </p>
+                    {comment.page.url ? (
+                      <a
+                        href={`${comment.page.url}#comment-${comment.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex max-w-36 items-center gap-1 font-mono text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        <span className="truncate">{comment.page.slug}</span>
+                        <ExternalLink className="size-3 shrink-0 opacity-0 group-hover:opacity-100" />
+                      </a>
+                    ) : (
+                      <p className="max-w-36 truncate font-mono text-xs text-muted-foreground">
+                        {comment.page.slug}
+                      </p>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={badge.variant} className={badge.className}>

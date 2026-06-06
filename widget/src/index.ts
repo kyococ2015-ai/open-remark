@@ -343,6 +343,7 @@ class ZeonWidget {
         body: finalBody,
         siteKey: this.config.siteKey,
         slug: this.config.slug,
+        url: window.location.href,
         parentId: finalParentId,
         replyToId,
       })
