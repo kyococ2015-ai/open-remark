@@ -197,7 +197,7 @@ export function PagesFilterPanel({
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Open page"
-                  className="mr-1 hidden size-6 shrink-0 items-center justify-center rounded text-muted-foreground group-hover:flex hover:text-foreground"
+                  className="mr-1 flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground"
                 >
                   <RiExternalLinkLine className="size-3.5" />
                 </a>
@@ -206,7 +206,7 @@ export function PagesFilterPanel({
                 type="button"
                 onClick={(e) => openDelete(p, e)}
                 aria-label={`Delete page ${p.slug}`}
-                className="mr-1 hidden size-6 shrink-0 items-center justify-center rounded text-muted-foreground group-hover:flex hover:bg-destructive/10 hover:text-destructive"
+                className="mr-1 flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
               >
                 <RiDeleteBinLine className="size-3.5" />
               </button>
