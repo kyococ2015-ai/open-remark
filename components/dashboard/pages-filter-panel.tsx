@@ -135,7 +135,7 @@ export function PagesFilterPanel({
   const canConfirm = !!target && typed === target.slug && !deleting
 
   return (
-    <div className="sticky top-22 flex h-[calc(100svh-5.5rem)] w-52 shrink-0 flex-col border-r bg-background">
+    <div className="sticky top-22 flex h-[calc(100svh-5.5rem)] w-[230px] shrink-0 flex-col border-r bg-background">
       {/* Panel header */}
       <div className="flex items-center justify-between border-b px-3 py-2.5">
         <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
