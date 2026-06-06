@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer"
+import type SMTPTransport from "nodemailer/lib/smtp-transport"
 
 export type SiteSmtpConfig = {
   smtpHost: string | null
@@ -22,7 +23,11 @@ export function buildTransporter(site: SiteSmtpConfig) {
     port,
     secure: port === 465,
     auth: { user: smtpUser, pass: smtpPass },
-  })
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
+    pool: false,
+  } as SMTPTransport.Options)
 }
 
 export function getFromAddress(site: SiteSmtpConfig): string {
