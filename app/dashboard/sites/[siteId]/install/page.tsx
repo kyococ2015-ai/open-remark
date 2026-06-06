@@ -53,47 +53,51 @@ export default async function InstallPage({ params }: Props) {
 ></div>
 <script async src="${appUrl}/embed.js"></script>`
 
-  const astroSnippet = `<div
+  const astroSnippet = `---
+// src/components/OpenRemark.astro
+---
+
+<div
   data-open-remark
   data-site-key="${site.siteKey}"
 >
 </div>
 
 <script is:inline>
-  function loadZeonComments() {
+  function loadOpenRemark() {
     const oldScript = document.querySelector(
       "script[data-open-remark-script]",
     );
-
     if (oldScript) oldScript.remove();
 
     const script = document.createElement("script");
     script.src = "${appUrl}/embed.js";
     script.async = true;
     script.setAttribute("data-open-remark-script", "true");
-
     document.body.appendChild(script);
   }
 
-  // first load
-  loadZeonComments();
+  loadOpenRemark();
 
-  // astro page transitions
-  document.addEventListener("astro:page-load", loadZeonComments);
+  // re-mount on Astro page transitions
+  document.addEventListener("astro:page-load", loadOpenRemark);
 </script>`
 
-  const hugoSnippet = `{{/* layouts/partials/comments.html */}}
+  const hugoSnippet = `{{/* layouts/partials/open-remark.html */}}
 <div
   data-open-remark
   data-site-key="${site.siteKey}"
 ></div>
-<script async src="${appUrl}/embed.js"></script>`
+<script async src="${appUrl}/embed.js"></script>
 
-  const nextSnippet = `// components/Comments.tsx
+{{/* In your single layout: */}}
+{{/* {{ partial "open-remark.html" . }} */}}`
+
+  const nextSnippet = `// components/OpenRemark.tsx
 "use client";
 import Script from "next/script";
 
-export function Comments() {
+export function OpenRemark() {
   return (
     <>
       <div
@@ -103,7 +107,11 @@ export function Comments() {
       <Script src="${appUrl}/embed.js" strategy="lazyOnload" />
     </>
   );
-}`
+}
+
+// Usage in any page or layout:
+// import { OpenRemark } from "@/components/OpenRemark";
+// <OpenRemark />`
 
   return (
     <div>

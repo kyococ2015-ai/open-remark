@@ -147,7 +147,7 @@ export function PagesFilterPanel({
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="space-y-0.5 p-1.5">
+        <div className="space-y-0.5 overflow-x-hidden p-1.5">
           {/* All pages */}
           <Link
             href={pageHref(null)}
@@ -174,14 +174,16 @@ export function PagesFilterPanel({
               <Link
                 href={pageHref(p.slug)}
                 title={p.slug}
-                className={`flex min-w-0 flex-1 items-center gap-2 px-2.5 py-1.5 ${
+                className={`flex min-w-0 flex-1 items-center gap-x-2 px-2.5 py-1.5 ${
                   activeSlug === p.slug ? "font-medium" : ""
                 }`}
               >
-                <RiFileTextLine className="size-3.5 shrink-0 opacity-50" />
-                <span className="flex-1 truncate text-xs leading-snug">
-                  {p.slug}
-                </span>
+                <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden [mask-image:linear-gradient(to_right,black_70%,transparent_100%)]">
+                  <RiFileTextLine className="size-3.5 shrink-0 opacity-50" />
+                  <span className="text-xs leading-snug whitespace-nowrap">
+                    {p.slug}
+                  </span>
+                </div>
                 {p.count > 0 && (
                   <Badge
                     variant="secondary"
@@ -191,25 +193,27 @@ export function PagesFilterPanel({
                   </Badge>
                 )}
               </Link>
-              {p.url && (
-                <a
-                  href={p.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Open page"
-                  className="mr-1 flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground"
+              <div className="absolute inset-y-0 right-0 hidden items-center gap-0.5 pr-1 group-hover:flex">
+                {p.url && (
+                  <a
+                    href={p.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open page"
+                    className="flex size-6 items-center justify-center rounded text-muted-foreground hover:text-foreground"
+                  >
+                    <RiExternalLinkLine className="size-3.5" />
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={(e) => openDelete(p, e)}
+                  aria-label={`Delete page ${p.slug}`}
+                  className="flex size-6 items-center justify-center rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <RiExternalLinkLine className="size-3.5" />
-                </a>
-              )}
-              <button
-                type="button"
-                onClick={(e) => openDelete(p, e)}
-                aria-label={`Delete page ${p.slug}`}
-                className="mr-1 flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
-              >
-                <RiDeleteBinLine className="size-3.5" />
-              </button>
+                  <RiDeleteBinLine className="size-3.5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
