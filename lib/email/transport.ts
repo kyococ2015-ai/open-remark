@@ -32,5 +32,8 @@ export function buildTransporter(site: SiteSmtpConfig) {
 }
 
 export function getFromAddress(site: SiteSmtpConfig): string {
-  return site.smtpFrom ?? "noreply@example.com"
+  if (site.smtpFrom) return site.smtpFrom
+  // Fall back to smtpUser when it's an email (standard SMTP setups where auth user = sender)
+  if (site.smtpUser && site.smtpUser.includes("@")) return site.smtpUser
+  return "noreply@example.com"
 }

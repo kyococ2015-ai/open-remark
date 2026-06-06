@@ -3,32 +3,27 @@
 ## Prerequisites
 
 - A Next.js site (v13+ App Router)
-- A OpenRemark account with a registered site
+- An OpenRemark account with a registered site
 - Your **site key** from the dashboard
 
 ## 1. Create a Comments component
 
-Create `components/ZeonComments.tsx`:
+Create `components/OpenRemark.tsx`:
 
 ```tsx
 "use client";
 
 import Script from "next/script";
 
-type Props = {
-  slug: string;
-};
-
-export function ZeonComments({ slug }: Props) {
+export function OpenRemark() {
   return (
     <>
       <div
         data-open-remark
-        data-site-key={process.env.NEXT_PUBLIC_ZEON_SITE_KEY}
-        data-slug={slug}
+        data-site-key={process.env.NEXT_PUBLIC_OPEN_REMARK_SITE_KEY}
       />
       <Script
-        src={`${process.env.NEXT_PUBLIC_ZEON_EMBED_URL}/embed.js`}
+        src={`${process.env.NEXT_PUBLIC_OPEN_REMARK_URL}/embed.js`}
         strategy="lazyOnload"
       />
     </>
@@ -41,8 +36,8 @@ export function ZeonComments({ slug }: Props) {
 In `.env.local`:
 
 ```env
-NEXT_PUBLIC_ZEON_SITE_KEY=YOUR_SITE_KEY
-NEXT_PUBLIC_ZEON_EMBED_URL=https://your-domain.com
+NEXT_PUBLIC_OPEN_REMARK_SITE_KEY=YOUR_SITE_KEY
+NEXT_PUBLIC_OPEN_REMARK_URL=https://your-domain.com
 ```
 
 ## 3. Add to your blog post page
@@ -50,13 +45,9 @@ NEXT_PUBLIC_ZEON_EMBED_URL=https://your-domain.com
 In `app/blog/[slug]/page.tsx`:
 
 ```tsx
-import { ZeonComments } from "@/components/ZeonComments";
+import { OpenRemark } from "@/components/OpenRemark";
 
-export default async function BlogPost({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default async function BlogPost({ params }: { params: { slug: string } }) {
   const post = await getPost(params.slug);
 
   return (
@@ -65,23 +56,12 @@ export default async function BlogPost({
       <div dangerouslySetInnerHTML={{ __html: post.content }} />
 
       <section aria-label="Comments" className="mt-16">
-        <ZeonComments slug={`/blog/${params.slug}`} />
+        <OpenRemark />
       </section>
     </article>
   );
 }
 ```
-
-## Using a stable slug
-
-Use a consistent slug format regardless of post title changes. A good pattern:
-
-```tsx
-// Use the database ID or a stable identifier, not the URL-derived slug
-<ZeonComments slug={`/blog/${post.id}`} />
-```
-
-This way, if you rename the post URL, existing comments follow the stable ID.
 
 ## Allowed origins
 

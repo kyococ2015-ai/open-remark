@@ -19,7 +19,11 @@ export default async function SiteSettingsPage({ params }: Props) {
 
   return (
     <SiteSettingsForm
-      site={{ ...site, theme: site.theme as "AUTO" | "LIGHT" | "DARK" }}
+      site={{
+        ...site,
+        theme: site.theme as "AUTO" | "LIGHT" | "DARK",
+        siteKey: site.siteKey,
+      }}
     />
   )
 }

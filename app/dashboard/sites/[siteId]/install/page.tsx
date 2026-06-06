@@ -50,25 +50,17 @@ export default async function InstallPage({ params }: Props) {
 <div
   data-open-remark
   data-site-key="${site.siteKey}"
-  data-slug="/your-post-slug"
 ></div>
 <script async src="${appUrl}/embed.js"></script>`
 
-  const astroSnippet = `---
-// Pass the slug dynamically from Astro.params:
-const { slug } = Astro.props;
----
-
-<div
+  const astroSnippet = `<div
   data-open-remark
   data-site-key="${site.siteKey}"
-  data-slug={slug}
 >
 </div>
 
 <script is:inline>
   function loadZeonComments() {
-    // prevent duplicate scripts
     const oldScript = document.querySelector(
       "script[data-open-remark-script]",
     );
@@ -94,7 +86,6 @@ const { slug } = Astro.props;
 <div
   data-open-remark
   data-site-key="${site.siteKey}"
-  data-slug="{{ .RelPermalink }}"
 ></div>
 <script async src="${appUrl}/embed.js"></script>`
 
@@ -102,13 +93,12 @@ const { slug } = Astro.props;
 "use client";
 import Script from "next/script";
 
-export function Comments({ slug }: { slug: string }) {
+export function Comments() {
   return (
     <>
       <div
         data-open-remark
         data-site-key="${site.siteKey}"
-        data-slug={slug}
       />
       <Script src="${appUrl}/embed.js" strategy="lazyOnload" />
     </>
@@ -138,7 +128,7 @@ export function Comments({ slug }: { slug: string }) {
           <StepHeader
             number={2}
             title="Add the snippet to your site"
-            description="Pick your framework and paste the code where you want comments to appear. Replace the slug with the current page path."
+            description="Pick your framework and paste the code where you want comments to appear."
           />
           <div className="ml-12">
             <Tabs defaultValue="html">

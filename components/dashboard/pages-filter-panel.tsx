@@ -24,10 +24,11 @@ import {
   RiDeleteBinLine,
   RiFileCopyLine,
   RiCheckLine,
+  RiExternalLinkLine,
 } from "@remixicon/react"
 import { deletePage } from "@/lib/services/comment-client"
 
-type Page = { id: string; slug: string; count: number }
+type Page = { id: string; slug: string; url?: string; count: number }
 
 type Props = {
   siteId: string
@@ -181,6 +182,18 @@ export function PagesFilterPanel({
                 <span className="flex-1 truncate text-xs leading-snug">
                   {p.slug}
                 </span>
+                {p.url && (
+                  <a
+                    href={p.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label="Open page"
+                    className="hidden shrink-0 text-muted-foreground group-hover:block hover:text-foreground"
+                  >
+                    <RiExternalLinkLine className="size-3.5" />
+                  </a>
+                )}
                 {p.count > 0 && (
                   <Badge
                     variant="secondary"

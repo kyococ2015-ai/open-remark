@@ -944,11 +944,11 @@ function mount(): ZeonWidget[] {
 
   for (const el of elements) {
     const siteKey = el.dataset.siteKey
-    const slug = el.dataset.slug
-    if (!siteKey || !slug) {
-      console.warn("[Open Remark] Missing data-site-key or data-slug", el)
+    if (!siteKey) {
+      console.warn("[Open Remark] Missing data-site-key", el)
       continue
     }
+    const slug = el.dataset.slug || window.location.pathname
 
     let onThemeChange: ((theme: "light" | "dark") => void) | undefined
     const cbName = el.dataset.onThemeChange

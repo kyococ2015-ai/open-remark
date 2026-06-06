@@ -23,12 +23,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { InstallSnippet } from "@/components/dashboard/install-snippet"
 
 type Theme = "AUTO" | "LIGHT" | "DARK"
 
 type Site = {
   id: string
   name: string
+  siteKey: string
   domain: string
   autoApprove: boolean
   allowedOrigins: string
@@ -132,12 +134,9 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
   const [showSmtpPass, setShowSmtpPass] = useState(false)
   const [smtpFrom, setSmtpFrom] = useState(initialSite.smtpFrom ?? "")
 
-  // All four required SMTP fields must be filled before notifications can be enabled
+  // smtpFrom is optional — falls back to smtpUser when smtpUser is an email
   const smtpConfigured =
-    smtpHost.trim() !== "" &&
-    smtpUser.trim() !== "" &&
-    smtpPass.trim() !== "" &&
-    smtpFrom.trim() !== ""
+    smtpHost.trim() !== "" && smtpUser.trim() !== "" && smtpPass.trim() !== ""
 
   // If SMTP config is removed, auto-disable notifications
   if (!smtpConfigured && emailEnabled) setEmailEnabled(false)
@@ -384,6 +383,23 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
               {loading ? "Saving…" : "Save changes"}
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Install snippet</CardTitle>
+          <CardDescription>
+            Paste this into any page where you want comments to appear.{" "}
+            <code className="text-xs">data-slug</code> is optional — if omitted,
+            the widget uses the current page path automatically.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <InstallSnippet
+            code={`<div\n  data-open-remark\n  data-site-key="${site.siteKey}"\n></div>\n<script async src="${process.env.NEXT_PUBLIC_APP_URL}/embed.js"></script>`}
+            language="html"
+          />
         </CardContent>
       </Card>
 
@@ -804,7 +820,12 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="smtp-from">From address</Label>
+              <Label htmlFor="smtp-from">
+                From address{" "}
+                <span className="font-normal text-muted-foreground">
+                  (optional)
+                </span>
+              </Label>
               <Input
                 id="smtp-from"
                 type="email"
@@ -812,6 +833,11 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
                 value={smtpFrom}
                 onChange={(e) => setSmtpFrom(e.target.value)}
               />
+              <p className="text-xs text-muted-foreground">
+                The sender address shown to recipients. Leave blank to use the
+                username above. Required for providers like Resend where the
+                username isn&apos;t an email (e.g. &quot;resend&quot;).
+              </p>
             </div>
           </div>
 

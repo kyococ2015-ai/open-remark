@@ -1,31 +1,24 @@
-# Embedding Zeon Comments in Astro
+# Embedding OpenRemark in Astro
 
 ## Prerequisites
 
 - An Astro site (v3+)
-- A Zeon Comments account with a registered site
+- An OpenRemark account with a registered site
 - Your **site key** from the dashboard
 
 ## 1. Create a Comments component
 
-Create `src/components/ZeonComments.astro`:
+Create `src/components/OpenRemark.astro`:
 
 ```astro
----
-// Pass the slug dynamically from Astro.params:
-const { slug } = Astro.props;
----
-
 <div
   data-open-remark
-  data-site-key="..."
-  data-slug={slug}
+  data-site-key="YOUR_SITE_KEY"
 >
 </div>
 
 <script is:inline>
-  function loadZeonComments() {
-    // prevent duplicate scripts
+  function loadOpenRemark() {
     const oldScript = document.querySelector(
       "script[data-open-remark-script]",
     );
@@ -33,7 +26,7 @@ const { slug } = Astro.props;
     if (oldScript) oldScript.remove();
 
     const script = document.createElement("script");
-    script.src = "https://open-remark.vercel.app/embed.js";
+    script.src = "https://your-domain.com/embed.js";
     script.async = true;
     script.setAttribute("data-open-remark-script", "true");
 
@@ -41,24 +34,22 @@ const { slug } = Astro.props;
   }
 
   // first load
-  loadZeonComments();
+  loadOpenRemark();
 
   // astro page transitions
-  document.addEventListener("astro:page-load", loadZeonComments);
+  document.addEventListener("astro:page-load", loadOpenRemark);
 </script>
 ```
 
-Replace `...` with your site key from the dashboard.
+Replace `YOUR_SITE_KEY` and the script `src` with your values from the dashboard.
 
-## 2. Add to blog post layout
+## 2. Add to your layout
 
-In your `src/layouts/BlogPost.astro`:
+In `src/layouts/BlogPost.astro`:
 
 ```astro
 ---
-import ZeonComments from "../components/ZeonComments.astro";
-
-const { slug } = Astro.props;
+import OpenRemark from "../components/OpenRemark.astro";
 ---
 
 <article>
@@ -66,43 +57,17 @@ const { slug } = Astro.props;
 </article>
 
 <section aria-label="Comments">
-  <ZeonComments slug={slug} />
+  <OpenRemark />
 </section>
-```
-
-## 3. Pass the slug from your blog collection 
-
-In `src/pages/blog/[slug].astro`:
-
-```astro
----
-import { getCollection } from "astro:content";
-import BlogPost from "../../layouts/BlogPost.astro";
-
-export async function getStaticPaths() {
-  const posts = await getCollection("blog");
-  return posts.map((post) => ({
-    params: { slug: post.slug },
-    props: { post },
-  }));
-}
-
-const { post } = Astro.props;
-const { Content } = await post.render();
----
-
-<BlogPost slug={`/blog/${post.slug}`}>
-  <Content />
-</BlogPost>
 ```
 
 ## Allowed origins
 
 Add `https://yourblog.com` (and `https://www.yourblog.com` if applicable) to
-the **Allowed origins** list in your site's Settings page. Zeon Comments will
+the **Allowed origins** list in your site's Settings page. OpenRemark will
 reject widget posts from unlisted origins.
 
 ## Self-hosting note
 
-If you self-host Zeon Comments, replace `https://your-domain.com` with your
+If you self-host OpenRemark, replace `https://your-domain.com` with your
 deployment URL in the `<script>` tag and in your site's allowed origins.

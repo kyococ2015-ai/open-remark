@@ -67,6 +67,7 @@ export default async function CommentsPage({ params, searchParams }: Props) {
           pages={pages.map((p) => ({
             id: p.id,
             slug: p.slug,
+            url: p.url ?? undefined,
             count: p._count.comments,
           }))}
           activeSlug={slug}
