@@ -1,6 +1,7 @@
 import { render } from "@react-email/render"
 import { NewCommentEmail } from "./templates/new-comment"
 import { ReplyEmail } from "./templates/reply"
+import { LikeEmail } from "./templates/like"
 import { buildTransporter, getFromAddress } from "./transport"
 import appConfig from "@/config/config.json"
 
@@ -135,6 +136,50 @@ export async function notifyReply(
     })
   } catch (err) {
     console.error("[email] notifyReply failed:", err)
+  }
+}
+
+export async function notifyLike(
+  comment: CommentInfo,
+  commenter: CommenterInfo,
+  page: PageInfo,
+  site: SiteEmailConfig,
+  likeCount: number
+): Promise<void> {
+  if (!site.emailNotificationsEnabled) return
+  if (!commenter.notificationsEnabled) return
+  const transport = buildTransporter(site)
+  if (!transport) return
+
+  try {
+    const { subjectPrefix, accentColor, footerText, fromName } =
+      resolveConfig(site)
+    const pageTitle = page.slug
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ""
+    const unsubscribeUrl = `${appUrl}/api/unsubscribe?token=${commenter.notificationToken}`
+
+    const html = await render(
+      LikeEmail({
+        pageTitle,
+        commentBody: truncate(comment.body, 200),
+        viewUrl: buildCommentUrl(site, page, comment.id),
+        likeCount,
+        accentColor,
+        logoUrl: site.emailLogoUrl,
+        footerText,
+        siteUrl: `https://${site.domain}`,
+        unsubscribeUrl,
+      })
+    )
+
+    await transport.sendMail({
+      from: `"${fromName}" <${getFromAddress(site)}>`,
+      to: commenter.email,
+      subject: `${subjectPrefix} Your comment received ${likeCount} ${likeCount === 1 ? "like" : "likes"} on "${pageTitle}"`,
+      html,
+    })
+  } catch (err) {
+    console.error("[email] notifyLike failed:", err)
   }
 }
 

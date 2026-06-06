@@ -45,6 +45,7 @@ export const UpdateSiteSchema = z.object({
     .optional(),
   radius: z.number().int().min(0).max(24).optional(),
   emailNotificationsEnabled: z.boolean().optional(),
+  likeNotificationLimit: z.number().int().min(0).max(100).optional(),
   emailSubjectPrefix: z.string().max(50).nullable().optional(),
   emailLogoUrl: z.string().url("Must be a valid URL").nullable().optional(),
   emailAccentColor: z

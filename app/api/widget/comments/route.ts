@@ -6,7 +6,10 @@ import {
   createComment,
 } from "@/lib/services/comment-service"
 import { getSiteBySiteKey } from "@/lib/services/site-service"
-import { isCommenterBannedOnSite } from "@/lib/services/user-service"
+import {
+  isCommenterBannedOnSite,
+  getCommenterNotificationsEnabled,
+} from "@/lib/services/user-service"
 import { verifyWidgetToken } from "@/lib/auth-widget"
 import { isOriginAllowed, getEffectiveOrigin, corsHeaders } from "@/lib/cors"
 import { rateLimit } from "@/lib/rate-limit"
@@ -38,6 +41,7 @@ export async function GET(req: NextRequest) {
     let userEmail: string | undefined
     let commenterId: string | undefined
     let isBanned = false
+    let notificationsEnabled = true
     const authHeader = req.headers.get("authorization")
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.slice(7)
@@ -48,6 +52,9 @@ export async function GET(req: NextRequest) {
         if (!isBanned) {
           commenterId = payload.commenterId
         }
+        notificationsEnabled = await getCommenterNotificationsEnabled(
+          payload.commenterId
+        )
       }
     }
 
@@ -63,7 +70,7 @@ export async function GET(req: NextRequest) {
         theme: site.theme,
         primaryColor: site.primaryColor,
         radius: site.radius,
-        currentUser: userEmail ? { isBanned } : undefined,
+        currentUser: userEmail ? { isBanned, notificationsEnabled } : undefined,
         enable: appConfig.branding.enable,
         poweredByHtml: appConfig.branding.powered_by_html,
       },

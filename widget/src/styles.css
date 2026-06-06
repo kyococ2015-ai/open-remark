@@ -437,6 +437,32 @@
   background: color-mix(in srgb, var(--z-primary) 12%, transparent);
 }
 
+.z-action-btn-loading {
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--z-primary);
+}
+
+.z-action-btn-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--z-primary) 40%, transparent) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: z-like-glare 0.9s ease-in-out infinite;
+}
+
+@keyframes z-like-glare {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* ─── Three-dot menu ─────────────────────────────────────────────────────── */
 .z-menu-btn {
   display: inline-flex;
@@ -837,6 +863,10 @@
   .z-skeleton {
     animation: none;
     background: var(--z-subtle);
+  }
+  .z-action-btn-loading::after {
+    animation: none;
+    opacity: 0.3;
   }
 }
 

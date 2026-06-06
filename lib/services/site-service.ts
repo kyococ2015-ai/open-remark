@@ -112,6 +112,9 @@ export async function updateSite(
       ...(typeof input.emailNotificationsEnabled === "boolean" && {
         emailNotificationsEnabled: input.emailNotificationsEnabled,
       }),
+      ...(typeof input.likeNotificationLimit === "number" && {
+        likeNotificationLimit: input.likeNotificationLimit,
+      }),
       ...(input.emailSubjectPrefix !== undefined && {
         emailSubjectPrefix: input.emailSubjectPrefix,
       }),

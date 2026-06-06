@@ -7,6 +7,7 @@ export const CreateCommentSchema = z.object({
   slug: z.string().min(1),
   url: z.string().url().optional(),
   parentId: z.string().cuid().optional(),
+  replyToId: z.string().cuid().optional(),
 })
 
 export const UpdateCommentStatusSchema = z.object({

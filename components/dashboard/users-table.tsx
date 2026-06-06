@@ -181,7 +181,7 @@ export function UsersTable({ commenters, siteId }: Props) {
               <TableHead>Deleted</TableHead>
               <TableHead>Spam</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Notifications</TableHead>
+              <TableHead>Email Notification</TableHead>
               <TableHead className="w-12" />
             </TableRow>
           </TableHeader>
@@ -236,7 +236,7 @@ export function UsersTable({ commenters, siteId }: Props) {
                         ? "Disable reply notifications"
                         : "Enable reply notifications"
                     }
-                    title="Disables reply notifications for this commenter on all sites"
+                    title="Disables reply notifications for this commenter on throughout the site."
                   />
                 </TableCell>
                 <TableCell>

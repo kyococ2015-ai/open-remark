@@ -3,7 +3,11 @@ import { ApiError } from "@/lib/api/error"
 import { sanitizeBody } from "@/lib/sanitize"
 import { CommentStatus } from "@/generated/prisma/client"
 import type { CreateCommentInput } from "@/lib/validators/comment"
-import { notifyNewComment, notifyReply } from "@/lib/email/email-service"
+import {
+  notifyNewComment,
+  notifyReply,
+  notifyLike,
+} from "@/lib/email/email-service"
 
 function buildCommenterSelect() {
   return {
@@ -52,7 +56,7 @@ function buildCommentSelect(userEmail?: string, commenterId?: string) {
         _count: { select: { likes: true } },
         likes: likeWhere ? { ...likeWhere, select: { id: true } } : undefined,
       },
-      orderBy: { createdAt: "asc" as const },
+      orderBy: { createdAt: "desc" as const },
     },
   }
 }
@@ -102,7 +106,7 @@ export async function getCommentsBySite(
           where: {
             status: { in: [CommentStatus.APPROVED, CommentStatus.DELETED] },
           },
-          orderBy: { createdAt: "asc" as const },
+          orderBy: { createdAt: "desc" as const },
           include: { commenter: { select: buildCommenterSelect() } },
         },
       },
@@ -262,21 +266,66 @@ export async function createComment(
     select: buildCommentSelect(),
   })
 
-  await notifyNewComment(
-    { id: raw.id, body: raw.body },
-    { name: raw.commenter.name },
-    { slug: page.slug, url: page.url ?? null },
-    site,
-    { email: site.owner.email }
-  )
+  const parent = data.parentId
+    ? await db.comment.findUnique({
+        where: { id: data.parentId },
+        select: {
+          id: true,
+          body: true,
+          commenterId: true,
+          commenter: {
+            select: {
+              name: true,
+              email: true,
+              notificationsEnabled: true,
+              notificationToken: true,
+            },
+          },
+        },
+      })
+    : null
 
-  if (data.parentId) {
-    const parent = await db.comment.findUnique({
-      where: { id: data.parentId },
+  const alreadyNotified = new Set<string>([raw.commenter.email])
+  const pageInfo = { slug: page.slug, url: page.url ?? null }
+  const replyInfo = { id: raw.id, body: raw.body }
+  const replierInfo = { name: raw.commenter.name }
+
+  // Suppress notifyNewComment when this reply goes directly to the owner
+  // (they'll get notifyReply instead, avoiding a duplicate email)
+  const isDirectReplyToOwner = parent?.commenter.email === site.owner.email
+
+  if (!isDirectReplyToOwner) {
+    const ownerCommenter = await db.commenter.findUnique({
+      where: { email: site.owner.email },
+      select: { notificationsEnabled: true },
+    })
+    if (ownerCommenter?.notificationsEnabled !== false) {
+      await notifyNewComment(replyInfo, replierInfo, pageInfo, site, {
+        email: site.owner.email,
+      })
+    }
+  }
+
+  if (parent && parent.commenterId !== commenterId) {
+    alreadyNotified.add(parent.commenter.email)
+    await notifyReply(
+      replyInfo,
+      replierInfo,
+      { id: parent.id, body: parent.body },
+      parent.commenter,
+      pageInfo,
+      site
+    )
+  }
+
+  // When the widget collapses a nested reply, it sends the exact comment ID
+  // that was clicked (replyToId) so we can notify its author with precise context.
+  if (data.replyToId) {
+    const replyToComment = await db.comment.findUnique({
+      where: { id: data.replyToId },
       select: {
         id: true,
         body: true,
-        commenterId: true,
         commenter: {
           select: {
             name: true,
@@ -287,15 +336,61 @@ export async function createComment(
         },
       },
     })
-    if (parent && parent.commenterId !== commenterId) {
+    if (
+      replyToComment &&
+      !alreadyNotified.has(replyToComment.commenter.email)
+    ) {
+      alreadyNotified.add(replyToComment.commenter.email)
       await notifyReply(
-        { id: raw.id, body: raw.body },
-        { name: raw.commenter.name },
-        { id: parent.id, body: parent.body },
-        parent.commenter,
-        { slug: page.slug, url: page.url ?? null },
+        replyInfo,
+        replierInfo,
+        { id: replyToComment.id, body: replyToComment.body },
+        replyToComment.commenter,
+        pageInfo,
         site
       )
+    }
+  }
+
+  // Notify any additional @mentioned commenters in this thread
+  if (raw.parentId) {
+    const mentionedUsernames = [...raw.body.matchAll(/@([a-z0-9]+)/g)].map(
+      (m) => m[1]
+    )
+    if (mentionedUsernames.length > 0) {
+      const mentionedComments = await db.comment.findMany({
+        where: {
+          parentId: raw.parentId,
+          commenter: {
+            username: { in: mentionedUsernames },
+            email: { notIn: [...alreadyNotified] },
+          },
+        },
+        select: {
+          id: true,
+          body: true,
+          commenter: {
+            select: {
+              name: true,
+              email: true,
+              notificationsEnabled: true,
+              notificationToken: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" as const },
+        distinct: ["commenterId"],
+      })
+      for (const mentioned of mentionedComments) {
+        await notifyReply(
+          replyInfo,
+          replierInfo,
+          { id: mentioned.id, body: mentioned.body },
+          mentioned.commenter,
+          pageInfo,
+          site
+        )
+      }
     }
   }
 
@@ -364,16 +459,67 @@ export async function toggleCommentLike(commentId: string, userEmail: string) {
   })
 
   if (existing) {
-    await db.commentLike.delete({
-      where: { id: existing.id },
-    })
+    await db.commentLike.delete({ where: { id: existing.id } })
     const count = await db.commentLike.count({ where: { commentId } })
     return { liked: false, count }
   }
 
-  await db.commentLike.create({
-    data: { commentId, userEmail },
-  })
+  await db.commentLike.create({ data: { commentId, userEmail } })
   const count = await db.commentLike.count({ where: { commentId } })
+
+  const comment = await db.comment.findUnique({
+    where: { id: commentId },
+    select: {
+      id: true,
+      body: true,
+      commenter: {
+        select: {
+          email: true,
+          name: true,
+          notificationsEnabled: true,
+          notificationToken: true,
+        },
+      },
+      page: {
+        select: {
+          slug: true,
+          url: true,
+          site: {
+            select: {
+              id: true,
+              domain: true,
+              emailNotificationsEnabled: true,
+              likeNotificationLimit: true,
+              emailSubjectPrefix: true,
+              emailLogoUrl: true,
+              emailAccentColor: true,
+              emailFooterText: true,
+              smtpHost: true,
+              smtpPort: true,
+              smtpUser: true,
+              smtpPass: true,
+              smtpFrom: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (
+    comment &&
+    comment.commenter.email !== userEmail &&
+    comment.page.site.likeNotificationLimit > 0 &&
+    count <= comment.page.site.likeNotificationLimit
+  ) {
+    await notifyLike(
+      { id: comment.id, body: comment.body },
+      comment.commenter,
+      { slug: comment.page.slug, url: comment.page.url ?? null },
+      comment.page.site,
+      count
+    )
+  }
+
   return { liked: true, count }
 }

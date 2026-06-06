@@ -20,6 +20,7 @@ export interface CommentState {
   deletingId: string | null
   isSubmitting: boolean
   currentUser: Commenter | null
+  likingIds: Set<string>
 }
 
 interface InlineFormConfig {
@@ -356,11 +357,15 @@ export function renderCommentItem(
     timeEl.textContent = formatRelativeTime(comment.createdAt)
     actions.appendChild(timeEl)
 
+    const isLiking = state.likingIds.has(comment.id)
     const likeBtn = document.createElement("button")
     likeBtn.className =
-      "z-action-btn" + (comment.hasLiked ? " z-action-btn-active" : "")
+      "z-action-btn" +
+      (comment.hasLiked || isLiking ? " z-action-btn-active" : "") +
+      (isLiking ? " z-action-btn-loading" : "")
     likeBtn.type = "button"
-    likeBtn.innerHTML = `${comment.hasLiked ? HEART_FILLED : HEART_OUTLINE}<span>${comment.likeCount}</span>`
+    likeBtn.setAttribute("aria-busy", isLiking ? "true" : "false")
+    likeBtn.innerHTML = `${comment.hasLiked || isLiking ? HEART_FILLED : HEART_OUTLINE}<span>${comment.likeCount}</span>`
     likeBtn.addEventListener("click", () => onLike(comment))
     actions.appendChild(likeBtn)
 
@@ -586,10 +591,15 @@ export function renderCommentList(
   return list
 }
 
+const BELL_ON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`
+const BELL_OFF = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M13.73 21a2 2 0 0 1-3.46 0"/><path d="M18.63 13A17.9 17.9 0 0 1 18 8"/><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"/><path d="M18 8a6 6 0 0 0-9.33-5"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+
 export function renderAuthBar(
   auth: AuthState,
   onSignIn: () => void,
-  onSignOut: () => void
+  onSignOut: () => void,
+  notificationsEnabled = true,
+  onToggleNotifications?: () => void
 ): HTMLElement {
   const bar = document.createElement("div")
   bar.className = "z-auth-bar"
@@ -600,6 +610,26 @@ export function renderAuthBar(
     name.className = "z-user-name"
     name.textContent = auth.user.name
     bar.appendChild(name)
+
+    if (onToggleNotifications) {
+      const bellBtn = document.createElement("button")
+      bellBtn.className =
+        "z-btn z-btn-ghost z-btn-sm z-notif-btn" +
+        (notificationsEnabled ? "" : " z-notif-btn-off")
+      bellBtn.type = "button"
+      bellBtn.innerHTML = notificationsEnabled ? BELL_ON : BELL_OFF
+      bellBtn.title = notificationsEnabled
+        ? "Mute email notifications"
+        : "Unmute email notifications"
+      bellBtn.setAttribute(
+        "aria-label",
+        notificationsEnabled
+          ? "Mute email notifications"
+          : "Unmute email notifications"
+      )
+      bellBtn.addEventListener("click", onToggleNotifications)
+      bar.appendChild(bellBtn)
+    }
 
     const signOutBtn = document.createElement("button")
     signOutBtn.className = "z-btn z-btn-ghost z-btn-sm"

@@ -11,6 +11,7 @@ import {
   likeComment,
   updateComment,
   deleteComment,
+  updateNotificationPreference,
 } from "./api"
 import { loadStoredAuth, signInWithGoogle, clearAuth } from "./auth"
 import {
@@ -121,6 +122,8 @@ class ZeonWidget {
   private deletingId: string | null = null
   private isSubmitting = false
   private isBanned = false
+  private notificationsEnabled = true
+  private likingIds = new Set<string>()
   private activeConfig: WidgetThemeConfig | null = null
   private lastEffectiveTheme: "LIGHT" | "DARK" | null = null
   private htmlObserver: MutationObserver | null = null
@@ -193,6 +196,8 @@ class ZeonWidget {
       this.applyTheme(themeConfig)
       saveCachedTheme(this.config.siteKey, themeConfig)
       this.isBanned = themeConfig.currentUser?.isBanned ?? false
+      this.notificationsEnabled =
+        themeConfig.currentUser?.notificationsEnabled ?? true
       this.comments = comments
       this.buildCommentMap()
       this.render()
@@ -254,6 +259,23 @@ class ZeonWidget {
     this.render()
   }
 
+  private async handleToggleNotifications() {
+    if (this.auth.status !== "authenticated") return
+    const next = !this.notificationsEnabled
+    this.notificationsEnabled = next
+    this.render()
+    try {
+      await updateNotificationPreference(
+        this.config.appUrl,
+        this.auth.token,
+        next
+      )
+    } catch {
+      this.notificationsEnabled = !next
+      this.render()
+    }
+  }
+
   private async handleSubmit(body: string, parentId?: string) {
     if (this.auth.status !== "authenticated") return
     this.isSubmitting = true
@@ -261,12 +283,14 @@ class ZeonWidget {
     try {
       let finalBody = body
       let finalParentId = parentId
+      let replyToId: string | undefined
       if (parentId) {
         const target = this.findComment(parentId)
         if (target && target.commenter) {
           const isNestedReply = this.findParentComment(parentId) !== null
           if (isNestedReply) {
             finalBody = `@${target.commenter.username} ${body}`
+            replyToId = parentId
             finalParentId = target.parentId ?? parentId
           }
         }
@@ -277,6 +301,7 @@ class ZeonWidget {
         siteKey: this.config.siteKey,
         slug: this.config.slug,
         parentId: finalParentId,
+        replyToId,
       })
 
       if (finalParentId) {
@@ -303,6 +328,8 @@ class ZeonWidget {
       this.handleSignIn()
       return
     }
+    this.likingIds.add(comment.id)
+    this.patchComment(comment.id)
     try {
       const result = await likeComment(
         this.config.appUrl,
@@ -311,9 +338,11 @@ class ZeonWidget {
       )
       comment.hasLiked = result.liked
       comment.likeCount = result.count
-      this.patchComment(comment.id)
     } catch (err: unknown) {
       this.handleApiError(err, "Failed to update like")
+    } finally {
+      this.likingIds.delete(comment.id)
+      this.patchComment(comment.id)
     }
   }
 
@@ -508,6 +537,7 @@ class ZeonWidget {
       deletingId: this.deletingId,
       isSubmitting: this.isSubmitting,
       currentUser: this.currentUser,
+      likingIds: this.likingIds,
     }
   }
 
@@ -544,7 +574,9 @@ class ZeonWidget {
       renderAuthBar(
         this.auth,
         () => this.handleSignIn(),
-        () => this.handleSignOut()
+        () => this.handleSignOut(),
+        this.notificationsEnabled,
+        () => this.handleToggleNotifications()
       )
     )
 

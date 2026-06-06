@@ -22,6 +22,7 @@ export async function postComment(
     siteKey: string
     slug: string
     parentId?: string
+    replyToId?: string
   }
 ): Promise<CommentData> {
   const res = await fetch(`${appUrl}/api/widget/comments`, {
@@ -97,6 +98,25 @@ export async function deleteComment(
     throw new Error(err.error ?? "Failed to delete comment")
   }
   return res.json()
+}
+
+export async function updateNotificationPreference(
+  appUrl: string,
+  token: string,
+  notificationsEnabled: boolean
+): Promise<void> {
+  const res = await fetch(`${appUrl}/api/widget/me`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ notificationsEnabled }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error ?? "Failed to update preference")
+  }
 }
 
 export async function exchangeGoogleToken(

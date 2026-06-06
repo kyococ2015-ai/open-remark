@@ -36,6 +36,7 @@ type Site = {
   primaryColor: string
   radius: number
   emailNotificationsEnabled: boolean
+  likeNotificationLimit: number
   emailSubjectPrefix: string | null
   emailLogoUrl: string | null
   emailAccentColor: string | null
@@ -106,6 +107,9 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
 
   const [emailEnabled, setEmailEnabled] = useState(
     initialSite.emailNotificationsEnabled
+  )
+  const [likeNotificationLimit, setLikeNotificationLimit] = useState(
+    String(initialSite.likeNotificationLimit)
   )
   const [emailSubjectPrefix, setEmailSubjectPrefix] = useState(
     initialSite.emailSubjectPrefix ?? ""
@@ -279,6 +283,10 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           emailNotificationsEnabled: emailEnabled,
+          likeNotificationLimit: Math.max(
+            0,
+            Math.min(100, parseInt(likeNotificationLimit, 10) || 0)
+          ),
           emailSubjectPrefix: emailSubjectPrefix || null,
           emailLogoUrl: emailLogoUrl || null,
           emailAccentColor: emailAccentColor || null,
@@ -657,6 +665,24 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
               checked={emailEnabled}
               onCheckedChange={setEmailEnabled}
               disabled={!smtpConfigured}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Like notification limit</p>
+              <p className="text-xs text-muted-foreground">
+                Notify commenters on likes up to this count. Set to 0 to
+                disable.
+              </p>
+            </div>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              className="w-20 text-right"
+              value={likeNotificationLimit}
+              onChange={(e) => setLikeNotificationLimit(e.target.value)}
             />
           </div>
 

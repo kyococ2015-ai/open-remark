@@ -177,6 +177,16 @@ export async function isCommenterBannedOnSite(
   return !!record
 }
 
+export async function getCommenterNotificationsEnabled(
+  commenterId: string
+): Promise<boolean> {
+  const commenter = await db.commenter.findUnique({
+    where: { id: commenterId },
+    select: { notificationsEnabled: true },
+  })
+  return commenter?.notificationsEnabled ?? true
+}
+
 export async function updateCommenterNotifications(
   commenterId: string,
   notificationsEnabled: boolean
@@ -196,6 +206,19 @@ export async function unsubscribeCommenter(token: string): Promise<boolean> {
   await db.commenter.update({
     where: { id: commenter.id },
     data: { notificationsEnabled: false },
+  })
+  return true
+}
+
+export async function resubscribeCommenter(token: string): Promise<boolean> {
+  const commenter = await db.commenter.findUnique({
+    where: { notificationToken: token },
+    select: { id: true },
+  })
+  if (!commenter) return false
+  await db.commenter.update({
+    where: { id: commenter.id },
+    data: { notificationsEnabled: true },
   })
   return true
 }

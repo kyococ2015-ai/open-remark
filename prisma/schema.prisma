@@ -85,6 +85,7 @@ model Site {
   autoApprove     Boolean  @default(false)
   allowAnonymous  Boolean  @default(false)
   emailNotificationsEnabled  Boolean  @default(false)
+  likeNotificationLimit      Int      @default(10)
   emailSubjectPrefix         String?
   emailLogoUrl               String?
   emailAccentColor           String?

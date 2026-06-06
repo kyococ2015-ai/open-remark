@@ -30,7 +30,8 @@ export async function GET(req: NextRequest) {
     )
   }
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ""
   return htmlResponse(
-    "<h1>You've been unsubscribed</h1><p>You will no longer receive reply notifications.</p>"
+    `<h1>You've been unsubscribed</h1><p>You will no longer receive email notifications.</p><p style="margin-top:16px"><a href="${appUrl}/api/subscribe?token=${token}" style="color:#6b7280;font-size:13px">Changed your mind? Re-subscribe</a></p>`
   )
 }
