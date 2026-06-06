@@ -472,6 +472,7 @@ export async function toggleCommentLike(commentId: string, userEmail: string) {
     select: {
       id: true,
       body: true,
+      likeNotifiedCount: true,
       commenter: {
         select: {
           email: true,
@@ -510,15 +511,22 @@ export async function toggleCommentLike(commentId: string, userEmail: string) {
     comment &&
     comment.commenter.email !== userEmail &&
     comment.page.site.likeNotificationLimit > 0 &&
+    count > comment.likeNotifiedCount &&
     count <= comment.page.site.likeNotificationLimit
   ) {
-    await notifyLike(
-      { id: comment.id, body: comment.body },
-      comment.commenter,
-      { slug: comment.page.slug, url: comment.page.url ?? null },
-      comment.page.site,
-      count
-    )
+    await Promise.all([
+      notifyLike(
+        { id: comment.id, body: comment.body },
+        comment.commenter,
+        { slug: comment.page.slug, url: comment.page.url ?? null },
+        comment.page.site,
+        count
+      ),
+      db.comment.update({
+        where: { id: commentId },
+        data: { likeNotifiedCount: count },
+      }),
+    ])
   }
 
   return { liked: true, count }

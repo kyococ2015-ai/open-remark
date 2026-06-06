@@ -141,12 +141,13 @@ model Commenter {
 }
 
 model Comment {
-  id        String        @id @default(cuid())
-  body      String
-  status    CommentStatus @default(PENDING)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  editedAt  DateTime?
+  id                 String        @id @default(cuid())
+  body               String
+  status             CommentStatus @default(PENDING)
+  likeNotifiedCount  Int           @default(0)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  editedAt           DateTime?
 
   pageId String
   page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
