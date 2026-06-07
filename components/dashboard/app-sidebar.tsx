@@ -146,18 +146,18 @@ export function AppSidebar({ user }: Props) {
         <SidebarMenu className="gap-1">
           <SidebarMenuItem>
             <SidebarMenuButton
-              tooltip={resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
+              tooltip={resolvedTheme === "dark" ? "Dark mode" : "Light mode"}
               onClick={() =>
                 setTheme(resolvedTheme === "dark" ? "light" : "dark")
               }
             >
               {resolvedTheme === "dark" ? (
-                <RiSunLine className="size-4 shrink-0" aria-hidden="true" />
-              ) : (
                 <RiMoonLine className="size-4 shrink-0" aria-hidden="true" />
+              ) : (
+                <RiSunLine className="size-4 shrink-0" aria-hidden="true" />
               )}
               <span className="group-data-[collapsible=icon]:hidden">
-                {resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
+                {resolvedTheme === "dark" ? "Dark mode" : "Light mode"}
               </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
