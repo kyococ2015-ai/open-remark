@@ -14,6 +14,9 @@ import {
   RiMessage2Fill,
   RiSunLine,
   RiMoonLine,
+  RiUserLine,
+  RiMegaphoneLine,
+  RiShieldUserLine,
 } from "@remixicon/react"
 import {
   Sidebar,
@@ -21,6 +24,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -41,19 +45,61 @@ type NavItem = {
   label: string
   href: string
   icon: React.ElementType
+  badge?: number
 }
 
-const navItems: NavItem[] = [
-  { label: "Overview", href: "/dashboard", icon: RiDashboardLine },
-  { label: "Sites", href: "/dashboard/sites", icon: RiGlobalLine },
-  { label: "Account", href: "/dashboard/account", icon: RiSettingsLine },
-]
+type NavGroup = {
+  label: string
+  items: NavItem[]
+}
 
 type Props = {
   user: { name?: string | null; email?: string | null; image?: string | null }
+  siteCount: number
 }
 
-export function AppSidebar({ user }: Props) {
+export function AppSidebar({ user, siteCount }: Props) {
+  const navGroups: NavGroup[] = [
+    {
+      label: "Application",
+      items: [
+        { label: "Overview", href: "/dashboard", icon: RiDashboardLine },
+        {
+          label: "Sites",
+          href: "/dashboard/sites",
+          icon: RiGlobalLine,
+          badge: siteCount,
+        },
+      ],
+    },
+    {
+      label: "My Account",
+      items: [
+        { label: "Profile", href: "/dashboard/account", icon: RiUserLine },
+        {
+          label: "Settings",
+          href: "/dashboard/settings",
+          icon: RiSettingsLine,
+        },
+      ],
+    },
+    {
+      label: "System",
+      items: [
+        {
+          label: "Notice Board",
+          href: "/dashboard/notice-board",
+          icon: RiMegaphoneLine,
+        },
+        {
+          label: "Administration",
+          href: "/dashboard/administration",
+          icon: RiShieldUserLine,
+        },
+      ],
+    },
+  ]
+
   const pathname = usePathname()
   const { resolvedTheme, setTheme } = useTheme()
   const initials = (user.name ?? user.email ?? "U")
@@ -113,32 +159,40 @@ export function AppSidebar({ user }: Props) {
         </SidebarGroup>
 
         {/* Nav */}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-1">
-              {navItems.map((item) => {
-                const active =
-                  item.href === "/dashboard"
-                    ? pathname === "/dashboard"
-                    : pathname.startsWith(item.href)
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={active}
-                      tooltip={item.label}
-                    >
-                      <Link href={item.href}>
-                        <item.icon aria-hidden="true" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {navGroups.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-1">
+                {group.items.map((item) => {
+                  const active =
+                    item.href === "/dashboard"
+                      ? pathname === "/dashboard"
+                      : pathname.startsWith(item.href)
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={active}
+                        tooltip={item.label}
+                      >
+                        <Link href={item.href}>
+                          <item.icon aria-hidden="true" />
+                          <span className="truncate">{item.label}</span>
+                          {item.badge !== undefined && (
+                            <span className="mr-1 ml-auto text-xs font-bold group-data-[collapsible=icon]:hidden">
+                              {item.badge}
+                            </span>
+                          )}
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       {/* ── Footer / user ───────────────────────────────── */}
@@ -202,16 +256,10 @@ export function AppSidebar({ user }: Props) {
                   </p>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/account">
-                    <RiSettingsLine className="size-4" aria-hidden="true" />
-                    Account settings
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem
+                  variant="destructive"
                   onSelect={() => signOut({ callbackUrl: "/sign-in" })}
-                  className="cursor-pointer text-destructive focus:text-destructive"
+                  className="cursor-pointer"
                 >
                   <RiLogoutBoxLine className="size-4" aria-hidden="true" />
                   Sign out

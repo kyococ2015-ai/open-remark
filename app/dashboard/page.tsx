@@ -208,10 +208,10 @@ export default async function OverviewPage() {
                           }
                           className={
                             comment.status === "SPAM"
-                              ? "h-4 rounded-none border-amber-200 bg-amber-50 px-1 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-400"
+                              ? "h-4 border-amber-200 bg-amber-50 px-1 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-400"
                               : comment.status === "DELETED"
-                                ? "h-4 rounded-none border-border bg-muted px-1 text-xs text-muted-foreground"
-                                : "h-4 rounded-none px-1 text-xs"
+                                ? "h-4 border-border bg-muted px-1 text-xs text-muted-foreground"
+                                : "h-4 px-1 text-xs"
                           }
                         >
                           {comment.status.toLowerCase()}

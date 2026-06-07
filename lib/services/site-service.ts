@@ -4,6 +4,10 @@ import { CommentStatus } from "@/generated/prisma/client"
 import type { CreateSiteInput, UpdateSiteInput } from "@/lib/validators/site"
 import { lookupUserByEmail } from "@/lib/services/user-service"
 
+export async function getSiteCountByOwner(ownerId: string) {
+  return db.site.count({ where: { ownerId } })
+}
+
 export async function getSitesByOwner(ownerId: string) {
   const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
 

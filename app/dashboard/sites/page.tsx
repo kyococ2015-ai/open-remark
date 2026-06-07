@@ -66,11 +66,11 @@ export default async function SitesPage() {
           </div>
         ) : (
           <TooltipProvider>
-            <div className="flex flex-wrap gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[repeat(auto-fill,minmax(415px,1fr))]">
               {sites.map((site) => (
                 <Card
                   key={site.id}
-                  className="flex max-w-[455px] flex-col gap-0 py-0 shadow-none transition-shadow hover:shadow-md"
+                  className="flex w-full flex-col gap-0 py-0 shadow-none transition-shadow hover:shadow-md"
                 >
                   {/* Header */}
                   <CardHeader className="flex flex-row items-start gap-3 p-5 pb-4">
