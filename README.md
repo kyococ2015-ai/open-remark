@@ -4,12 +4,11 @@
 <img width="1843" height="939" alt="image" src="https://github.com/user-attachments/assets/56240a20-501b-44a3-9772-ba5b02874d90" />
 <img width="1662" height="819" alt="image" src="https://github.com/user-attachments/assets/70af105c-7375-4bca-a0cd-58f4b7b49b22" />
 
-
 ![Beta](https://img.shields.io/badge/status-beta-orange) ![Version](https://img.shields.io/badge/version-0.3.0-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
 A self-hostable comment system for static websites — Astro, Hugo, Next.js, and any site that accepts HTML.
 
-[**Live Demo**](https://open-remark.vercel.app/demo.html)
+[**Live Demo**](https://open-remark.zeon.studio/demo.html)
 
 **Features:** Google sign-in · threaded replies · spam/moderation dashboard · shadow DOM widget · origin allowlisting
 
@@ -84,6 +83,7 @@ See [docs/architecture.md](docs/architecture.md) for system design, request flow
 | `NEXT_PUBLIC_APP_URL`  | Public app URL (used in embed snippets)                                          |
 
 ## License
-[MIT License](https://github.com/zeon-studio/open-remark/blob/main/LICENSE) 
+
+[MIT License](https://github.com/zeon-studio/open-remark/blob/main/LICENSE)
 
 This project is maintained by [Zeon Studio](https://zeon.studio/?ref=openremark)

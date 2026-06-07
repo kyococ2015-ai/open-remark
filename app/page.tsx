@@ -55,7 +55,7 @@ const embedSnippet = `<div
   data-site-key="YOUR_SITE_KEY"
   data-slug="/posts/hello-world"
 ></div>
-<script async src="https://open-remark.vercel.app/embed.js"></script>`
+<script async src="https://${process.env.NEXT_PUBLIC_APP_URL}/embed.js"></script>`
 
 export default function HomePage() {
   return (
