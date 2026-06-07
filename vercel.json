@@ -1,9 +1,29 @@
 {
-  "rewrites": [
+  "rewrites": {
+    "beforeFiles": [
+      {
+        "source": "/embed.js",
+        "has": [{ "type": "host", "value": "open-remark.vercel.app" }],
+        "destination": "https://open-remark.zeon.studio/embed.js"
+      },
+      {
+        "source": "/embed.debug.js",
+        "has": [{ "type": "host", "value": "open-remark.vercel.app" }],
+        "destination": "https://open-remark.zeon.studio/embed.debug.js"
+      },
+      {
+        "source": "/api/widget/:path*",
+        "has": [{ "type": "host", "value": "open-remark.vercel.app" }],
+        "destination": "https://open-remark.zeon.studio/api/widget/:path*"
+      }
+    ]
+  },
+  "redirects": [
     {
       "source": "/(.*)",
       "has": [{ "type": "host", "value": "open-remark.vercel.app" }],
-      "destination": "https://open-remark.zeon.studio/$1"
+      "destination": "https://open-remark.zeon.studio/$1",
+      "permanent": true
     }
   ]
 }
