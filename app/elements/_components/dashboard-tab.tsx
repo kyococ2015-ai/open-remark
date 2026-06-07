@@ -39,6 +39,12 @@ const navItems = [
   { label: "Account", href: "#", icon: RiSettingsLine, active: false },
 ]
 
+const overviewStats = [
+  { label: "Comments", value: "1,284" },
+  { label: "Sites", value: "6" },
+  { label: "Users", value: "348" },
+]
+
 function MockSidebar() {
   const initials = mockUser.name
     .split(" ")
@@ -171,16 +177,16 @@ export function DashboardTab() {
                 Sidebar preview — use the trigger to collapse/expand.
               </p>
               <div className="grid grid-cols-3 gap-4">
-                {["Comments", "Sites", "Users"].map((label) => (
+                {overviewStats.map((stat) => (
                   <div
-                    key={label}
+                    key={stat.label}
                     className="rounded-lg border border-border bg-card p-4"
                   >
                     <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
-                      {label}
+                      {stat.label}
                     </p>
                     <p className="mt-1 text-2xl font-bold text-foreground tabular-nums">
-                      —
+                      {stat.value}
                     </p>
                   </div>
                 ))}
