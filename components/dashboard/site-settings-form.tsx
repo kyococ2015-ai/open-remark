@@ -668,90 +668,6 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Enable notifications</p>
-              <p className="text-xs text-muted-foreground">
-                {smtpConfigured
-                  ? "Send email alerts for this site"
-                  : "Configure SMTP relay below before enabling"}
-              </p>
-            </div>
-            <Switch
-              checked={emailEnabled}
-              onCheckedChange={setEmailEnabled}
-              disabled={!smtpConfigured}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Like notification limit</p>
-              <p className="text-xs text-muted-foreground">
-                Notify commenters on likes up to this count. Set to 0 to
-                disable.
-              </p>
-            </div>
-            <Input
-              type="number"
-              min={0}
-              max={100}
-              className="w-20 text-right"
-              value={likeNotificationLimit}
-              onChange={(e) => setLikeNotificationLimit(e.target.value)}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="email-subject-prefix">Subject prefix</Label>
-              <Input
-                id="email-subject-prefix"
-                placeholder="[New Comment]"
-                value={emailSubjectPrefix}
-                onChange={(e) => setEmailSubjectPrefix(e.target.value)}
-                maxLength={50}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="email-logo-url">Logo URL</Label>
-              <Input
-                id="email-logo-url"
-                placeholder="https://yourdomain.com/logo.png"
-                value={emailLogoUrl}
-                onChange={(e) => setEmailLogoUrl(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="email-accent-color">Accent color</Label>
-              <Input
-                id="email-accent-color"
-                placeholder="#6366f1"
-                value={emailAccentColor}
-                onChange={(e) => setEmailAccentColor(e.target.value)}
-                maxLength={7}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="email-footer-text">Footer text</Label>
-              <Textarea
-                id="email-footer-text"
-                placeholder="You're receiving this because you commented on this site."
-                value={emailFooterText}
-                onChange={(e) => setEmailFooterText(e.target.value)}
-                rows={2}
-                maxLength={300}
-              />
-            </div>
-          </div>
-
-          <Separator />
-
           <div className="space-y-4">
             <p className="text-sm font-medium">SMTP Relay</p>
             <p className="-mt-2 text-xs text-muted-foreground">
@@ -779,6 +695,31 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
                   onChange={(e) => setSmtpPort(e.target.value)}
                 />
               </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <p className="text-sm font-medium">Sender identity</p>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="smtp-from">
+                From address{" "}
+                <span className="font-normal text-muted-foreground">
+                  (optional)
+                </span>
+              </Label>
+              <Input
+                id="smtp-from"
+                type="email"
+                placeholder="noreply@yourdomain.com"
+                value={smtpFrom}
+                onChange={(e) => setSmtpFrom(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                The sender address shown to recipients. Leave blank to use the
+                username below. Required for providers like Resend where the
+                username isn&apos;t an email (e.g. &quot;resend&quot;).
+              </p>
             </div>
 
             <div className="space-y-1.5">
@@ -818,28 +759,108 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
                 </button>
               </div>
             </div>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-4">
+            <p className="text-sm font-medium">Email appearance</p>
 
             <div className="space-y-1.5">
-              <Label htmlFor="smtp-from">
-                From address{" "}
-                <span className="font-normal text-muted-foreground">
-                  (optional)
-                </span>
-              </Label>
+              <Label htmlFor="email-logo-url">Logo URL</Label>
               <Input
-                id="smtp-from"
-                type="email"
-                placeholder="noreply@yourdomain.com"
-                value={smtpFrom}
-                onChange={(e) => setSmtpFrom(e.target.value)}
+                id="email-logo-url"
+                type="url"
+                placeholder="https://yourdomain.com/logo.png"
+                value={emailLogoUrl}
+                onChange={(e) => setEmailLogoUrl(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">
-                The sender address shown to recipients. Leave blank to use the
-                username above. Required for providers like Resend where the
-                username isn&apos;t an email (e.g. &quot;resend&quot;).
-              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="email-accent-color">Accent color</Label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={emailAccentColor || "#6366f1"}
+                  onChange={(e) => setEmailAccentColor(e.target.value)}
+                  className="h-9 w-12 cursor-pointer rounded-md border border-input bg-background p-0.5"
+                  aria-label="Accent color"
+                />
+                <Input
+                  id="email-accent-color"
+                  placeholder="#6366f1"
+                  value={emailAccentColor}
+                  onChange={(e) => setEmailAccentColor(e.target.value)}
+                  className="max-w-36 font-mono uppercase"
+                  maxLength={7}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="email-subject-prefix">Subject prefix</Label>
+              <Input
+                id="email-subject-prefix"
+                placeholder="[New Comment]"
+                value={emailSubjectPrefix}
+                onChange={(e) => setEmailSubjectPrefix(e.target.value)}
+                maxLength={50}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="email-footer-text">Footer text</Label>
+              <Textarea
+                id="email-footer-text"
+                placeholder="You're receiving this because you commented on this site."
+                value={emailFooterText}
+                onChange={(e) => setEmailFooterText(e.target.value)}
+                rows={2}
+                maxLength={300}
+              />
             </div>
           </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Like notification limit</p>
+              <p className="text-xs text-muted-foreground">
+                Notify commenters on likes up to this count. Set to 0 to
+                disable.
+              </p>
+            </div>
+            <Input
+              type="number"
+              min={0}
+              max={100}
+              className="w-20 text-right"
+              value={likeNotificationLimit}
+              onChange={(e) => setLikeNotificationLimit(e.target.value)}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Enable notifications</p>
+              <p className="text-xs text-muted-foreground">
+                {smtpConfigured
+                  ? "Send email alerts for this site"
+                  : "Configure SMTP relay before enabling"}
+              </p>
+            </div>
+            <Switch
+              checked={emailEnabled}
+              onCheckedChange={setEmailEnabled}
+              disabled={!smtpConfigured}
+            />
+          </div>
+
+          <Separator />
 
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <Button onClick={handleSaveEmail} disabled={savingEmail} size="sm">
