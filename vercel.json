@@ -13,7 +13,7 @@
   ],
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/:path((?!/embed.js).*)",
       "has": [
         {
           "type": "host",
