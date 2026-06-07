@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 const mockUser = {
   name: "Alex Johnson",
@@ -152,38 +153,42 @@ export function DashboardTab() {
       className="overflow-hidden rounded-lg border border-border"
       style={{ height: 480 }}
     >
-      <SidebarProvider>
-        <MockSidebar />
-        <SidebarInset>
-          <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <span className="text-sm font-medium text-muted-foreground">
-              Overview
-            </span>
-          </header>
-          <div className="flex flex-1 flex-col gap-4 p-6">
-            <p className="text-xs text-muted-foreground">
-              Sidebar preview — use the trigger to collapse/expand.
-            </p>
-            <div className="grid grid-cols-3 gap-4">
-              {["Comments", "Sites", "Users"].map((label) => (
-                <div
-                  key={label}
-                  className="rounded-lg border border-border bg-card p-4"
-                >
-                  <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
-                    {label}
-                  </p>
-                  <p className="mt-1 text-2xl font-bold text-foreground tabular-nums">
-                    —
-                  </p>
-                </div>
-              ))}
+      {/* SidebarMenuButton renders an internal Tooltip when given a `tooltip` prop;
+          the elements layout has no global TooltipProvider (see components-tab.tsx). */}
+      <TooltipProvider>
+        <SidebarProvider>
+          <MockSidebar />
+          <SidebarInset>
+            <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-4">
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mr-2 h-4" />
+              <span className="text-sm font-medium text-muted-foreground">
+                Overview
+              </span>
+            </header>
+            <div className="flex flex-1 flex-col gap-4 p-6">
+              <p className="text-xs text-muted-foreground">
+                Sidebar preview — use the trigger to collapse/expand.
+              </p>
+              <div className="grid grid-cols-3 gap-4">
+                {["Comments", "Sites", "Users"].map((label) => (
+                  <div
+                    key={label}
+                    className="rounded-lg border border-border bg-card p-4"
+                  >
+                    <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                      {label}
+                    </p>
+                    <p className="mt-1 text-2xl font-bold text-foreground tabular-nums">
+                      —
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
+          </SidebarInset>
+        </SidebarProvider>
+      </TooltipProvider>
     </div>
   )
 }
