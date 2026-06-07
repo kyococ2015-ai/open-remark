@@ -4,6 +4,7 @@ import { TokensTab } from "./_components/tokens-tab"
 import { ComponentsTab } from "./_components/components-tab"
 import { ControlsTab } from "./_components/controls-tab"
 import { ChartsTab } from "./_components/charts-tab"
+import { DashboardTab } from "./_components/dashboard-tab"
 
 export default function ElementsPage() {
   return (
@@ -18,6 +19,7 @@ export default function ElementsPage() {
           <TabsTrigger value="components">Components</TabsTrigger>
           <TabsTrigger value="controls">Controls</TabsTrigger>
           <TabsTrigger value="charts">Charts</TabsTrigger>
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
         </TabsList>
 
         <TabsContent value="tokens">
@@ -31,6 +33,9 @@ export default function ElementsPage() {
         </TabsContent>
         <TabsContent value="charts">
           <ChartsTab />
+        </TabsContent>
+        <TabsContent value="dashboard">
+          <DashboardTab />
         </TabsContent>
       </Tabs>
 
