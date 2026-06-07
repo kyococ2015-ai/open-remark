@@ -1,5 +1,6 @@
 # OpenRemark - An open-source comment system for static websites
 
+<img width="1200" height="630" alt="image" src="https://github.com/user-attachments/assets/8c8728da-cf93-499c-81d1-a6db68f9f87c" />
 <img width="1664" height="820" alt="image" src="https://github.com/user-attachments/assets/b81e3860-30e7-46b8-9756-0bc58a23d59c" />
 <img width="1843" height="939" alt="image" src="https://github.com/user-attachments/assets/56240a20-501b-44a3-9772-ba5b02874d90" />
 <img width="1662" height="819" alt="image" src="https://github.com/user-attachments/assets/70af105c-7375-4bca-a0cd-58f4b7b49b22" />
