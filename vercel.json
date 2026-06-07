@@ -1,9 +1,10 @@
 {
-  "rewrites": [
+  "redirects": [
     {
       "source": "/(.*)",
       "has": [{ "type": "host", "value": "open-remark.vercel.app" }],
-      "destination": "https://open-remark.zeon.studio/$1"
+      "destination": "https://open-remark.zeon.studio/$1",
+      "permanent": true
     }
   ]
 }
