@@ -1,4 +1,6 @@
+import type { Metadata } from "next"
 import Link from "next/link"
+import config from "@/config/config.json"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -10,6 +12,24 @@ import {
   ArrowRight,
 } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { Logo } from "@/components/logo"
+
+export const metadata: Metadata = {
+  title: config.site.title,
+  description: config.metadata.meta_description,
+  authors: [{ name: config.metadata.meta_author }],
+  openGraph: {
+    title: config.site.title,
+    description: config.metadata.meta_description,
+    images: [config.metadata.meta_image],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: config.site.title,
+    description: config.metadata.meta_description,
+    images: [config.metadata.meta_image],
+  },
+}
 
 const features = [
   {
@@ -66,11 +86,8 @@ export default function HomePage() {
           className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4"
           aria-label="Main navigation"
         >
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <div className="flex size-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-              R
-            </div>
-            OpenRemark
+          <Link href="/" className="flex items-center font-semibold">
+            <Logo />
           </Link>
           <div className="flex items-center gap-3">
             <Button asChild variant="ghost">
@@ -305,15 +322,8 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="mt-auto border-t">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-muted-foreground sm:flex-row">
-          <div className="flex items-center gap-2">
-            <div
-              className="flex size-6 items-center justify-center rounded bg-primary text-xs font-bold text-primary-foreground"
-              aria-hidden="true"
-            >
-              R
-            </div>
-            <span>OpenRemark</span>
-          </div>
+          <Logo />
+
           <p>
             An open source project by{" "}
             <Link

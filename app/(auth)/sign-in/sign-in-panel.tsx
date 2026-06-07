@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react"
 import Link from "next/link"
+import { Logo } from "@/components/logo"
 
 interface MouseState {
   x: number
@@ -103,13 +104,8 @@ export function SignInPanel() {
       />
 
       {/* Logo */}
-      <Link href="/" className="relative flex items-center gap-2.5">
-        <span className="flex size-7 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-          R
-        </span>
-        <span className="text-sm font-semibold tracking-tight">
-          Open Remark
-        </span>
+      <Link href="/" className="relative flex items-center">
+        <Logo variant="dark" />
       </Link>
 
       {/* Hero copy */}

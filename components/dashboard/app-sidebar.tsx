@@ -11,7 +11,6 @@ import {
   RiLogoutBoxLine,
   RiExpandUpDownLine,
   RiAddLine,
-  RiMessage2Fill,
   RiSunLine,
   RiMoonLine,
   RiUserLine,
@@ -40,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Logo } from "@/components/logo"
 
 type NavItem = {
   label: string
@@ -112,22 +112,15 @@ export function AppSidebar({ user, siteCount }: Props) {
   return (
     <Sidebar collapsible="icon">
       {/* ── Header ──────────────────────────────────────── */}
-      <SidebarHeader>
+      <SidebarHeader className="mb-0">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard/sites">
-                <div className="flex size-8 shrink-0 items-center justify-center bg-sidebar-primary text-sidebar-primary-foreground">
-                  <RiMessage2Fill className="size-4" aria-hidden="true" />
-                </div>
-                <div className="flex flex-col leading-tight">
-                  <span className="text-sm font-bold tracking-tight">
-                    OpenRemark
-                  </span>
-                  <span className="text-xs font-normal text-sidebar-foreground/70">
-                    Comment platform
-                  </span>
-                </div>
+            <SidebarMenuButton
+              size="lg"
+              className="flex items-center p-0 hover:bg-transparent"
+            >
+              <Link href="/dashboard/sites" className="max-h-[42px] pl-0">
+                <Logo />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

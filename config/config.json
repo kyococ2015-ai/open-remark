@@ -1,8 +1,24 @@
 {
+  "site": {
+    "title": "OpenRemark",
+    "favicon": "/images/favicon.png",
+    "logo": "/images/logo.png",
+    "logo_darkmode": "/images/logo-darkmode.png",
+    "logo_width": "208",
+    "logo_height": "50",
+    "logo_text": "OpenRemark"
+  },
+  "metadata": {
+    "meta_author": "Zeon.Studio",
+    "meta_image": "/images/og-image.png",
+    "meta_description": "OpenRemark - An open-source comment system for static websites, built with Next.js and Prisma."
+  },
+
   "google_tag_manager": {
     "enable": true,
     "gtm_id": "GTM-PTDPPT6L"
   },
+
   "branding": {
     "enable": true,
     "_note": "powered_by_html must include class=\"z-footer-link\" to receive widget styles",
