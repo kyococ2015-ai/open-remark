@@ -10,29 +10,5 @@
       ],
       "destination": "https://open-remark.zeon.studio/embed.js"
     }
-  ],
-  "redirects": [
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "open-remark.vercel.app"
-        }
-      ],
-      "destination": "https://open-remark.zeon.studio/",
-      "permanent": true
-    },
-    {
-      "source": "/:path((?!/embed.js).*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "open-remark.vercel.app"
-        }
-      ],
-      "destination": "https://open-remark.zeon.studio/:path*",
-      "permanent": true
-    }
   ]
 }
