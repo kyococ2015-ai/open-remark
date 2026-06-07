@@ -130,7 +130,7 @@ export function TokensTab() {
           {shadowTokens.map((s) => (
             <div
               key={s}
-              className={`rounded-lg bg-card px-4 py-3 text-sm font-medium text-foreground shadow-${s}`}
+              className={`rounded-lg bg-card px-4 py-3 text-sm font-medium text-foreground ${s}`}
             >
               {s}
             </div>
