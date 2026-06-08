@@ -2,6 +2,7 @@ import { auth, signIn } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { Logo } from "@/components/logo"
 import { SignInPanel } from "./sign-in-panel"
 
 export default async function SignInPage() {
@@ -15,13 +16,8 @@ export default async function SignInPage() {
       {/* Right — sign-in form */}
       <div className="flex flex-col items-center justify-center px-6 py-16">
         {/* Mobile logo */}
-        <Link href="/" className="mb-10 flex items-center gap-2.5 lg:hidden">
-          <span className="flex size-7 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-            R
-          </span>
-          <span className="text-sm font-semibold tracking-tight">
-            OpenRemark
-          </span>
+        <Link href="/" className="mb-10 flex items-center lg:hidden">
+          <Logo />
         </Link>
 
         <div className="w-full max-w-90 space-y-8">
