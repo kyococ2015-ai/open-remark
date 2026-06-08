@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth"
+import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { UpdateSiteSchema } from "@/lib/validators/site"
 import {
@@ -56,6 +57,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     const session = await auth()
     if (!session?.user?.id) throw new ApiError("Unauthorized", 401)
     await deleteSite(siteId, session.user.id)
+    revalidatePath("/dashboard", "layout")
     return noContent()
   } catch (err) {
     return handleApiError(err)

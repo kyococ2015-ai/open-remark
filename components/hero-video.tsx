@@ -33,8 +33,8 @@ export function HeroVideo() {
             alt="OpenRemark product preview"
             fill
             priority
-            sizes="(min-width: 1024px) 1024px, 100vw"
-            className="object-cover opacity-100 transition-opacity duration-300 ease-out group-hover:opacity-70"
+            sizes="(min-width: 1224px) 1224px, 100vw"
+            className="mx-auto max-w-248.75 object-cover opacity-100 transition-opacity duration-300 ease-out group-hover:opacity-80"
           />
           <span className="absolute inset-0 bg-black/25 transition-colors duration-300 group-hover:bg-black/35" />
           <span className="absolute inset-0 flex items-center justify-center">

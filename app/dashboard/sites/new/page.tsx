@@ -48,6 +48,7 @@ export default function NewSitePage() {
       const site = await res.json()
       toast.success("Site created!")
       router.push(`/dashboard/sites/${site.id}/install`)
+      router.refresh()
     } else {
       const err = await res.json()
       toast.error(err.error ?? "Failed to create site")

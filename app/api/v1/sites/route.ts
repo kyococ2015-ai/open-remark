@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth"
+import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { CreateSiteSchema } from "@/lib/validators/site"
 import { createSite, getSitesByOwner } from "@/lib/services/site-service"
@@ -36,6 +37,7 @@ export async function POST(req: NextRequest) {
     }
 
     const site = await createSite(session.user.id, parsed.data)
+    revalidatePath("/dashboard", "layout")
     return created(site)
   } catch (err) {
     return handleApiError(err)

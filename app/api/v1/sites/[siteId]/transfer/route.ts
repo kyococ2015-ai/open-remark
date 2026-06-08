@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth"
+import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { TransferSiteSchema } from "@/lib/validators/site"
 import { transferSite } from "@/lib/services/site-service"
@@ -28,6 +29,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     const site = await transferSite(siteId, session.user.id, parsed.data.email)
+    revalidatePath("/dashboard", "layout")
     return ok(site)
   } catch (err) {
     return handleApiError(err)
