@@ -56,7 +56,7 @@ function buildCommentSelect(userEmail?: string, commenterId?: string) {
         _count: { select: { likes: true } },
         likes: likeWhere ? { ...likeWhere, select: { id: true } } : undefined,
       },
-      orderBy: { createdAt: "desc" as const },
+      orderBy: { createdAt: "asc" as const },
     },
   }
 }
