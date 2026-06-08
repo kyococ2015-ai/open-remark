@@ -44,11 +44,16 @@ import type {
 type Props = {
   commenters: CommenterWithStats[]
   siteId: string
+  emailNotificationsEnabled: boolean
 }
 
 type ConfirmAction = "deleteAll" | "ban" | null
 
-export function UsersTable({ commenters, siteId }: Props) {
+export function UsersTable({
+  commenters,
+  siteId,
+  emailNotificationsEnabled,
+}: Props) {
   const [profileUser, setProfileUser] = useState<CommenterProfile | null>(null)
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null)
   const [confirmTarget, setConfirmTarget] = useState<CommenterWithStats | null>(
@@ -226,17 +231,26 @@ export function UsersTable({ commenters, siteId }: Props) {
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <Switch
-                    checked={commenter.notificationsEnabled}
+                    checked={
+                      emailNotificationsEnabled &&
+                      commenter.notificationsEnabled
+                    }
                     onCheckedChange={(checked) =>
                       handleToggleNotifications(commenter.id, checked)
                     }
-                    disabled={isBusy(commenter.id)}
+                    disabled={
+                      !emailNotificationsEnabled || isBusy(commenter.id)
+                    }
                     aria-label={
                       commenter.notificationsEnabled
                         ? "Disable reply notifications"
                         : "Enable reply notifications"
                     }
-                    title="Disables reply notifications for this commenter on throughout the site."
+                    title={
+                      emailNotificationsEnabled
+                        ? "Disables reply notifications for this commenter on throughout the site."
+                        : "Email notifications are disabled for this site. Enable them in site settings first."
+                    }
                   />
                 </TableCell>
                 <TableCell>

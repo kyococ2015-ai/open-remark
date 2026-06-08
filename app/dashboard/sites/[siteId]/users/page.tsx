@@ -21,8 +21,9 @@ export default async function UsersPage({ params, searchParams }: Props) {
 
   const session = await auth()
 
+  let site
   try {
-    await getSiteByIdForOwner(siteId, session!.user!.id as string)
+    site = await getSiteByIdForOwner(siteId, session!.user!.id as string)
   } catch {
     notFound()
   }
@@ -87,7 +88,11 @@ export default async function UsersPage({ params, searchParams }: Props) {
       </div>
 
       <div className="flex-1 overflow-auto p-6">
-        <UsersTable commenters={commenters} siteId={siteId} />
+        <UsersTable
+          commenters={commenters}
+          siteId={siteId}
+          emailNotificationsEnabled={site.emailNotificationsEnabled}
+        />
 
         {/* Pagination */}
         {totalPages > 1 && (
