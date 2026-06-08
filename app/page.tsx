@@ -13,6 +13,8 @@ import {
 } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Logo } from "@/components/logo"
+import { HeroVideo } from "@/components/hero-video"
+import { ProductHuntBadge } from "@/components/product-hunt-badge"
 
 export const metadata: Metadata = {
   description: config.metadata.meta_description,
@@ -104,6 +106,7 @@ export default function HomePage() {
                 </svg>
               </Link>
             </Button>
+            <ProductHuntBadge className="hidden sm:block" />
             <Button asChild>
               <Link href="/sign-in">
                 Get started
@@ -152,42 +155,15 @@ export default function HomePage() {
             </Button>
           </div>
 
-          {/* Video — browser chrome */}
+          {/* Video */}
           <div className="relative">
             {/* Ambient glow behind card */}
             <div
               className="pointer-events-none absolute inset-x-0 -bottom-6 mx-auto h-24 w-2/3 rounded-full bg-primary/20 blur-3xl"
               aria-hidden="true"
             />
-            <div className="relative overflow-hidden rounded-xl border bg-card shadow-2xl ring-1 ring-primary/10">
-              {/* Chrome bar */}
-              <div className="flex items-center gap-1.5 border-b bg-muted/60 px-4 py-3">
-                <div
-                  className="size-2.5 rounded-full bg-red-400"
-                  aria-hidden="true"
-                />
-                <div
-                  className="size-2.5 rounded-full bg-yellow-400"
-                  aria-hidden="true"
-                />
-                <div
-                  className="size-2.5 rounded-full bg-green-400"
-                  aria-hidden="true"
-                />
-                <div className="mx-auto rounded-sm bg-background/80 px-8 py-0.5 font-mono text-xs text-muted-foreground">
-                  open-remark · demo
-                </div>
-              </div>
-              {/* 16:9 iframe */}
-              <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
-                <iframe
-                  className="absolute inset-0 h-full w-full"
-                  src="https://www.youtube-nocookie.com/embed/uOYTTEZhHfI?rel=0&modestbranding=1"
-                  title="OpenRemark Demo"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
+            <div className="relative overflow-hidden rounded-xl shadow-2xl ring-1 ring-primary/10">
+              <HeroVideo />
             </div>
           </div>
         </section>

@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Logo } from "@/components/logo"
+import { ProductHuntBadge } from "@/components/product-hunt-badge"
 
 type NavItem = {
   label: string
@@ -191,6 +192,9 @@ export function AppSidebar({ user, siteCount }: Props) {
       {/* ── Footer / user ───────────────────────────────── */}
       <SidebarFooter>
         <SidebarMenu className="gap-1">
+          <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
+            <ProductHuntBadge className="flex justify-start px-2 py-1 [&_img]:h-auto [&_img]:w-full [&_img]:max-w-[180px]" />
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip={resolvedTheme === "dark" ? "Dark mode" : "Light mode"}
