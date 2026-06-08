@@ -5,7 +5,7 @@
 <img width="1843" height="939" alt="image" src="https://github.com/user-attachments/assets/56240a20-501b-44a3-9772-ba5b02874d90" />
 <img width="1662" height="819" alt="image" src="https://github.com/user-attachments/assets/70af105c-7375-4bca-a0cd-58f4b7b49b22" />
 
-![Beta](https://img.shields.io/badge/status-beta-orange) ![Version](https://img.shields.io/badge/version-0.3.1-blue) ![License](https://img.shields.io/badge/license-MIT-green)
+![Beta](https://img.shields.io/badge/status-beta-orange) ![Version](https://img.shields.io/badge/version-0.3.3-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
 <a href="https://www.producthunt.com/products/openremark?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-openremark" target="_blank" rel="noopener noreferrer"><img alt="OpenRemark - An open-source comment system for static websites | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1165618&theme=light&t=1780902380009"></a>
 
