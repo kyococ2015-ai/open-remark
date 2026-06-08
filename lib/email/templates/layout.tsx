@@ -59,7 +59,6 @@ export function EmailLayout({
           <Section
             style={{
               backgroundColor: "#ffffff",
-              borderRadius: "8px",
               padding: "24px",
               margin: "16px 0",
               borderTop: `3px solid ${accentColor}`,

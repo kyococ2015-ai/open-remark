@@ -63,7 +63,6 @@ export function NewCommentEmail({
           backgroundColor: accentColor,
           color: "#ffffff",
           padding: "10px 20px",
-          borderRadius: "6px",
           fontSize: "14px",
           fontWeight: "600",
           textDecoration: "none",
