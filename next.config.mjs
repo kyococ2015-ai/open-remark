@@ -1,28 +1,22 @@
-import path from "path";
-import { fileURLToPath } from "url";
+import path from "path"
+import { fileURLToPath } from "url"
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async redirects() {
-    return [
-      {
-        source: '/:path((?!embed\\.js$).*)',
-        destination: 'https://open-remark.zeon.studio/:path',
-        permanent: true,
-      },
-    ];
+  turbopack: {
+    root: __dirname,
   },
-
-  async rewrites() {
-    return [
+  images: {
+    remotePatterns: [
       {
-        source: '/embed.js',
-        destination: 'https://open-remark.zeon.studio/embed.js',
+        protocol: "https",
+        hostname: "i.pravatar.cc",
+        pathname: "/**",
       },
-    ];
+    ],
   },
-};
+}
 
-module.exports = nextConfig;
+export default nextConfig
