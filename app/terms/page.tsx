@@ -68,12 +68,6 @@ const sections = [
       `OpenRemark is in beta and these terms may change as the project evolves. Material changes will be reflected on this page with an updated revision date.`,
     ],
   },
-  {
-    title: "11. Contact",
-    body: [
-      `Questions about these terms can be sent to the project maintainers via the GitHub repository.`,
-    ],
-  },
 ]
 
 export default function TermsPage() {
