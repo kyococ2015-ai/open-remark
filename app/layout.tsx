@@ -46,7 +46,7 @@ export default function RootLayout({
 
       {/* Meta Informations */}
       {/* Favicon */}
-      <link rel="icon" type="image/x-icon" href={config.site.favicon} />
+      <link rel="icon" type="image/png" href={config.site.favicon} />
 
       <body suppressHydrationWarning>
         <a

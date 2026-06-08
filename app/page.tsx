@@ -15,17 +15,14 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { Logo } from "@/components/logo"
 
 export const metadata: Metadata = {
-  title: config.site.title,
   description: config.metadata.meta_description,
   authors: [{ name: config.metadata.meta_author }],
   openGraph: {
-    title: config.site.title,
     description: config.metadata.meta_description,
     images: [config.metadata.meta_image],
   },
   twitter: {
     card: "summary_large_image",
-    title: config.site.title,
     description: config.metadata.meta_description,
     images: [config.metadata.meta_image],
   },
