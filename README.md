@@ -1,7 +1,8 @@
 # OpenRemark - An open-source comment system for static websites
 
 <img width="1200" height="630" alt="image" src="https://github.com/user-attachments/assets/8c8728da-cf93-499c-81d1-a6db68f9f87c" />
-<img width="1664" height="820" alt="image" src="https://github.com/user-attachments/assets/b81e3860-30e7-46b8-9756-0bc58a23d59c" />
+<img width="1850" height="956" alt="image" src="https://github.com/user-attachments/assets/790db0b4-3fba-44d7-aec7-c0e6762290ae" />
+
 
 ![Beta](https://img.shields.io/badge/status-beta-orange) ![Version](https://img.shields.io/badge/version-0.3.3-blue) ![License](https://img.shields.io/badge/license-MIT-green)
 
