@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import config from "@/config/config.json"
+import pkg from "@/package.json"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -120,6 +121,16 @@ export default function HomePage() {
       <main id="main-content">
         {/* Hero */}
         <section className="relative mx-auto max-w-5xl overflow-hidden px-4 pt-28 pb-16 text-center">
+          <Link
+            href="/changelog"
+            className="mb-4 inline-flex items-center gap-1.5 rounded-full border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <span>v{pkg.version}</span>
+            <span aria-hidden="true">·</span>
+            <span>see what&apos;s new</span>
+            <ArrowRight className="size-3" aria-hidden="true" />
+          </Link>
+          <br />
           <Badge
             variant="secondary"
             className="mb-5 rounded-sm px-3 py-3 text-sm"
