@@ -121,22 +121,15 @@ export default function HomePage() {
       <main id="main-content">
         {/* Hero */}
         <section className="relative mx-auto max-w-5xl overflow-hidden px-4 pt-28 pb-16 text-center">
-          <Link
-            href="/changelog"
-            className="mb-4 inline-flex items-center gap-1.5 rounded-full border bg-muted/50 px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <span>v{pkg.version}</span>
-            <span aria-hidden="true">·</span>
-            <span>see what&apos;s new</span>
-            <ArrowRight className="size-3" aria-hidden="true" />
+          <Link href="/changelog" className="inline-block">
+            <Badge
+              variant="secondary"
+              className="mb-5 rounded-sm px-3 py-3 text-sm transition-colors hover:bg-secondary/80"
+            >
+              v{pkg.version} · see what&apos;s new
+              <ArrowRight className="ml-1 size-3.5" aria-hidden="true" />
+            </Badge>
           </Link>
-          <br />
-          <Badge
-            variant="secondary"
-            className="mb-5 rounded-sm px-3 py-3 text-sm"
-          >
-            Open source · Self-hostable
-          </Badge>
           <h1 className="mb-6 text-5xl font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">
             Comments for your
             <br />
