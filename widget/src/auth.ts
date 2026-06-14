@@ -39,7 +39,7 @@ function clearOAuthSession() {
 
 export function loadStoredAuth(): AuthState {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return { status: "idle" }
     const parsed = JSON.parse(raw) as {
       token: string
@@ -47,7 +47,7 @@ export function loadStoredAuth(): AuthState {
       exp: number
     }
     if (Date.now() > parsed.exp) {
-      sessionStorage.removeItem(STORAGE_KEY)
+      localStorage.removeItem(STORAGE_KEY)
       return { status: "idle" }
     }
     return { status: "authenticated", token: parsed.token, user: parsed.user }
@@ -58,11 +58,20 @@ export function loadStoredAuth(): AuthState {
 
 export function saveAuth(token: string, user: AuthUser) {
   const exp = Date.now() + 7 * 24 * 60 * 60 * 1000 // 7 days
-  sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user, exp }))
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user, exp }))
+  } catch {
+    // Storage unavailable (Safari private mode, quota exceeded) — sign-in
+    // still succeeds for this page load, it just won't persist.
+  }
 }
 
 export function clearAuth() {
-  sessionStorage.removeItem(STORAGE_KEY)
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // Storage unavailable — nothing to clear.
+  }
 }
 
 export async function signInWithGoogle(
