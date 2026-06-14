@@ -13,6 +13,7 @@ import {
   deleteComment,
   updateNotificationPreference,
   searchCommenters,
+  UnauthorizedError,
 } from "./api"
 import { loadStoredAuth, signInWithGoogle, clearAuth } from "./auth"
 import {
@@ -245,7 +246,16 @@ class ZeonWidget {
       this.buildCommentMap()
       this.render()
       this.scrollToCommentFromHash()
-    } catch {
+    } catch (err) {
+      if (
+        err instanceof UnauthorizedError &&
+        this.auth.status === "authenticated"
+      ) {
+        clearAuth()
+        this.auth = { status: "idle" }
+        await this.loadComments()
+        return
+      }
       this.renderErrorState("Failed to load comments. Please try again later.")
     }
   }
@@ -313,8 +323,12 @@ class ZeonWidget {
         this.auth.token,
         next
       )
-    } catch {
+    } catch (err) {
       this.notificationsEnabled = !next
+      if (err instanceof UnauthorizedError) {
+        this.handleSessionExpired()
+        return
+      }
       this.render()
     }
   }
@@ -414,7 +428,29 @@ class ZeonWidget {
     return null
   }
 
+  private handleSessionExpired() {
+    clearAuth()
+    this.replyTo = null
+    this.replyingToId = null
+    this.isEditingId = null
+    this.auth = {
+      status: "error",
+      message: "Your session expired. Please sign in again.",
+    }
+    this.render()
+    setTimeout(() => {
+      if (this.auth.status === "error") {
+        this.auth = { status: "idle" }
+        this.render()
+      }
+    }, 3000)
+  }
+
   private handleApiError(err: unknown, fallback: string): void {
+    if (err instanceof UnauthorizedError) {
+      this.handleSessionExpired()
+      return
+    }
     const message = err instanceof Error ? err.message : fallback
     if (message.toLowerCase().includes("suspended")) {
       this.isBanned = true
