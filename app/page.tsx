@@ -2,8 +2,16 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import config from "@/config/config.json"
 import pkg from "@/package.json"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card"
 import {
   MessageSquare,
   Globe,
@@ -11,6 +19,7 @@ import {
   Zap,
   Code2,
   ArrowRight,
+  Check,
 } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Logo } from "@/components/logo"
@@ -67,6 +76,54 @@ const features = [
     title: "Origin allowlisting",
     description:
       "Only your registered domains can post comments. No cross-site abuse.",
+  },
+]
+
+type Plan = {
+  name: string
+  price: string
+  period: string
+  description: string
+  includesNote?: string
+  features: string[]
+  cta: { label: string; href: string; external?: boolean }
+  highlighted?: boolean
+}
+
+const plans: Plan[] = [
+  {
+    name: "Free",
+    price: "$0",
+    period: "forever",
+    description: "Everything you need to get started.",
+    features: [
+      "1 site",
+      "Unlimited comments & pages",
+      "Google sign-in for visitors",
+      "Moderation dashboard",
+      "Threaded replies",
+      "Origin allowlisting",
+    ],
+    cta: { label: "Get started free", href: "/sign-in" },
+  },
+  {
+    name: "Lifetime Access",
+    price: "$99",
+    period: "one-time",
+    description: "Pay once, own it forever.",
+    includesNote: "Everything in Free, plus:",
+    features: [
+      "Unlimited sites",
+      "All future updates included",
+      "Priority email support",
+      "No recurring fees, ever",
+    ],
+    cta: {
+      label: "Get lifetime access",
+      href: "https://buy.paddle.com/product/905524",
+      external: true,
+    },
+    highlighted: true,
   },
 ]
 
@@ -227,6 +284,84 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </section>
+
+        {/* Pricing */}
+        <section className="mx-auto max-w-5xl px-4 py-28">
+          <h2 className="mb-4 text-center text-3xl font-bold text-balance">
+            Simple, transparent pricing
+          </h2>
+          <p className="mb-14 text-center text-lg text-balance text-muted-foreground">
+            Pay once or start free — no subscriptions, no hidden fees.
+          </p>
+          <div className="mx-auto grid max-w-3xl gap-6 sm:grid-cols-2">
+            {plans.map((plan) => (
+              <Card
+                key={plan.name}
+                className={cn(
+                  "relative",
+                  plan.highlighted && "ring-2 ring-primary"
+                )}
+              >
+                {plan.highlighted && (
+                  // Card has overflow-hidden, so the badge must stay inside
+                  // the box (negative offsets would get clipped).
+                  <Badge className="absolute top-4 right-4">Best value</Badge>
+                )}
+                <CardHeader>
+                  <h3 className="text-lg font-semibold">{plan.name}</h3>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold">{plan.price}</span>
+                    <span className="text-sm text-muted-foreground">
+                      / {plan.period}
+                    </span>
+                  </div>
+                  <CardDescription>{plan.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1">
+                  {plan.includesNote && (
+                    <p className="mb-3 text-sm font-medium text-muted-foreground">
+                      {plan.includesNote}
+                    </p>
+                  )}
+                  <ul className="flex flex-col gap-3">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-sm">
+                        <Check
+                          className="mt-0.5 size-4 shrink-0 text-primary"
+                          aria-hidden="true"
+                        />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    asChild
+                    className="w-full"
+                    variant={plan.highlighted ? "default" : "outline"}
+                  >
+                    {plan.cta.external ? (
+                      <Link
+                        href={plan.cta.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {plan.cta.label}
+                        <span className="sr-only"> (opens in new tab)</span>
+                      </Link>
+                    ) : (
+                      <Link href={plan.cta.href}>{plan.cta.label}</Link>
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            Self-hosting OpenRemark is free and unlimited.
+          </p>
         </section>
 
         {/* How it works */}
