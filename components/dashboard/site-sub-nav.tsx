@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
 import { SiteLogo } from "@/components/ui/site-logo"
 import {
   RiArrowRightSLine,
@@ -42,7 +41,6 @@ export function SiteSubNav({ siteId, siteName, siteDomain }: Props) {
       {/* Row 1 — breadcrumb */}
       <div className="flex h-12 items-center gap-1.5 px-4">
         <SidebarTrigger className="-ml-1 shrink-0" />
-        <Separator orientation="vertical" className="mx-1 h-4" />
 
         {/* breadcrumb */}
         <nav
