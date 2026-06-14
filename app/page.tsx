@@ -287,7 +287,7 @@ export default function HomePage() {
         </section>
 
         {/* Pricing */}
-        <section className="mx-auto max-w-5xl px-4 py-28">
+        <section className="mx-auto max-w-5xl px-4 py-28" id="pricing">
           <h2 className="mb-4 text-center text-3xl font-bold text-balance">
             Simple, transparent pricing
           </h2>
