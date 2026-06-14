@@ -1,5 +1,12 @@
 import type { CommentData, WidgetThemeConfig } from "./types"
 
+export class UnauthorizedError extends Error {
+  constructor() {
+    super("Unauthorized")
+    this.name = "UnauthorizedError"
+  }
+}
+
 export async function fetchComments(
   appUrl: string,
   siteKey: string,
@@ -10,7 +17,10 @@ export async function fetchComments(
   const headers: Record<string, string> = {}
   if (token) headers["Authorization"] = `Bearer ${token}`
   const res = await fetch(url, { headers })
-  if (!res.ok) throw new Error("Failed to fetch comments")
+  if (!res.ok) {
+    if (res.status === 401) throw new UnauthorizedError()
+    throw new Error("Failed to fetch comments")
+  }
   return res.json()
 }
 
@@ -35,6 +45,7 @@ export async function postComment(
     body: JSON.stringify(payload),
   })
   if (!res.ok) {
+    if (res.status === 401) throw new UnauthorizedError()
     const err = await res.json().catch(() => ({}))
     throw new Error(err.error ?? "Failed to post comment")
   }
@@ -54,6 +65,7 @@ export async function likeComment(
     },
   })
   if (!res.ok) {
+    if (res.status === 401) throw new UnauthorizedError()
     const err = await res.json().catch(() => ({}))
     throw new Error(err.error ?? "Failed to toggle like")
   }
@@ -75,6 +87,7 @@ export async function updateComment(
     body: JSON.stringify({ body }),
   })
   if (!res.ok) {
+    if (res.status === 401) throw new UnauthorizedError()
     const err = await res.json().catch(() => ({}))
     throw new Error(err.error ?? "Failed to update comment")
   }
@@ -95,6 +108,7 @@ export async function deleteComment(
     body: JSON.stringify({ status: "DELETED" }),
   })
   if (!res.ok) {
+    if (res.status === 401) throw new UnauthorizedError()
     const err = await res.json().catch(() => ({}))
     throw new Error(err.error ?? "Failed to delete comment")
   }
@@ -129,6 +143,7 @@ export async function updateNotificationPreference(
     body: JSON.stringify({ notificationsEnabled }),
   })
   if (!res.ok) {
+    if (res.status === 401) throw new UnauthorizedError()
     const err = await res.json().catch(() => ({}))
     throw new Error(err.error ?? "Failed to update preference")
   }
