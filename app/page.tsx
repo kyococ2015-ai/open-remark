@@ -108,7 +108,7 @@ const plans: Plan[] = [
   },
   {
     name: "Lifetime Access",
-    price: "$99",
+    price: "$47",
     period: "one-time",
     description: "Pay once, own it forever.",
     includesNote: "Everything in Free, plus:",
