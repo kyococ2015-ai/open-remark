@@ -281,7 +281,7 @@ export function UsersTable({
                         }}
                       >
                         <Trash2 className="mr-2 size-4" />
-                        Delete all comments
+                        Delete All Comments
                       </DropdownMenuItem>
                       {!commenter.isBanned ? (
                         <DropdownMenuItem
