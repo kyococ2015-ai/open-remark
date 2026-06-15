@@ -2,7 +2,7 @@
 title: "Changelog"
 subtitle: "Notes from each release. Newest first."
 entries:
-  - version: "0.3.4"
+  - version: "0.4.0"
     date: "June 15, 2026"
     changes:
       - "Public changelog page, linked from a badge in the homepage hero"
