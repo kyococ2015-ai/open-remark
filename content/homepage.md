@@ -1,7 +1,7 @@
 ---
 hero:
-  title: "Comments for your static website"
-  subtitle: "Add a fully-featured comment system to any Astro, Hugo, or Next.js site in two lines of HTML. Google sign-in, threaded replies, spam protection, and a moderation dashboard — all included."
+  title: "Comments for </br> **EVERY WEBSITE**"
+  subtitle: "Add a simple, full-featured comment system to any site — Astro, Hugo, Next.js, or your favorite framework — with just two lines of HTML. Includes Google sign-in, threaded replies, spam protection, and a moderation dashboard."
   primaryButton:
     label: "Start for free"
     link: "/sign-in"
@@ -38,6 +38,7 @@ pricing:
   footnote: "Self-hosting OpenRemark is free and unlimited."
   plans:
     - name: "Free"
+      icon: "Gift"
       price: "$0"
       period: "forever"
       description: "Everything you need to get started."
@@ -52,6 +53,7 @@ pricing:
         label: "Get started free"
         link: "/sign-in"
     - name: "Early Bird"
+      icon: "Zap"
       price: "$47"
       period: "one-time"
       description: "Pay once, own it forever."
@@ -66,7 +68,7 @@ pricing:
         link: "https://buy.paddle.com/product/905524"
         external: true
       highlighted: true
-      urgencyBadge: "3/10 slots available"
+      urgencyBadge: "4/10 slots available"
 
 howItWorks:
   heading: "Up and running in minutes"
