@@ -1,7 +1,7 @@
 ---
 hero:
-  title: "Comments for </br> **EVERY WEBSITE**"
-  subtitle: "Add a simple, full-featured comment system to any site — Astro, Hugo, Next.js, or your favorite framework — with just two lines of HTML. Includes Google sign-in, threaded replies, spam protection, and a moderation dashboard."
+  title: "Comments System for **Every Websites**"
+  subtitle: "Add a simple, full-featured comment system to any Astro, Hugo, Next.js, or your favorite framework with just two lines of HTML. Includes Google sign-in, threaded replies, spam protection, and a moderation dashboard."
   primaryButton:
     label: "Start for free"
     link: "/sign-in"

@@ -5,6 +5,7 @@ import config from "@/config/config.json"
 import pkg from "@/package.json"
 import { cn } from "@/lib/utils"
 import { getListPage } from "@/lib/content"
+import { markdownify } from "@/lib/text-converter"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -117,10 +118,11 @@ export default function HomePage() {
               <ArrowRight className="ml-1 size-3.5" aria-hidden="true" />
             </Badge>
           </Link>
-          <h1 className="mb-6 text-5xl font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">
-            {hero.title}
+          <h1 className="mb-6 text-5xl leading-[1.1] font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">
+            <span dangerouslySetInnerHTML={markdownify(hero.title)}></span>
+            <span className="animate-pulse">_</span>
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-xl leading-relaxed text-balance text-muted-foreground">
+          <p className="mx-auto mb-10 max-w-2xl text-xl leading-relaxed text-muted-foreground">
             {hero.subtitle}
           </p>
           <div className="mb-16 flex flex-wrap items-center justify-center gap-4">
