@@ -1,8 +1,10 @@
 import type { Metadata } from "next"
+import type { LucideIcon } from "lucide-react"
 import Link from "next/link"
 import config from "@/config/config.json"
 import pkg from "@/package.json"
 import { cn } from "@/lib/utils"
+import { getListPage } from "@/lib/content"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -40,92 +42,13 @@ export const metadata: Metadata = {
   },
 }
 
-const features = [
-  {
-    icon: Globe,
-    title: "Works everywhere",
-    description:
-      "Drop two lines of HTML into any Astro, Hugo, or Next.js site. No build step required on your end.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Built-in moderation",
-    description:
-      "Approve, reject, or mark spam from your dashboard. Pre-moderation on by default — nothing goes live without your sign-off.",
-  },
-  {
-    icon: MessageSquare,
-    title: "Threaded replies",
-    description:
-      "Visitors can reply to individual comments, keeping discussions focused and readable.",
-  },
-  {
-    icon: Zap,
-    title: "Google sign-in",
-    description:
-      "One-click authentication for visitors. No passwords, no friction, real identities.",
-  },
-  {
-    icon: Code2,
-    title: "Shadow DOM isolated",
-    description:
-      "The widget lives in a shadow DOM — your site styles never bleed in, and widget styles never leak out.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Origin allowlisting",
-    description:
-      "Only your registered domains can post comments. No cross-site abuse.",
-  },
-]
-
-type Plan = {
-  name: string
-  price: string
-  period: string
-  description: string
-  includesNote?: string
-  features: string[]
-  cta: { label: string; href: string; external?: boolean }
-  highlighted?: boolean
+const iconMap: Record<string, LucideIcon> = {
+  Globe,
+  ShieldCheck,
+  MessageSquare,
+  Zap,
+  Code2,
 }
-
-const plans: Plan[] = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    description: "Everything you need to get started.",
-    features: [
-      "1 site",
-      "Unlimited comments & pages",
-      "Google sign-in for visitors",
-      "Moderation dashboard",
-      "Threaded replies",
-      "Origin allowlisting",
-    ],
-    cta: { label: "Get started free", href: "/sign-in" },
-  },
-  {
-    name: "Lifetime Access",
-    price: "$47",
-    period: "one-time",
-    description: "Pay once, own it forever.",
-    includesNote: "Everything in Free, plus:",
-    features: [
-      "Unlimited sites",
-      "All future updates included",
-      "Priority email support",
-      "No recurring fees, ever",
-    ],
-    cta: {
-      label: "Get lifetime access",
-      href: "https://buy.paddle.com/product/905524",
-      external: true,
-    },
-    highlighted: true,
-  },
-]
 
 const embedSnippet = `<div
   data-open-remark
@@ -135,6 +58,10 @@ const embedSnippet = `<div
 <script async src="${process.env.NEXT_PUBLIC_APP_URL}/embed.js"></script>`
 
 export default function HomePage() {
+  const { frontmatter } = getListPage("homepage.md")
+  const { hero, features, pricing, howItWorks, cta } = frontmatter
+  const { plans } = pricing
+
   return (
     <div className="flex min-h-svh flex-col">
       {/* Nav */}
@@ -188,19 +115,15 @@ export default function HomePage() {
             </Badge>
           </Link>
           <h1 className="mb-6 text-5xl font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">
-            Comments for your
-            <br />
-            static website
+            {hero.title}
           </h1>
           <p className="mx-auto mb-10 max-w-2xl text-xl leading-relaxed text-balance text-muted-foreground">
-            Add a fully-featured comment system to any Astro, Hugo, or Next.js
-            site in two lines of HTML. Google sign-in, threaded replies, spam
-            protection, and a moderation dashboard — all included.
+            {hero.subtitle}
           </p>
           <div className="mb-16 flex flex-wrap items-center justify-center gap-4">
             <Button asChild size="lg" className="h-13 px-8 text-base">
-              <Link href="/sign-in">
-                Start for free
+              <Link href={hero.primaryButton.link}>
+                {hero.primaryButton.label}
                 <ArrowRight className="ml-2 size-5" aria-hidden="true" />
               </Link>
             </Button>
@@ -210,8 +133,12 @@ export default function HomePage() {
               size="lg"
               className="h-13 px-8 text-base"
             >
-              <Link href="/demo.html" target="_blank" rel="noopener">
-                Live demo
+              <Link
+                href={hero.secondaryButton.link}
+                target="_blank"
+                rel="noopener"
+              >
+                {hero.secondaryButton.label}
               </Link>
             </Button>
           </div>
@@ -263,39 +190,44 @@ export default function HomePage() {
         {/* Features */}
         <section className="mx-auto max-w-5xl px-4 py-28">
           <h2 className="mb-4 text-center text-3xl font-bold text-balance">
-            Everything you need, nothing you don&apos;t
+            {features.heading}
           </h2>
           <p className="mb-14 text-center text-lg text-balance text-muted-foreground">
-            No tracking pixels, no cookie banners, no third-party data sharing.
+            {features.subheading}
           </p>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((f) => (
-              <div
-                key={f.title}
-                className="flex flex-col gap-3 rounded-xl border bg-card p-6"
-              >
-                <div className="flex size-10 items-center justify-center rounded-md bg-primary/10">
-                  <f.icon className="size-5 text-primary" aria-hidden="true" />
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- markdown content is untyped by design */}
+            {features.items.map((item: any) => {
+              const Icon = iconMap[item.icon]
+              return (
+                <div
+                  key={item.title}
+                  className="flex flex-col gap-3 rounded-xl border bg-card p-6"
+                >
+                  <div className="flex size-10 items-center justify-center rounded-md bg-primary/10">
+                    <Icon className="size-5 text-primary" aria-hidden="true" />
+                  </div>
+                  <h3 className="text-base font-semibold">{item.title}</h3>
+                  <p className="text-base leading-relaxed text-muted-foreground">
+                    {item.description}
+                  </p>
                 </div>
-                <h3 className="text-base font-semibold">{f.title}</h3>
-                <p className="text-base leading-relaxed text-muted-foreground">
-                  {f.description}
-                </p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </section>
 
         {/* Pricing */}
         <section className="mx-auto max-w-5xl px-4 py-28" id="pricing">
           <h2 className="mb-4 text-center text-3xl font-bold text-balance">
-            Simple, transparent pricing
+            {pricing.heading}
           </h2>
           <p className="mb-14 text-center text-lg text-balance text-muted-foreground">
-            Pay once or start free — no subscriptions, no hidden fees.
+            {pricing.subheading}
           </p>
           <div className="mx-auto grid max-w-3xl gap-6 sm:grid-cols-2">
-            {plans.map((plan) => (
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- markdown content is untyped by design */}
+            {plans.map((plan: any) => (
               <Card
                 key={plan.name}
                 className={cn(
@@ -303,10 +235,13 @@ export default function HomePage() {
                   plan.highlighted && "ring-2 ring-primary"
                 )}
               >
-                {plan.highlighted && (
-                  // Card has overflow-hidden, so the badge must stay inside
-                  // the box (negative offsets would get clipped).
-                  <Badge className="absolute top-4 right-4">Best value</Badge>
+                {(plan.badge || plan.urgencyBadge) && (
+                  <div className="absolute top-4 right-4 flex flex-col items-end gap-1.5">
+                    {plan.badge && <Badge>{plan.badge}</Badge>}
+                    {plan.urgencyBadge && (
+                      <Badge variant="destructive">{plan.urgencyBadge}</Badge>
+                    )}
+                  </div>
                 )}
                 <CardHeader>
                   <h3 className="text-lg font-semibold">{plan.name}</h3>
@@ -325,7 +260,7 @@ export default function HomePage() {
                     </p>
                   )}
                   <ul className="flex flex-col gap-3">
-                    {plan.features.map((f) => (
+                    {plan.features.map((f: string) => (
                       <li key={f} className="flex items-start gap-2 text-sm">
                         <Check
                           className="mt-0.5 size-4 shrink-0 text-primary"
@@ -344,7 +279,7 @@ export default function HomePage() {
                   >
                     {plan.cta.external ? (
                       <Link
-                        href={plan.cta.href}
+                        href={plan.cta.link}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -352,7 +287,7 @@ export default function HomePage() {
                         <span className="sr-only"> (opens in new tab)</span>
                       </Link>
                     ) : (
-                      <Link href={plan.cta.href}>{plan.cta.label}</Link>
+                      <Link href={plan.cta.link}>{plan.cta.label}</Link>
                     )}
                   </Button>
                 </CardFooter>
@@ -360,7 +295,7 @@ export default function HomePage() {
             ))}
           </div>
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            Self-hosting OpenRemark is free and unlimited.
+            {pricing.footnote}
           </p>
         </section>
 
@@ -368,31 +303,11 @@ export default function HomePage() {
         <section className="border-y bg-muted/40 py-28">
           <div className="mx-auto max-w-3xl px-4">
             <h2 className="mb-14 text-center text-3xl font-bold text-balance">
-              Up and running in minutes
+              {howItWorks.heading}
             </h2>
             <ol className="flex flex-col gap-10" aria-label="Setup steps">
-              {[
-                {
-                  step: "1",
-                  title: "Create your account",
-                  body: "Sign in with Google. No credit card required.",
-                },
-                {
-                  step: "2",
-                  title: "Register your site",
-                  body: "Add your domain and get a unique site key from the dashboard.",
-                },
-                {
-                  step: "3",
-                  title: "Paste the snippet",
-                  body: "Drop the two-line embed into your blog post template. Works in any SSG.",
-                },
-                {
-                  step: "4",
-                  title: "Moderate from the dashboard",
-                  body: "Approve, reject, or mark comments as spam — all from one place.",
-                },
-              ].map((item) => (
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any -- markdown content is untyped by design */}
+              {howItWorks.steps.map((item: any) => (
                 <li key={item.step} className="flex gap-5">
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-base font-bold text-primary-foreground">
                     {item.step}
@@ -414,15 +329,14 @@ export default function HomePage() {
         {/* CTA */}
         <section className="mx-auto max-w-2xl px-4 py-28 text-center">
           <h2 className="mb-5 text-4xl font-bold text-balance">
-            Ready to add comments?
+            {cta.heading}
           </h2>
           <p className="mb-10 text-xl leading-relaxed text-balance text-muted-foreground">
-            Free to get started. Self-host on your own infrastructure if you
-            prefer.
+            {cta.subtitle}
           </p>
           <Button asChild size="lg" className="h-13 px-8 text-base">
-            <Link href="/sign-in">
-              Get started free
+            <Link href={cta.button.link}>
+              {cta.button.label}
               <ArrowRight className="ml-2 size-5" aria-hidden="true" />
             </Link>
           </Button>
