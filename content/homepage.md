@@ -66,7 +66,6 @@ pricing:
         link: "https://buy.paddle.com/product/905524"
         external: true
       highlighted: true
-      badge: "Best value"
       urgencyBadge: "3/10 slots available"
 
 howItWorks:
