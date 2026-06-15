@@ -1,9 +1,9 @@
 {
-  "content": "public",
-  "media": "public",
+  "content": "content",
+  "media": "public/images",
   "public": "public",
   "configs": [
-    "config"
+    "config/config.json"
   ],
   "custom-commit": false,
   "arrangement": []
