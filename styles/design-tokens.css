@@ -58,6 +58,16 @@
   --shadow-2xl: 0px 4px 12px 0px hsl(160 50% 10% / 0.15);
   --tracking-normal: 0.02em;
   --spacing: 0.25rem;
+
+  /* Fluid type scale (Utopia, 360px→1240px, 1.2→1.25 ratio). Used on marketing/legal pages only — not the dashboard. */
+  --step--2: clamp(0.6944rem, 0.684rem + 0.0465vw, 0.72rem);
+  --step--1: clamp(0.8333rem, 0.8061rem + 0.1212vw, 0.9rem);
+  --step-0: clamp(1rem, 0.9489rem + 0.2273vw, 1.125rem);
+  --step-1: clamp(1.2rem, 1.1156rem + 0.375vw, 1.4063rem);
+  --step-2: clamp(1.44rem, 1.31rem + 0.5778vw, 1.7578rem);
+  --step-3: clamp(1.728rem, 1.536rem + 0.8532vw, 2.1973rem);
+  --step-4: clamp(2.0736rem, 1.7983rem + 1.2236vw, 2.7466rem);
+  --step-5: clamp(2.4883rem, 2.1018rem + 1.718vw, 3.4332rem);
 }
 
 .dark {

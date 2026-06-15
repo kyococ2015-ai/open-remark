@@ -10,24 +10,50 @@
 }
 
 @import "../styles/design-tokens.css";
+
+/* Fluid type utilities (text-step--2 … text-step-5) backed by the Utopia scale in design-tokens.css. */
+@theme inline {
+  --text-step--2: var(--step--2);
+  --text-step--1: var(--step--1);
+  --text-step-0: var(--step-0);
+  --text-step-1: var(--step-1);
+  --text-step-2: var(--step-2);
+  --text-step-3: var(--step-3);
+  --text-step-4: var(--step-4);
+  --text-step-5: var(--step-5);
+}
+
 @layer components {
   @import "../styles/components.css";
 }
 
-
 @keyframes grid-drift {
-  from { background-position: 0 0; }
-  to { background-position: 48px 48px; }
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 48px 48px;
+  }
 }
 
 @keyframes orb-float-1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(40px, -50px) scale(1.1); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(40px, -50px) scale(1.1);
+  }
 }
 
 @keyframes orb-float-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-30px, 40px) scale(0.9); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-30px, 40px) scale(0.9);
+  }
 }
 
 @keyframes ripple-smooth {
@@ -42,8 +68,14 @@
 }
 
 @keyframes orb-float-3 {
-  0%, 100% { transform: translate(0, 0); }
-  33% { transform: translate(25px, -20px); }
-  66% { transform: translate(-20px, 25px); }
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  33% {
+    transform: translate(25px, -20px);
+  }
+  66% {
+    transform: translate(-20px, 25px);
+  }
 }
-

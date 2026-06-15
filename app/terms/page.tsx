@@ -85,21 +85,23 @@ export default function TermsPage() {
         id="main-content"
         className="mx-auto w-full max-w-3xl flex-1 px-4 py-16"
       >
-        <h1 className="mb-2 text-3xl font-bold tracking-tight text-balance">
+        <h1 className="mb-2 text-step-3 font-bold tracking-tight text-balance">
           Terms of Service
         </h1>
-        <p className="mb-12 text-sm text-muted-foreground">
+        <p className="mb-12 text-step--1 text-muted-foreground">
           Last updated: June 8, 2026
         </p>
 
         <div className="space-y-10">
           {sections.map((section) => (
             <section key={section.title}>
-              <h2 className="mb-3 text-xl font-semibold">{section.title}</h2>
+              <h2 className="mb-3 text-step-1 font-semibold">
+                {section.title}
+              </h2>
               {section.body.map((paragraph) => (
                 <p
                   key={paragraph}
-                  className="leading-relaxed text-muted-foreground"
+                  className="text-step-0 leading-relaxed text-muted-foreground"
                 >
                   {paragraph}
                 </p>

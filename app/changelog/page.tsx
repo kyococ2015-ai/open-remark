@@ -104,10 +104,10 @@ export default function ChangelogPage() {
         id="main-content"
         className="mx-auto w-full max-w-3xl flex-1 px-4 py-16"
       >
-        <h1 className="mb-2 text-3xl font-bold tracking-tight text-balance">
+        <h1 className="mb-2 text-step-3 font-bold tracking-tight text-balance">
           Changelog
         </h1>
-        <p className="mb-12 text-sm text-muted-foreground">
+        <p className="mb-12 text-step--1 text-muted-foreground">
           Notes from each release. Newest first.
         </p>
 
@@ -115,12 +115,12 @@ export default function ChangelogPage() {
           {entries.map((entry) => (
             <section key={entry.version}>
               <div className="mb-4 flex items-baseline gap-3">
-                <h2 className="text-2xl font-semibold">v{entry.version}</h2>
-                <span className="text-sm text-muted-foreground">
+                <h2 className="text-step-2 font-semibold">v{entry.version}</h2>
+                <span className="text-step--1 text-muted-foreground">
                   {entry.date}
                 </span>
               </div>
-              <ul className="list-disc space-y-2 pl-5 leading-relaxed text-muted-foreground">
+              <ul className="list-disc space-y-2 pl-5 text-step-0 leading-relaxed text-muted-foreground">
                 {entry.changes.map((change) => (
                   <li key={change}>{change}</li>
                 ))}

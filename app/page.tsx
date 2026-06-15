@@ -118,11 +118,11 @@ export default function HomePage() {
               <ArrowRight className="ml-1 size-3.5" aria-hidden="true" />
             </Badge>
           </Link>
-          <h1 className="mb-6 text-5xl leading-[1.1] font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">
+          <h1 className="mb-6 text-step-5 leading-[1.1] font-bold tracking-tight text-balance">
             <span dangerouslySetInnerHTML={markdownify(hero.title)}></span>
             <span className="animate-pulse">_</span>
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-xl leading-relaxed text-muted-foreground">
+          <p className="mx-auto mb-10 max-w-3xl text-lg leading-relaxed text-muted-foreground">
             {hero.subtitle}
           </p>
           <div className="mb-16 flex flex-wrap items-center justify-center gap-4">
@@ -164,7 +164,7 @@ export default function HomePage() {
         {/* Code snippet */}
         <section className="border-y bg-muted/40 py-16">
           <div className="mx-auto max-w-3xl px-4">
-            <p className="mb-6 text-center text-sm font-medium tracking-wider text-muted-foreground uppercase">
+            <p className="mb-6 text-center text-step--1 font-medium tracking-wider text-muted-foreground uppercase">
               Embed in 2 lines
             </p>
             <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
@@ -194,10 +194,10 @@ export default function HomePage() {
 
         {/* Features */}
         <section className="mx-auto max-w-5xl px-4 py-28">
-          <h2 className="mb-4 text-center text-3xl font-bold text-balance">
+          <h2 className="mb-4 text-center text-step-3 font-bold text-balance">
             {features.heading}
           </h2>
-          <p className="mb-14 text-center text-lg text-balance text-muted-foreground">
+          <p className="mb-14 text-center text-step-1 text-balance text-muted-foreground">
             {features.subheading}
           </p>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -207,15 +207,17 @@ export default function HomePage() {
               return (
                 <div
                   key={item.title}
-                  className="flex flex-col gap-3 rounded-xl border bg-card p-6"
+                  className="flex flex-col gap-4 rounded-xl border bg-card p-6"
                 >
                   <div className="flex size-10 items-center justify-center rounded-md bg-primary/10">
                     <Icon className="size-5 text-primary" aria-hidden="true" />
                   </div>
-                  <h3 className="text-base font-semibold">{item.title}</h3>
-                  <p className="text-base leading-relaxed text-muted-foreground">
-                    {item.description}
-                  </p>
+                  <div className="flex flex-col gap-1.5">
+                    <h3 className="text-step-0 font-semibold">{item.title}</h3>
+                    <p className="text-step--1 leading-relaxed text-muted-foreground">
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
               )
             })}
@@ -224,10 +226,10 @@ export default function HomePage() {
 
         {/* Pricing */}
         <section className="mx-auto max-w-5xl px-4 py-28" id="pricing">
-          <h2 className="mb-4 text-center text-3xl font-bold text-balance">
+          <h2 className="mb-4 text-center text-step-3 font-bold text-balance">
             {pricing.heading}
           </h2>
-          <p className="mb-14 text-center text-lg text-balance text-muted-foreground">
+          <p className="mb-14 text-center text-step-1 text-balance text-muted-foreground">
             {pricing.subheading}
           </p>
           <div className="mx-auto grid max-w-3xl gap-6 sm:grid-cols-2">
@@ -267,18 +269,18 @@ export default function HomePage() {
                         aria-hidden="true"
                       />
                     </div>
-                    <h3 className="text-lg font-semibold">{plan.name}</h3>
+                    <h3 className="text-step-1 font-semibold">{plan.name}</h3>
                     <div className="flex items-baseline gap-1">
                       <span
                         className={cn(
-                          "text-5xl font-bold",
+                          "text-step-4 font-bold",
                           plan.highlighted &&
                             "bg-gradient-to-br from-foreground to-primary bg-clip-text text-transparent"
                         )}
                       >
                         {plan.price}
                       </span>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-step--1 text-muted-foreground">
                         / {plan.period}
                       </span>
                     </div>
@@ -287,13 +289,16 @@ export default function HomePage() {
                   <Separator />
                   <CardContent className="flex-1">
                     {plan.includesNote && (
-                      <p className="mb-3 text-sm font-medium text-muted-foreground">
+                      <p className="mb-3 text-step--1 font-medium text-muted-foreground">
                         {plan.includesNote}
                       </p>
                     )}
                     <ul className="flex flex-col gap-3">
                       {plan.features.map((f: string) => (
-                        <li key={f} className="flex items-start gap-2 text-sm">
+                        <li
+                          key={f}
+                          className="flex items-start gap-2 text-step--1"
+                        >
                           <Check
                             className="mt-0.5 size-4 shrink-0 text-primary"
                             aria-hidden="true"
@@ -328,7 +333,7 @@ export default function HomePage() {
               )
             })}
           </div>
-          <p className="mt-8 text-center text-sm text-muted-foreground">
+          <p className="mt-8 text-center text-step--1 text-muted-foreground">
             {pricing.footnote}
           </p>
         </section>
@@ -336,7 +341,7 @@ export default function HomePage() {
         {/* How it works */}
         <section className="border-y bg-muted/40 py-28">
           <div className="mx-auto max-w-3xl px-4">
-            <h2 className="mb-14 text-center text-3xl font-bold text-balance">
+            <h2 className="mb-14 text-center text-step-3 font-bold text-balance">
               {howItWorks.heading}
             </h2>
             <ol className="flex flex-col gap-10" aria-label="Setup steps">
@@ -347,10 +352,10 @@ export default function HomePage() {
                     {item.step}
                   </div>
                   <div>
-                    <h3 className="mb-1.5 text-base font-semibold">
+                    <h3 className="mb-1.5 text-step-0 font-semibold">
                       {item.title}
                     </h3>
-                    <p className="text-base text-muted-foreground">
+                    <p className="text-step-0 text-muted-foreground">
                       {item.body}
                     </p>
                   </div>
@@ -362,10 +367,10 @@ export default function HomePage() {
 
         {/* CTA */}
         <section className="mx-auto max-w-2xl px-4 py-28 text-center">
-          <h2 className="mb-5 text-4xl font-bold text-balance">
+          <h2 className="mb-5 text-step-4 font-bold text-balance">
             {cta.heading}
           </h2>
-          <p className="mb-10 text-xl leading-relaxed text-balance text-muted-foreground">
+          <p className="mb-10 text-step-1 leading-relaxed text-balance text-muted-foreground">
             {cta.subtitle}
           </p>
           <Button asChild size="lg" className="h-13 px-8 text-base">
