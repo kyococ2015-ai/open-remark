@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { siteCan } from "@/lib/permissions"
 import { SiteLogo } from "@/components/ui/site-logo"
 import {
   RiAddLine,
@@ -182,39 +183,50 @@ export default async function SitesPage() {
                         Comments
                       </Link>
                     </Button>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          asChild
-                          variant="outline"
-                          size="icon-sm"
-                          aria-label={`Install widget for ${site.name}`}
-                        >
-                          <Link href={`/dashboard/sites/${site.id}/install`}>
-                            <RiCodeLine className="size-4" aria-hidden="true" />
-                          </Link>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Install widget</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          asChild
-                          variant="outline"
-                          size="icon-sm"
-                          aria-label={`Settings for ${site.name}`}
-                        >
-                          <Link href={`/dashboard/sites/${site.id}/settings`}>
-                            <RiSettings3Line
-                              className="size-4"
-                              aria-hidden="true"
-                            />
-                          </Link>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Settings</TooltipContent>
-                    </Tooltip>
+                    {siteCan(site.role, "MANAGE_SETTINGS") && (
+                      <>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="icon-sm"
+                              aria-label={`Install widget for ${site.name}`}
+                            >
+                              <Link
+                                href={`/dashboard/sites/${site.id}/install`}
+                              >
+                                <RiCodeLine
+                                  className="size-4"
+                                  aria-hidden="true"
+                                />
+                              </Link>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Install widget</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="icon-sm"
+                              aria-label={`Settings for ${site.name}`}
+                            >
+                              <Link
+                                href={`/dashboard/sites/${site.id}/settings`}
+                              >
+                                <RiSettings3Line
+                                  className="size-4"
+                                  aria-hidden="true"
+                                />
+                              </Link>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Settings</TooltipContent>
+                        </Tooltip>
+                      </>
+                    )}
                   </CardFooter>
                 </Card>
               ))}

@@ -40,6 +40,8 @@ export async function getSitesForUser(userId: string) {
         pages: {
           select: { id: true, _count: { select: { comments: true } } },
         },
+        // The caller's membership only — used to gate per-card actions by role.
+        members: { where: { userId }, select: { role: true } },
       },
       orderBy: { createdAt: "desc" },
     }),
@@ -81,8 +83,10 @@ export async function getSitesForUser(userId: string) {
 
   return sites.map((site) => {
     const dayMap = activityBySite.get(site.id) ?? new Map()
+    const { members, ...rest } = site
     return {
-      ...site,
+      ...rest,
+      role: members[0].role,
       totalComments: site.pages.reduce((acc, p) => acc + p._count.comments, 0),
       pendingComments: site.pages.reduce(
         (acc, p) => acc + (pendingByPageId.get(p.id) ?? 0),
