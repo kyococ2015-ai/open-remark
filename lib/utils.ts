@@ -28,3 +28,15 @@ const twMerge = extendTailwindMerge({
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+const FALLBACK_APP_URL = "https://open-remark.zeon.studio"
+
+// Absolute, trailing-slash-free base URL for canonical SEO metadata
+// (sitemap, robots, JSON-LD). Falls back to the production URL when
+// NEXT_PUBLIC_APP_URL is unset.
+export function getBaseUrl() {
+  return (process.env.NEXT_PUBLIC_APP_URL ?? FALLBACK_APP_URL).replace(
+    /\/$/,
+    ""
+  )
+}

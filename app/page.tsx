@@ -30,6 +30,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { Logo } from "@/components/logo"
 import { HeroVideo } from "@/components/hero-video"
 import { ProductHuntBadge } from "@/components/product-hunt-badge"
+import { ProductSchema } from "@/components/product-schema"
 
 export const metadata: Metadata = {
   description: config.metadata.meta_description,
@@ -68,6 +69,9 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-svh flex-col">
+      {/* Product structured data (JSON-LD) for SEO */}
+      <ProductSchema plans={plans} />
+
       {/* Nav */}
       <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur">
         <nav
