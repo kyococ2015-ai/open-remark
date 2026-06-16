@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { getSiteByIdForOwner } from "@/lib/services/site-service"
+import { requireSiteAccess } from "@/lib/services/membership-service"
+import { getSiteByIdForUser } from "@/lib/services/site-service"
 import { previewTemplate } from "@/lib/email/email-service"
 import { ApiError, handleApiError } from "@/lib/api/error"
 
@@ -12,7 +13,8 @@ export async function GET(req: NextRequest, { params }: Params) {
     const session = await auth()
     if (!session?.user?.id) throw new ApiError("Unauthorized", 401)
 
-    const site = await getSiteByIdForOwner(siteId, session.user.id)
+    await requireSiteAccess(siteId, session.user.id, "MANAGE_SETTINGS")
+    const site = await getSiteByIdForUser(siteId, session.user.id)
 
     const type = req.nextUrl.searchParams.get("type")
     if (type !== "new-comment" && type !== "reply") {

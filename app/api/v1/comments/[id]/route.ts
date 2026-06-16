@@ -4,8 +4,12 @@ import {
   UpdateCommentStatusSchema,
   UpdateCommentSchema,
 } from "@/lib/validators/comment"
-import { moderateComment } from "@/lib/services/moderation-service"
+import {
+  moderateComment,
+  getSiteIdForComment,
+} from "@/lib/services/moderation-service"
 import { updateCommentBody } from "@/lib/services/comment-service"
+import { requireSiteAccess } from "@/lib/services/membership-service"
 import { handleApiError, ApiError } from "@/lib/api/error"
 import { ok } from "@/lib/api/response"
 
@@ -15,7 +19,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   try {
     const { id } = await params
     const session = await auth()
-    if (!session?.user?.email) throw new ApiError("Unauthorized", 401)
+    if (!session?.user?.id || !session?.user?.email)
+      throw new ApiError("Unauthorized", 401)
+
+    const siteId = await getSiteIdForComment(id)
+    await requireSiteAccess(siteId, session.user.id, "MODERATE")
 
     const body = await req.json()
 

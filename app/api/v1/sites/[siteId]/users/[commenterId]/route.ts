@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
-import { getSiteByIdForOwner } from "@/lib/services/site-service"
+import { requireSiteAccess } from "@/lib/services/membership-service"
 import { updateCommenterNotifications } from "@/lib/services/user-service"
 import { ok } from "@/lib/api/response"
 import { ApiError, handleApiError } from "@/lib/api/error"
@@ -13,7 +13,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const session = await auth()
     if (!session?.user?.id) throw new ApiError("Unauthorized", 401)
 
-    await getSiteByIdForOwner(siteId, session.user.id)
+    await requireSiteAccess(siteId, session.user.id, "MODERATE")
 
     const body = await req.json()
     if (typeof body.notificationsEnabled !== "boolean") {

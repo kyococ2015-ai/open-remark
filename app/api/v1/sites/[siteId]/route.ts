@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { UpdateSiteSchema } from "@/lib/validators/site"
 import {
-  getSiteByIdForOwner,
+  getSiteByIdForUser,
   updateSite,
   deleteSite,
 } from "@/lib/services/site-service"
@@ -17,7 +17,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     const { siteId } = await params
     const session = await auth()
     if (!session?.user?.id) throw new ApiError("Unauthorized", 401)
-    const site = await getSiteByIdForOwner(siteId, session.user.id)
+    const site = await getSiteByIdForUser(siteId, session.user.id)
     return ok(site)
   } catch (err) {
     return handleApiError(err)
