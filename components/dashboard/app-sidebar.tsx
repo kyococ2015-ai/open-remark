@@ -17,6 +17,7 @@ import {
   RiMegaphoneLine,
   RiShieldUserLine,
 } from "@remixicon/react"
+import { platformCan, type PlatformRole } from "@/lib/permissions"
 import {
   Sidebar,
   SidebarContent,
@@ -57,9 +58,10 @@ type NavGroup = {
 type Props = {
   user: { name?: string | null; email?: string | null; image?: string | null }
   siteCount: number
+  platformRole: PlatformRole
 }
 
-export function AppSidebar({ user, siteCount }: Props) {
+export function AppSidebar({ user, siteCount, platformRole }: Props) {
   const navGroups: NavGroup[] = [
     {
       label: "Application",
@@ -77,28 +79,30 @@ export function AppSidebar({ user, siteCount }: Props) {
       label: "My Account",
       items: [
         { label: "Profile", href: "/dashboard/account", icon: RiUserLine },
-        {
-          label: "Settings",
-          href: "/dashboard/settings",
-          icon: RiSettingsLine,
-        },
+        ...(platformCan(platformRole, "MANAGE_PLATFORM_SETTINGS")
+          ? [{ label: "Settings", href: "/dashboard/settings", icon: RiSettingsLine }]
+          : []),
       ],
     },
-    {
-      label: "System",
-      items: [
-        {
-          label: "Notice Board",
-          href: "/dashboard/notice-board",
-          icon: RiMegaphoneLine,
-        },
-        {
-          label: "Administration",
-          href: "/dashboard/administration",
-          icon: RiShieldUserLine,
-        },
-      ],
-    },
+    ...(platformCan(platformRole, "VIEW_ADMINISTRATION")
+      ? [
+          {
+            label: "System",
+            items: [
+              {
+                label: "Notice Board",
+                href: "/dashboard/notice-board",
+                icon: RiMegaphoneLine,
+              },
+              {
+                label: "Administration",
+                href: "/dashboard/administration",
+                icon: RiShieldUserLine,
+              },
+            ],
+          },
+        ]
+      : []),
   ]
 
   const pathname = usePathname()

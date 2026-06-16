@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { AppSidebar } from "@/components/dashboard/app-sidebar"
-import { getSiteCountByOwner } from "@/lib/services/site-service"
+import { getSiteCountForUser } from "@/lib/services/site-service"
 
 export default async function DashboardLayout({
   children,
@@ -13,12 +13,16 @@ export default async function DashboardLayout({
   const session = await auth()
   if (!session?.user) redirect("/sign-in")
 
-  const siteCount = await getSiteCountByOwner(session.user.id!)
+  const siteCount = await getSiteCountForUser(session.user.id)
 
   return (
     <TooltipProvider>
       <SidebarProvider>
-        <AppSidebar user={session.user} siteCount={siteCount} />
+        <AppSidebar
+          user={session.user}
+          siteCount={siteCount}
+          platformRole={session.user.platformRole}
+        />
         <SidebarInset>{children}</SidebarInset>
       </SidebarProvider>
     </TooltipProvider>
