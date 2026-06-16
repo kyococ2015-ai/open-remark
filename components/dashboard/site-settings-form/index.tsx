@@ -12,6 +12,31 @@ import { siteCan } from "@/lib/permissions"
 import type { SiteRole } from "@/lib/permissions"
 import type { Site } from "./types"
 
+function RestrictedSection({
+  restricted,
+  children,
+}: {
+  restricted: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <div className="relative">
+      {restricted && (
+        <div className="absolute inset-0 z-10 flex items-start justify-end rounded-lg p-2">
+          <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+            Restricted: Owner only
+          </span>
+        </div>
+      )}
+      <div
+        className={restricted ? "pointer-events-none opacity-40" : undefined}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
 type Props = {
   site: Site
   role: SiteRole
@@ -19,37 +44,23 @@ type Props = {
 
 export function SiteSettingsForm({ site: initialSite, role }: Props) {
   const [site, setSite] = useState<Site>(initialSite)
+  const isOwner = siteCan(role, "TRANSFER_SITE")
 
   return (
     <div className="flex max-w-2xl flex-col gap-6 p-6">
       <GeneralSection site={site} onSiteChange={setSite} />
       <InstallSnippetSection siteKey={site.siteKey} />
       <AppearanceSection site={site} onSiteChange={setSite} />
-      {siteCan(role, "TRANSFER_SITE") && <TransferSection siteId={site.id} />}
-      <div className="relative">
-        {!siteCan(role, "TRANSFER_SITE") && (
-          <div className="absolute inset-0 z-10 flex items-start justify-end rounded-lg p-2">
-            <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-              Restricted: Owner only
-            </span>
-          </div>
-        )}
-        <div
-          className={
-            !siteCan(role, "TRANSFER_SITE")
-              ? "pointer-events-none opacity-40"
-              : undefined
-          }
-        >
-          <EmailNotificationsSection site={site} />
-        </div>
-      </div>
-      {siteCan(role, "DELETE_SITE") && (
-        <>
-          <Separator />
-          <DangerZoneSection siteId={site.id} />
-        </>
-      )}
+      <RestrictedSection restricted={!isOwner}>
+        <TransferSection siteId={site.id} />
+      </RestrictedSection>
+      <RestrictedSection restricted={!isOwner}>
+        <EmailNotificationsSection site={site} />
+      </RestrictedSection>
+      <Separator />
+      <RestrictedSection restricted={!isOwner}>
+        <DangerZoneSection siteId={site.id} />
+      </RestrictedSection>
     </div>
   )
 }
