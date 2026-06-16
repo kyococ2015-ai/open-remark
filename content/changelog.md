@@ -2,6 +2,14 @@
 title: "Changelog"
 subtitle: "Notes from each release. Newest first."
 entries:
+  - version: "0.5.0"
+    date: "June 16, 2026"
+    changes:
+      - "Site teams — invite people to a site as an admin or moderator, each with scoped access across moderation, settings, and team management"
+      - "Invite by email: people without an account yet are added automatically the first time they sign in"
+      - "Platform and site roles are now separate — the first registered user owns the instance, everyone else manages only the sites they belong to"
+      - "Owner-only areas (ownership transfer, email/SMTP settings, danger zone) and the install/settings shortcuts now show only for the roles allowed to use them"
+      - "Transferring a site keeps the team intact and demotes the previous owner to admin"
   - version: "0.4.0"
     date: "June 15, 2026"
     changes:
