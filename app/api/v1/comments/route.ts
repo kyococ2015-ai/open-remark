@@ -26,6 +26,8 @@ export async function GET(req: NextRequest) {
 
     const search = searchParams.get("search")
 
+    await requireSiteAccess(siteId, session.user.id, "MODERATE")
+
     const result = await getCommentsBySite(siteId, {
       status: status ?? undefined,
       page,
