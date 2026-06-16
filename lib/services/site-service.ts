@@ -3,17 +3,21 @@ import { ApiError } from "@/lib/api/error"
 import { CommentStatus } from "@/generated/prisma/client"
 import type { CreateSiteInput, UpdateSiteInput } from "@/lib/validators/site"
 import { lookupUserByEmail } from "@/lib/services/user-service"
+import {
+  requireSiteAccess,
+  getSiteForMember,
+} from "@/lib/services/membership-service"
 
-export async function getSiteCountByOwner(ownerId: string) {
-  return db.site.count({ where: { ownerId } })
+export async function getSiteCountForUser(userId: string) {
+  return db.site.count({ where: { members: { some: { userId } } } })
 }
 
-export async function getSitesByOwner(ownerId: string) {
+export async function getSitesForUser(userId: string) {
   const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
 
   const [sites, pendingByPage, recentActivity] = await Promise.all([
     db.site.findMany({
-      where: { ownerId },
+      where: { members: { some: { userId } } },
       include: {
         _count: { select: { pages: true } },
         pages: {
@@ -24,11 +28,17 @@ export async function getSitesByOwner(ownerId: string) {
     }),
     db.comment.groupBy({
       by: ["pageId"],
-      where: { status: CommentStatus.PENDING, page: { site: { ownerId } } },
+      where: {
+        status: CommentStatus.PENDING,
+        page: { site: { members: { some: { userId } } } },
+      },
       _count: { _all: true },
     }),
     db.comment.findMany({
-      where: { page: { site: { ownerId } }, createdAt: { gte: twoWeeksAgo } },
+      where: {
+        page: { site: { members: { some: { userId } } } },
+        createdAt: { gte: twoWeeksAgo },
+      },
       select: { createdAt: true, page: { select: { siteId: true } } },
     }),
   ])
@@ -66,9 +76,8 @@ export async function getSitesByOwner(ownerId: string) {
   })
 }
 
-export async function getSiteByIdForOwner(siteId: string, ownerId: string) {
-  const site = await db.site.findFirst({ where: { id: siteId, ownerId } })
-  if (!site) throw new ApiError("Site not found", 404)
+export async function getSiteByIdForUser(siteId: string, userId: string) {
+  const { site } = await getSiteForMember(siteId, userId)
   return site
 }
 
@@ -79,26 +88,32 @@ export async function getSiteBySiteKey(siteKey: string) {
 }
 
 export async function createSite(ownerId: string, input: CreateSiteInput) {
-  return db.site.create({
-    data: {
-      name: input.name,
-      domain: input.domain,
-      autoApprove: input.autoApprove,
-      allowedOrigins: JSON.stringify(input.allowedOrigins),
-      theme: input.theme,
-      primaryColor: input.primaryColor,
-      radius: input.radius,
-      ownerId,
-    },
+  return db.$transaction(async (tx) => {
+    const site = await tx.site.create({
+      data: {
+        name: input.name,
+        domain: input.domain,
+        autoApprove: input.autoApprove,
+        allowedOrigins: JSON.stringify(input.allowedOrigins),
+        theme: input.theme,
+        primaryColor: input.primaryColor,
+        radius: input.radius,
+        ownerId,
+      },
+    })
+    await tx.siteMember.create({
+      data: { siteId: site.id, userId: ownerId, role: "SITE_OWNER" },
+    })
+    return site
   })
 }
 
 export async function updateSite(
   siteId: string,
-  ownerId: string,
+  userId: string,
   input: UpdateSiteInput
 ) {
-  await getSiteByIdForOwner(siteId, ownerId)
+  await requireSiteAccess(siteId, userId, "MANAGE_SETTINGS")
   return db.site.update({
     where: { id: siteId },
     data: {
@@ -140,23 +155,36 @@ export async function updateSite(
   })
 }
 
-export async function deleteSite(siteId: string, ownerId: string) {
-  await getSiteByIdForOwner(siteId, ownerId)
+export async function deleteSite(siteId: string, userId: string) {
+  await requireSiteAccess(siteId, userId, "DELETE_SITE")
   await db.site.delete({ where: { id: siteId } })
 }
 
 export async function transferSite(
   siteId: string,
-  currentOwnerId: string,
+  currentUserId: string,
   newOwnerEmail: string
 ) {
-  await getSiteByIdForOwner(siteId, currentOwnerId)
+  await requireSiteAccess(siteId, currentUserId, "TRANSFER_SITE")
   const newOwner = await lookupUserByEmail(newOwnerEmail)
-  if (newOwner.id === currentOwnerId) {
+  if (newOwner.id === currentUserId) {
     throw new ApiError("Cannot transfer to yourself", 400)
   }
-  return db.site.update({
-    where: { id: siteId, ownerId: currentOwnerId },
-    data: { ownerId: newOwner.id },
+  return db.$transaction(async (tx) => {
+    // Demote current owner to admin (retains access).
+    await tx.siteMember.update({
+      where: { userId_siteId: { userId: currentUserId, siteId } },
+      data: { role: "SITE_ADMIN" },
+    })
+    // Promote / create the new owner's membership.
+    await tx.siteMember.upsert({
+      where: { userId_siteId: { userId: newOwner.id, siteId } },
+      create: { siteId, userId: newOwner.id, role: "SITE_OWNER" },
+      update: { role: "SITE_OWNER" },
+    })
+    return tx.site.update({
+      where: { id: siteId },
+      data: { ownerId: newOwner.id },
+    })
   })
 }
