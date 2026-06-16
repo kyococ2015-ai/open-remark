@@ -1,6 +1,6 @@
 ---
 hero:
-  title: Comments System for **Every Websites**
+  title: Commenting System for **Every Websites**
   subtitle: Add a simple, full-featured comment system to any Astro, Hugo,
     Next.js, or your favorite framework with just two lines of HTML. Includes
     Google sign-in, threaded replies, spam protection, and a moderation
@@ -18,23 +18,28 @@ features:
   items:
     - icon: Globe
       title: Works everywhere
-      description: Drop two lines of HTML into any Astro, Hugo, or Next.js site. No
+      description:
+        Drop two lines of HTML into any Astro, Hugo, or Next.js site. No
         build step required on your end.
     - icon: ShieldCheck
       title: Built-in moderation
-      description: Approve, reject, or mark spam from your dashboard. Pre-moderation
+      description:
+        Approve, reject, or mark spam from your dashboard. Pre-moderation
         on by default — nothing goes live without your sign-off.
     - icon: MessageSquare
       title: Threaded replies
-      description: Visitors can reply to individual comments, keeping discussions
+      description:
+        Visitors can reply to individual comments, keeping discussions
         focused and readable.
     - icon: Zap
       title: Google sign-in
-      description: One-click authentication for visitors. No passwords, no friction,
+      description:
+        One-click authentication for visitors. No passwords, no friction,
         real identities.
     - icon: Code2
       title: Shadow DOM isolated
-      description: The widget lives in a shadow DOM — your site styles never bleed in,
+      description:
+        The widget lives in a shadow DOM — your site styles never bleed in,
         and widget styles never leak out.
     - icon: ShieldCheck
       title: Origin allowlisting
@@ -101,4 +106,5 @@ cta:
     label: Get started free
     link: /sign-in
 ---
+
 ​
