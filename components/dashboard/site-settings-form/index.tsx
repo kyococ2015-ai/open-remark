@@ -26,7 +26,9 @@ export function SiteSettingsForm({ site: initialSite, role }: Props) {
       <InstallSnippetSection siteKey={site.siteKey} />
       <AppearanceSection site={site} onSiteChange={setSite} />
       {siteCan(role, "TRANSFER_SITE") && <TransferSection siteId={site.id} />}
-      <EmailNotificationsSection site={site} />
+      {siteCan(role, "TRANSFER_SITE") && (
+        <EmailNotificationsSection site={site} />
+      )}
       {siteCan(role, "DELETE_SITE") && (
         <>
           <Separator />
