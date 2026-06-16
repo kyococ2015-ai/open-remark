@@ -10,7 +10,7 @@ export default async function SiteSettingsPage({ params }: Props) {
 
   const session = await auth()
 
-  let site
+  let site, role
   try {
     const res = await requireSiteAccess(
       siteId,
@@ -18,6 +18,7 @@ export default async function SiteSettingsPage({ params }: Props) {
       "MANAGE_SETTINGS"
     )
     site = res.site
+    role = res.membership.role
   } catch {
     notFound()
   }
@@ -29,6 +30,7 @@ export default async function SiteSettingsPage({ params }: Props) {
         theme: site.theme as "AUTO" | "LIGHT" | "DARK",
         siteKey: site.siteKey,
       }}
+      role={role}
     />
   )
 }

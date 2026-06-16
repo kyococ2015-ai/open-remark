@@ -13,6 +13,9 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "public/embed.js",
+    // Git worktrees live inside the repo root — exclude so ESLint doesn't
+    // traverse into them and pick up their node_modules.
+    ".claude/worktrees/**",
   ]),
 ]);
 

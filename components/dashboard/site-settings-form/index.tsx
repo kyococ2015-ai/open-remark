@@ -8,13 +8,16 @@ import { AppearanceSection } from "./appearance-section"
 import { TransferSection } from "./transfer-section"
 import { EmailNotificationsSection } from "./email-notifications-section"
 import { DangerZoneSection } from "./danger-zone-section"
+import { siteCan } from "@/lib/permissions"
+import type { SiteRole } from "@/lib/permissions"
 import type { Site } from "./types"
 
 type Props = {
   site: Site
+  role: SiteRole
 }
 
-export function SiteSettingsForm({ site: initialSite }: Props) {
+export function SiteSettingsForm({ site: initialSite, role }: Props) {
   const [site, setSite] = useState<Site>(initialSite)
 
   return (
@@ -22,10 +25,14 @@ export function SiteSettingsForm({ site: initialSite }: Props) {
       <GeneralSection site={site} onSiteChange={setSite} />
       <InstallSnippetSection siteKey={site.siteKey} />
       <AppearanceSection site={site} onSiteChange={setSite} />
-      <TransferSection siteId={site.id} />
+      {siteCan(role, "TRANSFER_SITE") && <TransferSection siteId={site.id} />}
       <EmailNotificationsSection site={site} />
-      <Separator />
-      <DangerZoneSection siteId={site.id} />
+      {siteCan(role, "DELETE_SITE") && (
+        <>
+          <Separator />
+          <DangerZoneSection siteId={site.id} />
+        </>
+      )}
     </div>
   )
 }
