@@ -7,6 +7,23 @@ import {
   requireSiteAccess,
   getSiteForMember,
 } from "@/lib/services/membership-service"
+import { siteCan } from "@/lib/permissions"
+
+// Fields owned by the Email Notifications section — gated by MANAGE_EMAIL_SETTINGS
+// so a SITE_ADMIN (who has MANAGE_SETTINGS) cannot change them via the API.
+const EMAIL_SETTING_FIELDS = [
+  "emailNotificationsEnabled",
+  "likeNotificationLimit",
+  "emailSubjectPrefix",
+  "emailLogoUrl",
+  "emailAccentColor",
+  "emailFooterText",
+  "smtpHost",
+  "smtpPort",
+  "smtpUser",
+  "smtpPass",
+  "smtpFrom",
+] as const satisfies readonly (keyof UpdateSiteInput)[]
 
 export async function getSiteCountForUser(userId: string) {
   return db.site.count({ where: { members: { some: { userId } } } })
@@ -113,7 +130,20 @@ export async function updateSite(
   userId: string,
   input: UpdateSiteInput
 ) {
-  await requireSiteAccess(siteId, userId, "MANAGE_SETTINGS")
+  const { membership } = await requireSiteAccess(
+    siteId,
+    userId,
+    "MANAGE_SETTINGS"
+  )
+  const touchesEmailSettings = EMAIL_SETTING_FIELDS.some(
+    (field) => input[field] !== undefined
+  )
+  if (
+    touchesEmailSettings &&
+    !siteCan(membership.role, "MANAGE_EMAIL_SETTINGS")
+  ) {
+    throw new ApiError("Forbidden", 403)
+  }
   return db.site.update({
     where: { id: siteId },
     data: {

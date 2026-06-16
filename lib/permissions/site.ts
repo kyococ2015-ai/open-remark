@@ -8,6 +8,7 @@ export type SiteRole = "SITE_OWNER" | "SITE_ADMIN" | "SITE_MODERATOR"
 export type SiteCapability =
   | "MODERATE"
   | "MANAGE_SETTINGS"
+  | "MANAGE_EMAIL_SETTINGS"
   | "MANAGE_MODERATORS"
   | "MANAGE_ADMINS"
   | "DELETE_SITE"
@@ -17,6 +18,7 @@ const SITE_PERMISSIONS: Record<SiteRole, readonly SiteCapability[]> = {
   SITE_OWNER: [
     "MODERATE",
     "MANAGE_SETTINGS",
+    "MANAGE_EMAIL_SETTINGS",
     "MANAGE_MODERATORS",
     "MANAGE_ADMINS",
     "DELETE_SITE",
@@ -28,6 +30,29 @@ const SITE_PERMISSIONS: Record<SiteRole, readonly SiteCapability[]> = {
 
 export const siteCan = (role: SiteRole, cap: SiteCapability): boolean =>
   SITE_PERMISSIONS[role].includes(cap)
+
+// Settings page sections gated by capability — consumed by the settings form
+// (SSOT for which role sees which section). General/install/appearance need
+// only MANAGE_SETTINGS; the rest are owner-only.
+export type SettingsSection =
+  | "general"
+  | "install"
+  | "appearance"
+  | "transfer"
+  | "email"
+  | "danger"
+
+export const SETTINGS_SECTION_CAPABILITY: Record<
+  SettingsSection,
+  SiteCapability
+> = {
+  general: "MANAGE_SETTINGS",
+  install: "MANAGE_SETTINGS",
+  appearance: "MANAGE_SETTINGS",
+  transfer: "TRANSFER_SITE",
+  email: "MANAGE_EMAIL_SETTINGS",
+  danger: "DELETE_SITE",
+}
 
 // Roles that can be granted via the team UI / invites (never SITE_OWNER).
 export type GrantableSiteRole = Extract<
