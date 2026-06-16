@@ -26,9 +26,24 @@ export function SiteSettingsForm({ site: initialSite, role }: Props) {
       <InstallSnippetSection siteKey={site.siteKey} />
       <AppearanceSection site={site} onSiteChange={setSite} />
       {siteCan(role, "TRANSFER_SITE") && <TransferSection siteId={site.id} />}
-      {siteCan(role, "TRANSFER_SITE") && (
-        <EmailNotificationsSection site={site} />
-      )}
+      <div className="relative">
+        {!siteCan(role, "TRANSFER_SITE") && (
+          <div className="absolute inset-0 z-10 flex items-start justify-end rounded-lg p-2">
+            <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+              Restricted: Owner only
+            </span>
+          </div>
+        )}
+        <div
+          className={
+            !siteCan(role, "TRANSFER_SITE")
+              ? "pointer-events-none opacity-40"
+              : undefined
+          }
+        >
+          <EmailNotificationsSection site={site} />
+        </div>
+      </div>
       {siteCan(role, "DELETE_SITE") && (
         <>
           <Separator />
