@@ -17,7 +17,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { id: user.id },
           select: { platformRole: true },
         })
-        token.platformRole = (u?.platformRole ?? "PLATFORM_USER") as PlatformRole
+        token.platformRole = (u?.platformRole ??
+          "PLATFORM_USER") as PlatformRole
       }
       return token
     },

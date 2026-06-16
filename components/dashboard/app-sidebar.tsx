@@ -80,7 +80,13 @@ export function AppSidebar({ user, siteCount, platformRole }: Props) {
       items: [
         { label: "Profile", href: "/dashboard/account", icon: RiUserLine },
         ...(platformCan(platformRole, "MANAGE_PLATFORM_SETTINGS")
-          ? [{ label: "Settings", href: "/dashboard/settings", icon: RiSettingsLine }]
+          ? [
+              {
+                label: "Settings",
+                href: "/dashboard/settings",
+                icon: RiSettingsLine,
+              },
+            ]
           : []),
       ],
     },

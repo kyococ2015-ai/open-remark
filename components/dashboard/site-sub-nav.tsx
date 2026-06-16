@@ -29,9 +29,24 @@ export function SiteSubNav({ siteId, siteName, siteDomain, role }: Props) {
     { label: "Overview", href: "", icon: RiDashboardLine, show: true },
     { label: "Comments", href: "/comments", icon: RiMessage2Line, show: true },
     { label: "Users", href: "/users", icon: RiUserLine, show: true },
-    { label: "Team", href: "/team", icon: RiTeamLine, show: siteCan(role, "MANAGE_MODERATORS") },
-    { label: "Install", href: "/install", icon: RiCodeSSlashLine, show: siteCan(role, "MANAGE_SETTINGS") },
-    { label: "Settings", href: "/settings", icon: RiSettingsLine, show: siteCan(role, "MANAGE_SETTINGS") },
+    {
+      label: "Team",
+      href: "/team",
+      icon: RiTeamLine,
+      show: siteCan(role, "MANAGE_MODERATORS"),
+    },
+    {
+      label: "Install",
+      href: "/install",
+      icon: RiCodeSSlashLine,
+      show: siteCan(role, "MANAGE_SETTINGS"),
+    },
+    {
+      label: "Settings",
+      href: "/settings",
+      icon: RiSettingsLine,
+      show: siteCan(role, "MANAGE_SETTINGS"),
+    },
   ].filter((t) => t.show)
 
   function isActive(href: string) {

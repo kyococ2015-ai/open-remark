@@ -33,7 +33,8 @@ export const authConfig = {
         (route) => path === route || path.startsWith(route + "/")
       )
       if (matched) {
-        const role: PlatformRole = (auth?.user as { platformRole?: PlatformRole })?.platformRole ?? "PLATFORM_USER"
+        const role: PlatformRole =
+          (auth?.user?.platformRole as PlatformRole) ?? "PLATFORM_USER"
         if (!platformCan(role, PLATFORM_ROUTE_CAPABILITY[matched])) {
           return NextResponse.redirect(new URL("/dashboard", nextUrl))
         }
@@ -42,8 +43,8 @@ export const authConfig = {
     },
     session({ session, token }) {
       if (token.sub) session.user.id = token.sub
-      session.user.platformRole =
-        (token.platformRole as PlatformRole) ?? "PLATFORM_USER"
+      session.user.platformRole = (token.platformRole ??
+        "PLATFORM_USER") as PlatformRole
       return session
     },
   },

@@ -12,7 +12,11 @@ export default async function SiteSettingsPage({ params }: Props) {
 
   let site
   try {
-    const res = await requireSiteAccess(siteId, session!.user!.id, "MANAGE_SETTINGS")
+    const res = await requireSiteAccess(
+      siteId,
+      session!.user!.id,
+      "MANAGE_SETTINGS"
+    )
     site = res.site
   } catch {
     notFound()

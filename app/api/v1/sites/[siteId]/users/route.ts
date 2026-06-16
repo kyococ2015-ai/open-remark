@@ -20,7 +20,11 @@ export async function GET(
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10))
     const search = searchParams.get("search") ?? undefined
 
-    const result = await getCommentersBySite(siteId, { page, limit: 20, search })
+    const result = await getCommentersBySite(siteId, {
+      page,
+      limit: 20,
+      search,
+    })
     return ok(result)
   } catch (err) {
     return handleApiError(err)
