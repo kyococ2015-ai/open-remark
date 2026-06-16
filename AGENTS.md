@@ -1,6 +1,9 @@
-# CLAUDE.md
-
 This file provides guidance to agentic tools when working with code in this repository.
+
+> **Detailed conventions live in the `project-guidelines` skill** (`.agents/skills/project-guidelines/`).
+> Before changing schema, routes, UI, services, folder structure, or auth — or writing a commit —
+> invoke that skill and read the matching reference file. This document is the always-loaded
+> high-level map; the skill is the detailed rulebook. Don't duplicate convention details here.
 
 ## Project
 
@@ -10,7 +13,7 @@ Status: beta. APIs and schema may change without migration paths.
 
 ## Commands
 
-Package manager: **pnpm** (v11). Most contributor docs say `yarn` — substitute `pnpm` (or `npm run`).
+Package manager: **pnpm** (v11).
 
 ```bash
 pnpm dev              # prisma generate + widget build + next dev (turbopack)
@@ -40,18 +43,21 @@ No test runner configured. `pnpm dev` regenerates Prisma client and rebuilds the
 
 ## Architecture
 
-### Two auth systems, kept separate
+The mental model below is always-on context. For the detailed rules behind each point, invoke the
+`project-guidelines` skill (reference file named in parentheses).
 
-| System | Who      | Mechanism                                  | Storage          | Routes                    |
-| ------ | -------- | ------------------------------------------ | ---------------- | ------------------------- |
-| Admin  | Owners   | Auth.js v5 + Google OAuth → session cookie | Server session   | `/dashboard`, `/api/v1/*` |
-| Widget | Visitors | Google `id_token` → signed Widget JWT      | `sessionStorage` | `/api/widget/*`           |
+### Two auth systems, kept separate (`auth-system.md`)
+
+| System | Who      | Mechanism                                  | Storage              | Routes                    |
+| ------ | -------- | ------------------------------------------ | -------------------- | ------------------------- |
+| Admin  | Owners   | Auth.js v5 + Google OAuth → session cookie | Server session       | `/dashboard`, `/api/v1/*` |
+| Widget | Visitors | Google OAuth PKCE → signed Widget JWT      | `localStorage` (JWT) | `/api/widget/*`           |
 
 - Admin routes gated by `proxy.ts` (Next middleware — named `proxy.ts`, not `middleware.ts`; matcher: `/dashboard/:path*`). Uses edge-safe `lib/auth.config.ts` (no Prisma adapter).
 - Widget uses `Authorization: Bearer <jwt>` — no cookies (cross-origin). CSRF not applicable; CORS allowlist enforced per `Site.allowedOrigins`.
 - `WIDGET_JWT_SECRET` is distinct from `AUTH_SECRET` — do not conflate.
 
-### Layered request flow (HARD RULE)
+### Layered request flow — HARD RULE (`coding-conventions.md`)
 
 ```
 app/api/**          route handler  — thin: parse, auth, call service, respond (≤25 lines)
@@ -67,31 +73,7 @@ PostgreSQL (Prisma adapter-pg)
 - Zod schemas live in `lib/validators/` and are shared by routes + services.
 - Response/error helpers in `lib/api/`.
 
-### Directory map (non-obvious only)
-
-- `app/(auth)/` — sign-in route group (no path prefix)
-- `app/(dashboard)/` — dashboard layout group; actual pages under `app/dashboard/`
-- `app/api/v1/` — admin REST API (session-gated)
-- `app/api/widget/` — public widget API (CORS-open, JWT-gated for writes)
-- `app/api/auth/[...nextauth]/` — Auth.js handler
-- `lib/services/` — `comment-service.ts`, `comment-client.ts`, `moderation-service.ts`, `page-service.ts`, `site-service.ts`, `user-service.ts`
-- `lib/auth.ts` vs `lib/auth.config.ts` — full config (with Prisma adapter) vs edge-safe subset for middleware
-- `lib/auth-widget.ts` — Widget JWT issue/verify (jose)
-- `lib/cors.ts`, `lib/rate-limit.ts` (in-memory LRU, 10 req/min), `lib/sanitize.ts`
-- `generated/prisma/` — Prisma client output. Import from `@/generated/prisma/client`. Do not edit.
-- `widget/src/` — `index.ts` (entry), `api.ts`, `auth.ts`, `render.ts`, `styles.css`, `types.ts`. Builds via `widget/build.ts` → `public/embed.js`.
-- `proxy.ts` (root) — Next middleware. Renamed from `middleware.ts`.
-- `prisma.config.ts` — Prisma schema/migrations config.
-- `config/config.json`, `.agents/instructions/*.md` — agent-facing rules (see below).
-
-### Widget specifics
-
-- Shadow DOM — CSS isolated. Edit `widget/src/styles.css` for visuals.
-- Compile-time injected constants via esbuild `define`: `__APP_URL__`, `__GOOGLE_CLIENT_ID__`, `__STYLES__`. **Do not** read from `process.env` in widget source.
-- `widget/build.ts` loads `.env` then `.env.local` before bundling, so widget needs `NEXT_PUBLIC_APP_URL` + `GOOGLE_CLIENT_ID` at build time.
-- Auth flow: popup → `accounts.google.com` → redirect to `/api/widget/oauth-callback` → `postMessage({type: "ZEON_GOOGLE_TOKEN", idToken})` → `POST /api/widget/auth` → server verifies via Google tokeninfo → issues 7-day Widget JWT.
-
-### Data model
+### Data model (`database-schema.md`)
 
 ```
 User ──< Site ──< Page ──< Comment ──< Comment (replies, self-ref via @relation("Replies"))
@@ -102,27 +84,19 @@ User ──< Site ──< Page ──< Comment ──< Comment (replies, self-re
 - `Comment.status`: PENDING | APPROVED | SPAM | DELETED (soft delete only — never physically delete domain rows).
 - `Site.siteKey` — public embed identifier. `Site.allowedOrigins` is JSON (Postgres native), enforced on widget POST.
 
-## Schema / migration rules (from `.agents/instructions/database-schema-and-migrations.md`)
+### Non-obvious gotchas (`folder-structure.md`)
 
-Follow this file when touching `prisma/schema.prisma`. Highlights:
+- `proxy.ts` (root) is the Next middleware — renamed from `middleware.ts`.
+- `generated/prisma/` — Prisma client output. Import from `@/generated/prisma/client`. Do not edit.
+- `prisma.config.ts` — Prisma schema/migrations config.
+- `config/config.json` — feature flags and app config. All new config goes here, not `.env` or hardcoded.
 
-- Always CUID (`@id @default(cuid())`) for PKs. Never autoincrement int.
-- Every domain model: `createdAt` (`@default(now())`) + `updatedAt` (`@updatedAt`).
-- `Json` type for JSON columns — not stringified.
-- Auth.js models (`User` / `Account` / `Session` / `VerificationToken`) — do not modify structure.
-- Soft-delete domain data via status enums; `onDelete: Cascade` only for clearly child rows.
-- **Index every FK, every common status+timestamp filter, every WHERE lookup field.** Composite-index column order MUST match query order.
-- Workflow: edit schema → `npx prisma validate` → `pnpm db:migrate --name <descriptive>` → review generated SQL → `pnpm db:generate` → verify in app.
-- Never edit applied migrations; create a new one.
+### Widget specifics
 
-## Code conventions (from `.agents/instructions/code-guidelines.md`)
-
-- TypeScript strict; no `any`, no unjustified `ts-ignore`.
-- Comments: only WHY (hidden constraints / non-obvious invariants), not WHAT.
-- Functional style preferred (`map`/`filter`/`reduce` over mutation).
-- shadcn/ui for dashboard UI — do not import Radix primitives directly. Tailwind v4 utilities only; no per-component custom CSS.
-- Optimistic UI uses `hooks/use-optimistic-state.ts`.
-- If logic is needed in 2+ places, extract to `lib/` or `lib/utils.ts` — don't duplicate.
+- Shadow DOM — CSS isolated. Edit `widget/src/styles.css` for visuals.
+- Compile-time injected constants via esbuild `define`: `__APP_URL__`, `__GOOGLE_CLIENT_ID__`, `__STYLES__`. **Do not** read from `process.env` in widget source.
+- `widget/build.ts` loads `.env` then `.env.local` before bundling, so widget needs `NEXT_PUBLIC_APP_URL` + `GOOGLE_CLIENT_ID` at build time.
+- Auth flow (PKCE): popup → `accounts.google.com` (with `code_challenge`) → redirect to `/api/widget/oauth-callback` → `postMessage({type: "ZEON_GOOGLE_CODE", code, state})` to opener → `POST /api/widget/auth` exchanges `code` + `code_verifier` → server verifies with Google → issues 7-day Widget JWT.
 
 ## Environment
 
@@ -132,3 +106,11 @@ Google Cloud Console — Authorized redirect URIs must include:
 
 - `<APP_URL>/api/auth/callback/google` (admin Auth.js)
 - `<APP_URL>/api/widget/oauth-callback` (widget visitor flow)
+
+<!-- BEGIN:project-guidelines-rules -->
+
+# Read project guidelines before changing structure, schema, components, or routes
+
+Before modifying or creating database schemas, coding patterns, UI components, folder structure, or routes, trigger the `project-guidelines` skill for the relevant reference so you follow project conventions (DB rules, coding style, component usage, auth patterns, route templates).
+
+<!-- END:project-guidelines-rules -->
