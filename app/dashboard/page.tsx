@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { auth } from "@/lib/auth"
-import { getOwnerOverview } from "@/lib/services/moderation-service"
+import { getUserOverview } from "@/lib/services/moderation-service"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { CommentActivityChart } from "@/components/dashboard/comment-activity-chart"
@@ -21,7 +21,7 @@ import {
 
 export default async function OverviewPage() {
   const session = await auth()
-  const overview = await getOwnerOverview(session!.user!.id as string)
+  const overview = await getUserOverview(session!.user!.id as string)
 
   const approvalRate =
     overview.totalComments > 0
