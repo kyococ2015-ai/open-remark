@@ -11,24 +11,28 @@ import {
   RiUserLine,
   RiCodeSSlashLine,
   RiSettingsLine,
+  RiTeamLine,
 } from "@remixicon/react"
+import { siteCan, type SiteRole } from "@/lib/permissions"
 
 type Props = {
   siteId: string
   siteName: string
   siteDomain: string
+  role: SiteRole
 }
 
-const TABS = [
-  { label: "Overview", href: "", icon: RiDashboardLine },
-  { label: "Comments", href: "/comments", icon: RiMessage2Line },
-  { label: "Users", href: "/users", icon: RiUserLine },
-  { label: "Install", href: "/install", icon: RiCodeSSlashLine },
-  { label: "Settings", href: "/settings", icon: RiSettingsLine },
-]
-
-export function SiteSubNav({ siteId, siteName, siteDomain }: Props) {
+export function SiteSubNav({ siteId, siteName, siteDomain, role }: Props) {
   const pathname = usePathname()
+
+  const tabs = [
+    { label: "Overview", href: "", icon: RiDashboardLine, show: true },
+    { label: "Comments", href: "/comments", icon: RiMessage2Line, show: true },
+    { label: "Users", href: "/users", icon: RiUserLine, show: true },
+    { label: "Team", href: "/team", icon: RiTeamLine, show: siteCan(role, "MANAGE_MODERATORS") },
+    { label: "Install", href: "/install", icon: RiCodeSSlashLine, show: siteCan(role, "MANAGE_SETTINGS") },
+    { label: "Settings", href: "/settings", icon: RiSettingsLine, show: siteCan(role, "MANAGE_SETTINGS") },
+  ].filter((t) => t.show)
 
   function isActive(href: string) {
     const full = `/dashboard/sites/${siteId}${href}`
@@ -78,7 +82,7 @@ export function SiteSubNav({ siteId, siteName, siteDomain }: Props) {
           aria-label="Site sections"
           className="flex min-w-max items-end gap-0 px-4"
         >
-          {TABS.map(({ label, href, icon: Icon }) => {
+          {tabs.map(({ label, href, icon: Icon }) => {
             const active = isActive(href)
             return (
               <Link

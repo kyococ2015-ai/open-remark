@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { notFound } from "next/navigation"
-import { getSiteByIdForOwner } from "@/lib/services/site-service"
+import { getSiteForMember } from "@/lib/services/membership-service"
 import { SiteSubNav } from "@/components/dashboard/site-sub-nav"
 
 type Props = {
@@ -10,12 +10,13 @@ type Props = {
 
 export default async function SiteLayout({ children, params }: Props) {
   const { siteId } = await params
-
   const session = await auth()
 
-  let site
+  let site, role
   try {
-    site = await getSiteByIdForOwner(siteId, session!.user!.id as string)
+    const res = await getSiteForMember(siteId, session!.user!.id)
+    site = res.site
+    role = res.role
   } catch {
     notFound()
   }
@@ -26,6 +27,7 @@ export default async function SiteLayout({ children, params }: Props) {
         siteId={siteId}
         siteName={site.name}
         siteDomain={site.domain}
+        role={role}
       />
       <div className="min-h-0 flex-1">{children}</div>
     </div>

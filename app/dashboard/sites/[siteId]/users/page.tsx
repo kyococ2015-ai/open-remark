@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { notFound } from "next/navigation"
-import { getSiteByIdForOwner } from "@/lib/services/site-service"
+import { getSiteForMember } from "@/lib/services/membership-service"
 import { getCommentersBySite } from "@/lib/services/user-service"
 import { UsersTable } from "@/components/dashboard/users-table"
 import { UserSearchInput } from "@/components/dashboard/user-search-input"
@@ -23,7 +23,8 @@ export default async function UsersPage({ params, searchParams }: Props) {
 
   let site
   try {
-    site = await getSiteByIdForOwner(siteId, session!.user!.id as string)
+    const res = await getSiteForMember(siteId, session!.user!.id)
+    site = res.site
   } catch {
     notFound()
   }

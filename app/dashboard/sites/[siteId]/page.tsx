@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { auth } from "@/lib/auth"
 import { notFound } from "next/navigation"
-import { getSiteByIdForOwner } from "@/lib/services/site-service"
+import { getSiteForMember } from "@/lib/services/membership-service"
 import { getSiteCommentStats } from "@/lib/services/moderation-service"
 import { StatCard } from "@/components/dashboard/stat-card"
 import { Button } from "@/components/ui/button"
@@ -19,7 +19,7 @@ export default async function SiteOverviewPage({ params }: Props) {
   const session = await auth()
 
   try {
-    await getSiteByIdForOwner(siteId, session!.user!.id as string)
+    await getSiteForMember(siteId, session!.user!.id)
   } catch {
     notFound()
   }

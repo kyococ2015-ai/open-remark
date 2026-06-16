@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { getSiteByIdForOwner } from "@/lib/services/site-service"
+import { requireSiteAccess } from "@/lib/services/membership-service"
 import { SiteSettingsForm } from "@/components/dashboard/site-settings-form"
 import { auth } from "@/lib/auth"
 
@@ -12,7 +12,8 @@ export default async function SiteSettingsPage({ params }: Props) {
 
   let site
   try {
-    site = await getSiteByIdForOwner(siteId, session!.user!.id as string)
+    const res = await requireSiteAccess(siteId, session!.user!.id, "MANAGE_SETTINGS")
+    site = res.site
   } catch {
     notFound()
   }

@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth"
 import { notFound } from "next/navigation"
-import { getSiteByIdForOwner } from "@/lib/services/site-service"
+import { requireSiteAccess } from "@/lib/services/membership-service"
 import { InstallSnippet } from "@/components/dashboard/install-snippet"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
@@ -39,7 +39,8 @@ export default async function InstallPage({ params }: Props) {
 
   let site
   try {
-    site = await getSiteByIdForOwner(siteId, session!.user!.id as string)
+    const res = await requireSiteAccess(siteId, session!.user!.id, "MANAGE_SETTINGS")
+    site = res.site
   } catch {
     notFound()
   }
