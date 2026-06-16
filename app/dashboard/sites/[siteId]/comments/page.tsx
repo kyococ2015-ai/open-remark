@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { auth } from "@/lib/auth"
 import { notFound } from "next/navigation"
-import { getSiteByIdForOwner } from "@/lib/services/site-service"
+import { getSiteForMember } from "@/lib/services/membership-service"
 import { getCommentsBySite } from "@/lib/services/comment-service"
 import { getPagesForSite } from "@/lib/services/page-service"
 import { CommentsTable } from "@/components/dashboard/comments-table"
@@ -35,7 +35,7 @@ export default async function CommentsPage({ params, searchParams }: Props) {
   const session = await auth()
 
   try {
-    await getSiteByIdForOwner(siteId, session!.user!.id as string)
+    await getSiteForMember(siteId, session!.user!.id)
   } catch {
     notFound()
   }

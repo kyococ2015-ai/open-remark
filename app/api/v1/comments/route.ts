@@ -1,7 +1,11 @@
 import { auth } from "@/lib/auth"
 import { NextRequest, NextResponse } from "next/server"
 import { getCommentsBySite } from "@/lib/services/comment-service"
-import { bulkModerate } from "@/lib/services/moderation-service"
+import {
+  bulkModerate,
+  getSiteIdsForComments,
+} from "@/lib/services/moderation-service"
+import { requireSiteAccess } from "@/lib/services/membership-service"
 import { BulkUpdateCommentStatusSchema } from "@/lib/validators/comment"
 import { handleApiError, ApiError } from "@/lib/api/error"
 import { ok } from "@/lib/api/response"
@@ -22,6 +26,8 @@ export async function GET(req: NextRequest) {
 
     const search = searchParams.get("search")
 
+    await requireSiteAccess(siteId, session.user.id, "MODERATE")
+
     const result = await getCommentsBySite(siteId, {
       status: status ?? undefined,
       page,
@@ -38,7 +44,8 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const session = await auth()
-    if (!session?.user?.email) throw new ApiError("Unauthorized", 401)
+    if (!session?.user?.id || !session?.user?.email)
+      throw new ApiError("Unauthorized", 401)
 
     const parsed = BulkUpdateCommentStatusSchema.safeParse(await req.json())
     if (!parsed.success) {
@@ -46,6 +53,11 @@ export async function PATCH(req: NextRequest) {
         { error: parsed.error.flatten() },
         { status: 422 }
       )
+    }
+
+    const siteIds = await getSiteIdsForComments(parsed.data.ids)
+    for (const sid of siteIds) {
+      await requireSiteAccess(sid, session.user.id, "MODERATE")
     }
 
     await bulkModerate(parsed.data.ids, parsed.data.status, session.user.email)

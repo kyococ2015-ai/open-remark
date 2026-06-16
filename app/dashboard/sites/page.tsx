@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { auth } from "@/lib/auth"
-import { getSitesByOwner } from "@/lib/services/site-service"
+import { getSitesForUser } from "@/lib/services/site-service"
 import { PageHeader } from "@/components/dashboard/page-header"
 import { SiteSparkline } from "@/components/dashboard/site-sparkline"
 import { Button } from "@/components/ui/button"
@@ -26,7 +26,7 @@ import {
 
 export default async function SitesPage() {
   const session = await auth()
-  const sites = await getSitesByOwner(session!.user!.id as string)
+  const sites = await getSitesForUser(session!.user!.id as string)
 
   return (
     <div>

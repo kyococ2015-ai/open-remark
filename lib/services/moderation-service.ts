@@ -59,9 +59,9 @@ export async function getSiteCommentStats(siteId: string) {
 
 type DailyCount = { date: string; count: number }
 
-export async function getOwnerOverview(ownerId: string) {
+export async function getUserOverview(userId: string) {
   const allSites = await db.site.findMany({
-    where: { ownerId },
+    where: { members: { some: { userId } } },
     include: {
       _count: { select: { pages: true } },
       pages: {
@@ -146,4 +146,21 @@ export async function getOwnerOverview(ownerId: string) {
     recentComments,
     commentActivity,
   }
+}
+
+export async function getSiteIdForComment(commentId: string): Promise<string> {
+  const comment = await db.comment.findUnique({
+    where: { id: commentId },
+    select: { page: { select: { siteId: true } } },
+  })
+  if (!comment) throw new ApiError("Comment not found", 404)
+  return comment.page.siteId
+}
+
+export async function getSiteIdsForComments(ids: string[]): Promise<string[]> {
+  const rows = await db.comment.findMany({
+    where: { id: { in: ids } },
+    select: { page: { select: { siteId: true } } },
+  })
+  return [...new Set(rows.map((r) => r.page.siteId))]
 }

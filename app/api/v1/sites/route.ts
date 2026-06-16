@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { CreateSiteSchema } from "@/lib/validators/site"
-import { createSite, getSitesByOwner } from "@/lib/services/site-service"
+import { createSite, getSitesForUser } from "@/lib/services/site-service"
 import { handleApiError, ApiError } from "@/lib/api/error"
 import { ok, created } from "@/lib/api/response"
 
@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const session = await auth()
     if (!session?.user?.id) throw new ApiError("Unauthorized", 401)
-    const sites = await getSitesByOwner(session.user.id)
+    const sites = await getSitesForUser(session.user.id)
     return ok(sites)
   } catch (err) {
     return handleApiError(err)
